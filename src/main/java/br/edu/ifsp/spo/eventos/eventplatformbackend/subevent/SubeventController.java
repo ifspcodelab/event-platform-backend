@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -11,7 +12,8 @@ import java.util.UUID;
 public class SubeventController {
 
     @PostMapping
-    public ResponseEntity<SubeventDto> create(@PathVariable UUID eventId, @RequestBody SubeventCreateDto subeventCreateDto) {
+    public ResponseEntity<SubeventDto> create(@PathVariable UUID eventId, @Valid @RequestBody SubeventCreateDto subeventCreateDto) {
+        System.out.println(eventId);
         SubeventDto subeventDto = new SubeventDto(
                 UUID.randomUUID(),
                 subeventCreateDto.getTitle(),

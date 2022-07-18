@@ -10,7 +10,7 @@ public class SpaceCreateDto {
     private String name;
     @NotNull
     @Min(value = 2)
-    @Max(value =9999)
+    @Max(value = 9999)
     private Integer capacity;
     //TODO: Validar tipos que não existem
     @NotNull

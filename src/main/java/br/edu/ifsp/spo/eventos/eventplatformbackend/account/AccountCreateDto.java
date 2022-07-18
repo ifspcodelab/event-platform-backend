@@ -1,11 +1,29 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
+import org.hibernate.validator.constraints.br.CPF;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 public class AccountCreateDto {
 
+    @NotNull
+    @NotBlank
+    @Size(min = 5, max = 256)
     private String name;
+    @NotNull
+    @Email
     private String email;
+    @NotNull
+    @CPF
     private String cpf;
+    @NotNull
+    @NotBlank
+    @Size(min = 8, max = 64)
     private String password;
+    @NotNull
     private Boolean agreed;
 
     public AccountCreateDto(String name, String email, String cpf, String password, Boolean agreed) {

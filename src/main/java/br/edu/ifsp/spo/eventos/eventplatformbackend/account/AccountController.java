@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class AccountController {
 
     @PostMapping
-    public ResponseEntity<AccountDto> create(@RequestBody AccountCreateDto accountCreateDto) {
+    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) {
         AccountDto accountDto = new AccountDto(
                 UUID.randomUUID(),
                 accountCreateDto.getName(),

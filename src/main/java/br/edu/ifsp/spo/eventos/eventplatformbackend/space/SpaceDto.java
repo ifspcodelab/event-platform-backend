@@ -6,10 +6,10 @@ public class SpaceDto {
 
     private UUID id;
     private String name;
-    private int capacity;
+    private Integer capacity;
     private String type;
 
-    public SpaceDto(UUID id, String name, int capacity, String type) {
+    public SpaceDto(UUID id, String name, Integer capacity, String type) {
         this.id = id;
         this.name = name;
         this.capacity = capacity;
@@ -32,11 +32,11 @@ public class SpaceDto {
         this.name = name;
     }
 
-    public int getCapacity() {
+    public Integer getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 

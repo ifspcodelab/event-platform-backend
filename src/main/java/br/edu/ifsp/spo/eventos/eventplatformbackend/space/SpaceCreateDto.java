@@ -9,14 +9,14 @@ public class SpaceCreateDto {
     @Size (min=4, max=100)
     private String name;
     @NotNull
-    @Min(2)
-    @Max(9999)
-    private int capacity;
+    @Min(value = 2)
+    @Max(value =9999)
+    private Integer capacity;
     @NotNull
     @NotBlank
     private String type;
 
-    public SpaceCreateDto(String name, int capacity, String type) {
+    public SpaceCreateDto(String name, Integer capacity, String type) {
         this.name = name;
         this.capacity = capacity;
         this.type = type;
@@ -30,11 +30,11 @@ public class SpaceCreateDto {
         this.name = name;
     }
 
-    public int getCapacity() {
+    public Integer getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 

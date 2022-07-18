@@ -12,11 +12,11 @@ public class SpaceCreateDto {
     @Min(value = 2)
     @Max(value =9999)
     private Integer capacity;
+    //TODO: Validar tipos que não existem
     @NotNull
-    @NotBlank
-    private String type;
+    private SpaceType type;
 
-    public SpaceCreateDto(String name, Integer capacity, String type) {
+    public SpaceCreateDto(String name, Integer capacity, SpaceType type) {
         this.name = name;
         this.capacity = capacity;
         this.type = type;
@@ -38,11 +38,11 @@ public class SpaceCreateDto {
         this.capacity = capacity;
     }
 
-    public String getType() {
+    public SpaceType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(SpaceType type) {
         this.type = type;
     }
 }

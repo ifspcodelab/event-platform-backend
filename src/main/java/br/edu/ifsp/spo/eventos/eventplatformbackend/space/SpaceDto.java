@@ -7,9 +7,9 @@ public class SpaceDto {
     private UUID id;
     private String name;
     private Integer capacity;
-    private String type;
+    private SpaceType type;
 
-    public SpaceDto(UUID id, String name, Integer capacity, String type) {
+    public SpaceDto(UUID id, String name, Integer capacity, SpaceType type) {
         this.id = id;
         this.name = name;
         this.capacity = capacity;
@@ -40,11 +40,11 @@ public class SpaceDto {
         this.capacity = capacity;
     }
 
-    public String getType() {
+    public SpaceType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(SpaceType type) {
         this.type = type;
     }
 }

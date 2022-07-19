@@ -14,3 +14,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     generate-ddl: false
+jwt:
+  issuer: event-platform
+  secret: ${JWT_SECRET:81ad58d0-eea6-44a0-a765-a8fb8b2e39c1}
+  expires-in: ${JWT_EXPIRES_IN:86400}

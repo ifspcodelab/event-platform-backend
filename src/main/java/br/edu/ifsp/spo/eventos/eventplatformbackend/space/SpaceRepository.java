@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface AreaRepository extends JpaRepository<Area, UUID> {
+public interface SpaceRepository extends JpaRepository<Space, UUID> {
 }

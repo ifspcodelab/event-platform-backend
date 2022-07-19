@@ -20,5 +20,4 @@ public class SpaceController {
         SpaceDto spaceDto = new SpaceDto(space.getId(), space.getName(), space.getCapacity(), space.getType());
         return spaceDto;
     }
-
 }

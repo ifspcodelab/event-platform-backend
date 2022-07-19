@@ -1,6 +1,6 @@
 CREATE TABLE areas(
     id UUID NOT NULL,
-    name VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
     reference VARCHAR,
     location_id UUID NOT NULL,
     CONSTRAINT areas_pk PRIMARY KEY (id),

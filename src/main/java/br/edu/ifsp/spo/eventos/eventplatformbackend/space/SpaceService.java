@@ -2,12 +2,12 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,16 +24,16 @@ public class SpaceService {
 
         Area area = getArea(areaId);
 
+        if(spaceRepository.existsByNameAndArea(dto.getName(), area)) {
+           throw new ResourceAlreadyExistsException("space", "name", dto.getName());
+        }
+
         Space space = new Space(dto.getName(), dto.getCapacity(), dto.getType(), area);
         return spaceRepository.save(space);
     }
 
     private Area getArea(UUID areaId) {
-        Optional<Area> optionalArea = areaRepository.findById(areaId);
-        if(optionalArea.isEmpty()) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
-        return optionalArea.get();
+        return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
     }
 }
 

@@ -27,4 +27,13 @@ public class ExceptionHandlerApp {
         );
         return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceAlreadyExistsException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource already exists exception",
+                List.of(new Violation(ex.getResourceName(), ex.getMessage()))
+        );
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
 }

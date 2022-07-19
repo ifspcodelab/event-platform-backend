@@ -21,14 +21,15 @@ public class Space {
     private String name;
     private Integer capacity;
     @Enumerated(EnumType.STRING)
-    private SpaceType spaceType;
+    private SpaceType type;
     @ManyToOne
     private Area area;
 
-    public Space(String name, Integer capacity, SpaceType spaceType, Area area) {
+    public Space(String name, Integer capacity, SpaceType type, Area area) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.capacity = capacity;
-        this.spaceType = spaceType;
+        this.type = type;
         this.area = area;
     }
 }

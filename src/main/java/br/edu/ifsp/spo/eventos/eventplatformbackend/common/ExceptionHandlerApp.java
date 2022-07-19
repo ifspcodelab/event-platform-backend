@@ -18,4 +18,13 @@ public class ExceptionHandlerApp {
                 .collect(Collectors.toList());
         return new ResponseEntity(violations, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource not found exception",
+                List.of(new Violation(ex.getResourceName(), ex.getMessage()))
+        );
+        return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
+    }
 }

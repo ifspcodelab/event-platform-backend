@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
 public class SubeventDto {
     private UUID id;
     private String title;
@@ -18,6 +17,6 @@ public class SubeventDto {
     private LocalDate endDate;
     private String smallerImage;
     private String biggerImage;
-    private EventStatus eventStatus;
+    private EventStatus status;
 
 }

@@ -2,11 +2,11 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import lombok.Value;
 
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 @Value
 public class SpaceCreateDto {
-
     @NotNull
     @NotBlank
     @Size (min=4, max=100)
@@ -17,7 +17,7 @@ public class SpaceCreateDto {
     @Max(value = 9999)
     Integer capacity;
     //TODO: Validar tipos que não existem
+    @Valid
     @NotNull
     SpaceType type;
-
 }

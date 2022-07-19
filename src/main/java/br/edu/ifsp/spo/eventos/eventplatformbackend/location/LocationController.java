@@ -6,9 +6,9 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
+@RequestMapping(value = "api/v1/locations")
 public class LocationController {
 
-    @RequestMapping(value = "api/v1/locations")
     @PostMapping
     public LocationDto create(@RequestBody @Valid LocationCreateDto locationCreateDto) {
         LocationDto locationDto = new LocationDto(UUID.randomUUID(), locationCreateDto.getName(), locationCreateDto.getAddress());

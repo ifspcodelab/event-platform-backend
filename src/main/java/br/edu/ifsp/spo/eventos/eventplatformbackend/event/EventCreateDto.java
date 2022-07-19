@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
-import lombok.Data;
 import lombok.Value;
 import org.hibernate.validator.constraints.URL;
 

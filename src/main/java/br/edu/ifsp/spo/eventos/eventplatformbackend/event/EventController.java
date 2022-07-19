@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,27 +9,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/events")
+@AllArgsConstructor
 public class EventController {
+    private final EventService eventService;
+    private final EventMapper eventMapper;
+
     @PostMapping
     public ResponseEntity<EventDto> create(@Valid @RequestBody EventCreateDto eventCreateDto) {
-        EventDto eventDto = new EventDto(
-                UUID.randomUUID(),
-                eventCreateDto.getTitle(),
-                eventCreateDto.getSlug(),
-                eventCreateDto.getSummary(),
-                eventCreateDto.getPresentation(),
-                eventCreateDto.getRegistrationStartDate(),
-                eventCreateDto.getRegistrationEndDate(),
-                eventCreateDto.getStartDate(),
-                eventCreateDto.getEndDate(),
-                eventCreateDto.getSmallerImage(),
-                eventCreateDto.getBiggerImage(),
-                EventStatus.DRAFT
-        );
+
+        Event event = eventService.create(eventCreateDto);
+
+        EventDto eventDto = eventMapper.to(event);
+
         return new ResponseEntity<>(eventDto, HttpStatus.CREATED);
     }
 }

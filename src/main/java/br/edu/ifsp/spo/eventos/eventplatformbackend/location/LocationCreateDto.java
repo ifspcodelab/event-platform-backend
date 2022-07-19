@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class LocationCreateDto {
+
     @NotNull
     @NotBlank
     @Size(min = 4, max = 150)
@@ -35,4 +36,5 @@ public class LocationCreateDto {
     public void setAddress(String address) {
         this.address = address;
     }
+
 }

@@ -15,4 +15,5 @@ public class AreaController {
         AreaDto areaDto = new AreaDto(UUID.randomUUID(), areaCreateDto.getName(), areaCreateDto.getReference());
         return areaDto;
     }
+
 }

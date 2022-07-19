@@ -49,6 +49,19 @@ public class AreaCreateDtoTest {
                 .isEqualTo("reference");
     }
 
+    @ParameterizedTest(name = "Valid reference value {0}")
+    @ValueSource(strings = { "Piso superior", "Piso superior 5.", "Piso-superior", "Piso: superior", "448, 98" })
+    void areaCreateDtoValidReference(String reference) {
+        // Arrange
+        AreaCreateDto areaCreateDto = new AreaCreateDto("Bloco C", reference);
+
+        // Act
+        Set<ConstraintViolation<AreaCreateDto>> violations = validator.validate(areaCreateDto);
+
+        // Assert
+        assertThat(violations).hasSize(0);
+    }
+
     @ParameterizedTest(name = "Invalid reference value {0}")
     @ValueSource(strings = { "   ", "$#@ *", "Piso superior?", "Piso superior!" })
     void areaCreateDtoInvalidReference(String reference) {
@@ -65,18 +78,5 @@ public class AreaCreateDtoTest {
                 .map(Path::toString)
                 .first()
                 .isEqualTo("reference");
-    }
-
-    @ParameterizedTest(name = "Valid reference value {0}")
-    @ValueSource(strings = { "Piso superior", "Piso superior 5.", "Piso-superior", "Piso: superior", "448, 98" })
-    void areaCreateDtoValidReference(String reference) {
-        // Arrange
-        AreaCreateDto areaCreateDto = new AreaCreateDto("Bloco C", reference);
-
-        // Act
-        Set<ConstraintViolation<AreaCreateDto>> violations = validator.validate(areaCreateDto);
-
-        // Assert
-        assertThat(violations).hasSize(0);
     }
 }

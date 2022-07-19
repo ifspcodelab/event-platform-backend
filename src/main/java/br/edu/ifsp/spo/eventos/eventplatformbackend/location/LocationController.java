@@ -14,4 +14,5 @@ public class LocationController {
         LocationDto locationDto = new LocationDto(UUID.randomUUID(), locationCreateDto.getName(), locationCreateDto.getAddress());
         return locationDto;
     }
+
 }

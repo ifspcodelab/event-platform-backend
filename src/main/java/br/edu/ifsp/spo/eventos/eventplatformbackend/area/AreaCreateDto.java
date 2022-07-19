@@ -6,6 +6,7 @@ import javax.validation.constraints.*;
 
 @Value
 public class AreaCreateDto {
+
     @NotNull
     @NotBlank
     @Size(min = 4, max = 80)
@@ -16,4 +17,5 @@ public class AreaCreateDto {
     @Pattern(regexp="^[0-9A-Za-záàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ,:.-[\\s]]*$", message = "Campo referência deve conter apenas letras e números")
     @Size(min = 4, max = 150)
     String reference;
+
 }

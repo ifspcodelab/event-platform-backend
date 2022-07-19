@@ -8,7 +8,9 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 public class AreaDto {
+
     UUID id;
     String name;
     String reference;
+
 }

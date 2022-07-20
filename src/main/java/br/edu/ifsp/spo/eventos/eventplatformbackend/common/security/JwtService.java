@@ -25,7 +25,7 @@ public class JwtService {
         builder.withIssuedAt(now);
         builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
         builder.withClaim("email", account.getEmail());
-        builder.withClaim("role", account.getRole());
+        builder.withClaim("role", account.getRole().name());
 
         return builder.sign(algorithm);
     }

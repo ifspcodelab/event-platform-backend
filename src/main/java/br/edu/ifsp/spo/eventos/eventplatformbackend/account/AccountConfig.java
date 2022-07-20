@@ -10,4 +10,5 @@ import org.springframework.stereotype.Component;
 @Setter
 public class AccountConfig {
     private Integer verificationTokenExpiresIn;
+    private Integer passwordResetTokenExpiresIn;
 }

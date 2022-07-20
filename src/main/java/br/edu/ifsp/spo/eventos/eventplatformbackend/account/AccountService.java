@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.LoginException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,8 +42,16 @@ public class AccountService {
     }
 
     public Account login(LoginCreateDto loginCreateDto){
-        Account account = new Account (loginCreateDto.getEmail(), loginCreateDto.getPassword(), "ADMIN");
+        Account account = getAccount(loginCreateDto.getEmail());
+        //TODO: a account foi verificada?
+        //TODO: indicar erro de senha
 
         return account;
+    }
+
+    private Account getAccount(String email){
+        return accountRepository.findByEmail(email).orElseThrow(
+                () -> new LoginException(String.format("Login Exception email %s not found", email))
+        );
     }
 }

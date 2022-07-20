@@ -14,3 +14,17 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     generate-ddl: false
+
+
+account:
+  verification-token-expires-in: 900
+  password-reset-token-expires-in: 900
+
+logging:
+  level:
+    root: INFO
+    br:
+      edu:
+        ifsp:
+          spo:
+            eventos: ${APP_LOGGING_LEVEL:TRACE}

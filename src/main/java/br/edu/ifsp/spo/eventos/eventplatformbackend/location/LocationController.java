@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "api/v1/locations")
@@ -19,5 +21,14 @@ public class LocationController {
         Location location = locationService.create(locationCreateDto);
         LocationDto locationDto = locationMapper.to(location);
         return new ResponseEntity<>(locationDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<LocationDto>> index() {
+        List<Location> locations = locationService.findAll();
+        List<LocationDto> locationsDto = locations.stream()
+                .map(location -> locationMapper.to(location))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(locationsDto, HttpStatus.OK);
     }
 }

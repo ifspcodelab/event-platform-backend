@@ -4,6 +4,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExists
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class LocationService {
@@ -16,6 +18,10 @@ public class LocationService {
 
         Location location = new Location(dto.getName(), dto.getAddress());
         return locationRepository.save(location);
+    }
+
+    public List<Location> findAll() {
+        return locationRepository.findAll();
     }
 
 }

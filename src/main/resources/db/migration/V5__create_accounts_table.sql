@@ -6,5 +6,6 @@ CREATE TABLE accounts(
     password VARCHAR NOT NULL,
     agreed BOOLEAN NOT NULL,
     role VARCHAR NOT NULL,
+    verified BOOLEAN NOT NULL,
     CONSTRAINT accounts_pk PRIMARY KEY (id)
 )

@@ -24,6 +24,7 @@ public class Account {
     private Boolean agreed;
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    private Boolean verified;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
         this.id = UUID.randomUUID();
@@ -33,5 +34,6 @@ public class Account {
         this.password = password;
         this.agreed = agreed;
         this.role = UserRole.ATTENDANT;
+        this.verified = false;
     }
 }

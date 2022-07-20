@@ -6,16 +6,20 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class AreaService {
+
     private AreaRepository areaRepository;
     private LocationRepository locationRepository;
 
-    public Area create(AreaCreateDto dto, UUID locationId) {
+    public Area create(@RequestBody @Valid AreaCreateDto dto, @PathVariable UUID locationId) {
         if(!locationRepository.existsById(locationId)) {
             throw new ResourceNotFoundException("location", locationId);
         }

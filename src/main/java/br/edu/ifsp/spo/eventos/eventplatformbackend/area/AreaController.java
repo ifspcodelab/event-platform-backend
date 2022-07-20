@@ -41,4 +41,10 @@ public class AreaController {
         AreaDto areaDto = areaMapper.to(area);
         return new ResponseEntity<>(areaDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("{areaId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID locationId, @PathVariable UUID areaId) {
+        areaService.delete(locationId, areaId);
+        return ResponseEntity.noContent().build();
+    }
 }

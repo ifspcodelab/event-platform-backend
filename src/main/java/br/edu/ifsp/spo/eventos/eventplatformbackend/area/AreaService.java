@@ -41,6 +41,13 @@ public class AreaService {
         return getArea(areaId);
     }
 
+    public void delete(UUID locationId, UUID areaId) {
+        checkLocationExists(locationId);
+        checkAreaExists(areaId);
+        //TODO verificar se não existe nenhum espaço associado (existsByAreaId)
+        areaRepository.deleteById(areaId);
+    }
+
     private Location getLocation(UUID locationId) {
         return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
     }
@@ -52,6 +59,12 @@ public class AreaService {
     private void checkLocationExists(UUID locationId) {
         if(!locationRepository.existsById(locationId)) {
             throw new ResourceNotFoundException("location", locationId);
+        }
+    }
+
+    private void checkAreaExists(UUID areaId) {
+        if(!areaRepository.existsById(areaId)) {
+            throw new ResourceNotFoundException("area", areaId);
         }
     }
 }

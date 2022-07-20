@@ -16,7 +16,7 @@ public class SpaceController {
     private final SpaceMapper spaceMapper;
 
     @PostMapping
-    public ResponseEntity<SpaceDto> create (@PathVariable UUID locationId, @PathVariable UUID areaId, @RequestBody @Valid SpaceCreateDto spaceCreateDto) {
+    public ResponseEntity<SpaceDto> create(@PathVariable UUID locationId, @PathVariable UUID areaId, @RequestBody @Valid SpaceCreateDto spaceCreateDto) {
         Space space = spaceService.create(spaceCreateDto, areaId, locationId);
         SpaceDto spaceDto = spaceMapper.to(space);
         return new ResponseEntity<>(spaceDto, HttpStatus.CREATED);

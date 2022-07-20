@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
@@ -17,15 +19,18 @@ public class SpaceService {
     private SpaceRepository spaceRepository;
     private AreaRepository areaRepository;
     private LocationRepository locationRepository;
+    private AreaMapper areaMapper;
 
     public Space create(SpaceCreateDto dto, UUID areaId, UUID locationId) {
-        if (!locationRepository.existsById(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
+        Location location = getLocation(locationId);
+        Area area = getArea(areaId);
+        AreaDto areaDto = areaMapper.to(area);
+
+        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
+            throw new ResourceNotFoundException("area", areaId);
         }
 
-        Area area = getArea(areaId);
-
-        if (spaceRepository.existsByNameAndArea(dto.getName(), area)) {
+        if(spaceRepository.existsByNameAndArea(dto.getName(), area)) {
             throw new ResourceAlreadyExistsException("space", "name", dto.getName());
         }
 

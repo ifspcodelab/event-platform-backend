@@ -12,11 +12,12 @@ import javax.validation.Valid;
 @AllArgsConstructor
 public class LocationController {
     private LocationService locationService;
+    private final LocationMapper locationMapper;
 
     @PostMapping
     public ResponseEntity<LocationDto> create(@RequestBody @Valid LocationCreateDto locationCreateDto) {
         Location location = locationService.create(locationCreateDto);
-        LocationDto locationDto = new LocationDto(location.getId(), location.getName(), location.getAddress());
+        LocationDto locationDto = locationMapper.to(location);
         return new ResponseEntity<>(locationDto, HttpStatus.CREATED);
     }
 }

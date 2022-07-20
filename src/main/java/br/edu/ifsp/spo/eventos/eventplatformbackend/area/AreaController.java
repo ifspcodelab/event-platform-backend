@@ -22,4 +22,11 @@ public class AreaController {
         AreaDto areaDto = areaMapper.to(area);
         return new ResponseEntity<>(areaDto, HttpStatus.CREATED);
     }
+
+    @GetMapping("{areaId}")
+    public ResponseEntity<AreaDto> show(@PathVariable UUID locationId, @PathVariable UUID areaId) {
+        Area area = areaService.findById(locationId, areaId);
+        AreaDto areaDto = areaMapper.to(area);
+        return new ResponseEntity<>(areaDto, HttpStatus.OK);
+    }
 }

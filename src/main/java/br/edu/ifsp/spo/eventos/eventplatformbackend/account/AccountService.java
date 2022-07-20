@@ -54,14 +54,12 @@ public class AccountService {
                         )
                 );
 
-
         if (!account.getVerified()){
             throw new ResetPasswordException(
                     String.format("Forgot email account not verified id: %s | email: %s",
                     account.getId(),
                     forgotPasswordCreateDto.getEmail()));
         }
-
 
         if (passwordResetTokenRepository.existsByAccountAndExpiresInAfter(account, Instant.now())){
             throw new ResetPasswordException(
@@ -75,17 +73,34 @@ public class AccountService {
                 new PasswordResetToken(account, accountConfig.getPasswordResetTokenExpiresIn());
 
         passwordResetTokenRepository.save(passwordResetToken);
-
     }
 
     public void resetPassword(PasswordResetDto dto){
-        //
-        // Trazer token para a memoria ou lançar exceção
-        // Verifica validade do token
-        // Altera valor da senha
-        // Salva o account no banco
-        // apagar o token
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(dto.getToken())
+                .orElseThrow(() ->
+                        new ResetPasswordException(
+                                String.format("Reset password token not found %s", dto.getToken())
+                        )
+                );
 
+        if (passwordResetTokenRepository.existsByTokenAndExpiresInBefore(passwordResetToken.getToken(), Instant.now())){
+            throw new ResetPasswordException(
+                    String.format("Reset password token expired id: %s | email: %s",
+                            passwordResetToken.getAccount().getId(),
+                            passwordResetToken.getAccount().getEmail()));
+        }
+
+        Account account = accountRepository.findByEmail(passwordResetToken.getAccount().getEmail())
+                .orElseThrow(() ->
+                        new ResetPasswordException(
+                                String.format("Reset password email account does not exist %s",
+                                        passwordResetToken.getAccount().getEmail())
+                        )
+                );
+
+        account.setPassword(dto.getPassword());
+        accountRepository.save(account);
+
+        passwordResetTokenRepository.deleteById(passwordResetToken.getId());
     }
-
 }

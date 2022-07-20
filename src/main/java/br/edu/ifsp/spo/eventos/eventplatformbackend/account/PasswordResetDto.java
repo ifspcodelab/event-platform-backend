@@ -10,9 +10,7 @@ import java.util.UUID;
 
 @Value
 public class PasswordResetDto {
-    @NotNull
-    @NotBlank
-    @Size(min = 20, max = 200)
+
     UUID token;
 
     @NotNull

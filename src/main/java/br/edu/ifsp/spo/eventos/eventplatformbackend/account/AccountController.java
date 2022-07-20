@@ -32,9 +32,9 @@ public class AccountController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetDto resetPasswordDto){
-        accountService.resetPassword(resetPasswordDto);
-        System.out.println(resetPasswordDto);
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetDto dto){
+        accountService.resetPassword(dto);
+
         return ResponseEntity.noContent().build();
     }
 

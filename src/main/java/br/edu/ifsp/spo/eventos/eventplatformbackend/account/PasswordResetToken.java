@@ -15,10 +15,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "password_reset_tokens")
-@NoArgsConstructor
 @AllArgsConstructor
-@Getter
+@NoArgsConstructor
 @Setter
+@Getter
 public class PasswordResetToken {
 
     @Id
@@ -34,4 +34,5 @@ public class PasswordResetToken {
         this.expiresIn = Instant.now().plusSeconds(durationInSeconds);
         this.account = account;
     }
+
 }

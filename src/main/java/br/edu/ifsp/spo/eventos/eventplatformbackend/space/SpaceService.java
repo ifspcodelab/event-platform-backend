@@ -11,6 +11,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -37,6 +38,18 @@ public class SpaceService {
 
         Space space = new Space(dto.getName(), dto.getCapacity(), dto.getType(), area);
         return spaceRepository.save(space);
+    }
+
+    public List<Space> findAll(UUID locationId, UUID areaId) {
+        Location location = getLocation(locationId);
+        Area area = getArea(areaId);
+        AreaDto areaDto = areaMapper.to(area);
+
+        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
+            throw new ResourceNotFoundException("area", areaId);
+        }
+
+        return spaceRepository.findAllByAreaId(areaId);
     }
 
     public Space findById(UUID locationId, UUID areaId, UUID spaceId) {

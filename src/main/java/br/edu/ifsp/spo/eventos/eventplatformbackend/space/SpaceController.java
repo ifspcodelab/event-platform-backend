@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -20,6 +22,15 @@ public class SpaceController {
         Space space = spaceService.create(spaceCreateDto, areaId, locationId);
         SpaceDto spaceDto = spaceMapper.to(space);
         return new ResponseEntity<>(spaceDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<SpaceDto>> index(@PathVariable UUID locationId, @PathVariable UUID areaId) {
+        List<Space> spaces = spaceService.findAll(locationId, areaId);
+        List<SpaceDto> spacesDto = spaces.stream()
+                .map(space -> spaceMapper.to(space))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(spacesDto, HttpStatus.OK);
     }
 
     @GetMapping("{spaceId}")

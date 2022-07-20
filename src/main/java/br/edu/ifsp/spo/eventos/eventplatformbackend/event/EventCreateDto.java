@@ -1,12 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
 import lombok.Value;
 import org.hibernate.validator.constraints.URL;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.time.LocalDate;
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 
 @Value
 public class EventCreateDto {
@@ -26,16 +24,12 @@ public class EventCreateDto {
     @NotBlank
     @Size(min = 1000, max = 5000)
     String presentation;
-
-    // TODO: validar datas de registro e início do evento
     @NotNull
-    LocalDate registrationStartDate;
+    @Valid
+    Period registrationPeriod;
     @NotNull
-    LocalDate registrationEndDate;
-    @NotNull
-    LocalDate startDate;
-    @NotNull
-    LocalDate endDate;
+    @Valid
+    Period executionPeriod;
     @NotNull
     @URL
     String smallerImage;

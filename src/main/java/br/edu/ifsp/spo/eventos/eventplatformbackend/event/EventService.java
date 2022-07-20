@@ -23,10 +23,8 @@ public class EventService {
                 dto.getSlug(),
                 dto.getSummary(),
                 dto.getPresentation(),
-                dto.getRegistrationStartDate(),
-                dto.getRegistrationEndDate(),
-                dto.getStartDate(),
-                dto.getEndDate(),
+                dto.getRegistrationPeriod(),
+                dto.getExecutionPeriod(),
                 dto.getSmallerImage(),
                 dto.getBiggerImage()
         );

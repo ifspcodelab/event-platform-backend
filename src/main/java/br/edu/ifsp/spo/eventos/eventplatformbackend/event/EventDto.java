@@ -1,8 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
 import lombok.Data;
-
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -12,10 +11,8 @@ public class EventDto {
     String slug;
     String summary;
     String presentation;
-    LocalDate registrationStartDate;
-    LocalDate registrationEndDate;
-    LocalDate startDate;
-    LocalDate endDate;
+    Period registrationPeriod;
+    Period executionPeriod;
     String smallerImage;
     String biggerImage;
     EventStatus status;

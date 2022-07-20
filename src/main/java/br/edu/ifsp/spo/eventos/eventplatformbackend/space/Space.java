@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name ="spaces")
+@Table(name = "spaces")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

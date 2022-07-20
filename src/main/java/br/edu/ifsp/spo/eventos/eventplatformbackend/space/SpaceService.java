@@ -35,5 +35,7 @@ public class SpaceService {
     private Area getArea(UUID areaId) {
         return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
     }
+
+
 }
 

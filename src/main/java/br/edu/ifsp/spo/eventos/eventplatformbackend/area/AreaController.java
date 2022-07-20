@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -14,10 +16,10 @@ public class AreaController {
     private AreaMapper areaMapper;
 
     @PostMapping
-    public AreaDto create(@PathVariable UUID locationId, @Valid @RequestBody AreaCreateDto areaCreateDto) {
+    public ResponseEntity<AreaDto> create(@PathVariable UUID locationId, @Valid @RequestBody AreaCreateDto areaCreateDto) {
         System.out.println(locationId);
         Area area = areaService.create(areaCreateDto, locationId);
         AreaDto areaDto = areaMapper.to(area);
-        return areaDto;
+        return new ResponseEntity<>(areaDto, HttpStatus.CREATED);
     }
 }

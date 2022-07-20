@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +23,16 @@ public class AreaController {
         Area area = areaService.create(areaCreateDto, locationId);
         AreaDto areaDto = areaMapper.to(area);
         return new ResponseEntity<>(areaDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AreaDto>> index(@PathVariable UUID locationId) {
+        List<Area> areas = areaService.findAll(locationId);
+        List<AreaDto> areasDto = new ArrayList<>();
+        for (Area area : areas) {
+            areasDto.add(areaMapper.to(area));
+        }
+        return new ResponseEntity<>(areasDto, HttpStatus.OK);
     }
 
     @GetMapping("{areaId}")

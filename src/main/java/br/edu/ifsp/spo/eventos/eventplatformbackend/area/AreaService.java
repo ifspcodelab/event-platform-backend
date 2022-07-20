@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,10 +21,6 @@ public class AreaService {
     private LocationRepository locationRepository;
 
     public Area create(@RequestBody @Valid AreaCreateDto dto, @PathVariable UUID locationId) {
-        if(!locationRepository.existsById(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
-        }
-
         Location location = getLocation(locationId);
 
         if(areaRepository.existsByNameAndLocation(dto.getName(), location)) {
@@ -34,11 +31,13 @@ public class AreaService {
         return areaRepository.save(area);
     }
 
-    public Area findById(UUID locationId, UUID areaId) {
-        if(!locationRepository.existsById(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
-        }
+    public List<Area> findAll(UUID locationId) {
+        checkLocationExists(locationId);
+        return areaRepository.findAllByLocationId(locationId);
+    }
 
+    public Area findById(UUID locationId, UUID areaId) {
+        checkLocationExists(locationId);
         return getArea(areaId);
     }
 
@@ -48,5 +47,11 @@ public class AreaService {
 
     private Area getArea(UUID areaId) {
         return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
+    }
+
+    private void checkLocationExists(UUID locationId) {
+        if(!locationRepository.existsById(locationId)) {
+            throw new ResourceNotFoundException("location", locationId);
+        }
     }
 }

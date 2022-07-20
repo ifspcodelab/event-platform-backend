@@ -21,4 +21,10 @@ public class SpaceController {
         SpaceDto spaceDto = spaceMapper.to(space);
         return new ResponseEntity<>(spaceDto, HttpStatus.CREATED);
     }
+
+    @GetMapping("{spaceId}")
+    public ResponseEntity<SpaceDto> show(@PathVariable UUID locationId, @PathVariable UUID areaId, @PathVariable UUID spaceId){
+        Space space = spaceService.findById(locationId, areaId, spaceId);
+        return new ResponseEntity<>(spaceMapper.to(space), HttpStatus.OK);
+    }
 }

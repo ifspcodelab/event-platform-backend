@@ -32,6 +32,18 @@ public class SpaceService {
         return spaceRepository.save(space);
     }
 
+    public Space findById(UUID locationId, UUID areaId, UUID spaceId) {
+        if(!locationRepository.existsById(locationId)) {
+            throw new ResourceNotFoundException("location", locationId);
+        }
+
+        if(!areaRepository.existsById(areaId)) {
+            throw new ResourceNotFoundException("area", areaId);
+        }
+
+        return spaceRepository.findById(spaceId).get();
+    }
+
     private Area getArea(UUID areaId) {
         return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
     }

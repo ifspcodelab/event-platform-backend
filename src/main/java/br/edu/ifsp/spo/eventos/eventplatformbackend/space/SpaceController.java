@@ -39,4 +39,10 @@ public class SpaceController {
         SpaceDto spaceDto = spaceMapper.to(space);
         return new ResponseEntity<>(spaceDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("{spaceId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID locationId, @PathVariable UUID areaId, @PathVariable UUID spaceId) {
+        spaceService.delete(locationId, areaId, spaceId);
+        return ResponseEntity.noContent().build();
+    }
 }

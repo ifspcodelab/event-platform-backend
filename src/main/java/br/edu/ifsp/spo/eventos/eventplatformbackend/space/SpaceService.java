@@ -70,6 +70,24 @@ public class SpaceService {
         return getSpace(spaceId);
     }
 
+    public void delete(UUID locationId, UUID areaId, UUID spaceId) {
+        Location location = getLocation(locationId);
+        Area area = getArea(areaId);
+        AreaDto areaDto = areaMapper.to(area);
+        Space space = getSpace(spaceId);
+        SpaceDto spaceDto = spaceMapper.to(space);
+
+        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
+            throw new ResourceNotFoundException("area", areaId);
+        }
+
+        if(!spaceRepository.existsByNameAndArea(spaceDto.getName(), area)) {
+            throw new ResourceNotFoundException("space", spaceId);
+        }
+
+        spaceRepository.deleteById(spaceId);
+    }
+
     private Location getLocation(UUID locationId) {
         return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
     }

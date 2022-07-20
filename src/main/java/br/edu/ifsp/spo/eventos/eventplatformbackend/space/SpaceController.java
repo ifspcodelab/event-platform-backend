@@ -16,14 +16,14 @@ public class SpaceController {
     private final SpaceMapper spaceMapper;
 
     @PostMapping
-    public ResponseEntity<SpaceDto> create (@PathVariable UUID locationId, @PathVariable UUID areaId, @RequestBody @Valid SpaceCreateDto spaceCreateDto){
+    public ResponseEntity<SpaceDto> create (@PathVariable UUID locationId, @PathVariable UUID areaId, @RequestBody @Valid SpaceCreateDto spaceCreateDto) {
         Space space = spaceService.create(spaceCreateDto, areaId, locationId);
         SpaceDto spaceDto = spaceMapper.to(space);
         return new ResponseEntity<>(spaceDto, HttpStatus.CREATED);
     }
 
     @GetMapping("{spaceId}")
-    public ResponseEntity<SpaceDto> show(@PathVariable UUID locationId, @PathVariable UUID areaId, @PathVariable UUID spaceId){
+    public ResponseEntity<SpaceDto> show(@PathVariable UUID locationId, @PathVariable UUID areaId, @PathVariable UUID spaceId) {
         Space space = spaceService.findById(locationId, areaId, spaceId);
         return new ResponseEntity<>(spaceMapper.to(space), HttpStatus.OK);
     }

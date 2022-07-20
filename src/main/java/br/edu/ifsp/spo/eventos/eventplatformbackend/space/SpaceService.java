@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,14 +19,14 @@ public class SpaceService {
     private LocationRepository locationRepository;
 
     public Space create(SpaceCreateDto dto, UUID areaId, UUID locationId) {
-        if(!locationRepository.existsById(locationId)) {
+        if (!locationRepository.existsById(locationId)) {
             throw new ResourceNotFoundException("location", locationId);
         }
 
         Area area = getArea(areaId);
 
-        if(spaceRepository.existsByNameAndArea(dto.getName(), area)) {
-           throw new ResourceAlreadyExistsException("space", "name", dto.getName());
+        if (spaceRepository.existsByNameAndArea(dto.getName(), area)) {
+            throw new ResourceAlreadyExistsException("space", "name", dto.getName());
         }
 
         Space space = new Space(dto.getName(), dto.getCapacity(), dto.getType(), area);
@@ -33,21 +34,33 @@ public class SpaceService {
     }
 
     public Space findById(UUID locationId, UUID areaId, UUID spaceId) {
-        if(!locationRepository.existsById(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
-        }
+        checkLocationExists(locationId);
+        checkAreaExists(areaId);
+        return getSpace(spaceId);
+    }
 
-        if(!areaRepository.existsById(areaId)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
-
-        return spaceRepository.findById(spaceId).get();
+    private Location getLocation(UUID locationId) {
+        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
     }
 
     private Area getArea(UUID areaId) {
         return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
     }
 
+    private Space getSpace(UUID spaceId) {
+        return spaceRepository.findById(spaceId).orElseThrow(() -> new ResourceNotFoundException("space", spaceId));
+    }
 
+    private void checkLocationExists(UUID locationId) {
+        if (!locationRepository.existsById(locationId)) {
+            throw new ResourceNotFoundException("location", locationId);
+        }
+    }
+
+    private void checkAreaExists(UUID areaId) {
+        if (!areaRepository.existsById(areaId)) {
+            throw new ResourceNotFoundException("area", areaId);
+        }
+    }
 }
 

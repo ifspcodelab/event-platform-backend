@@ -20,6 +20,7 @@ public class SpaceService {
     private AreaRepository areaRepository;
     private LocationRepository locationRepository;
     private AreaMapper areaMapper;
+    private SpaceMapper spaceMapper;
 
     public Space create(SpaceCreateDto dto, UUID areaId, UUID locationId) {
         Location location = getLocation(locationId);
@@ -39,8 +40,20 @@ public class SpaceService {
     }
 
     public Space findById(UUID locationId, UUID areaId, UUID spaceId) {
-        checkLocationExists(locationId);
-        checkAreaExists(areaId);
+        Location location = getLocation(locationId);
+        Area area = getArea(areaId);
+        AreaDto areaDto = areaMapper.to(area);
+        Space space = getSpace(spaceId);
+        SpaceDto spaceDto = spaceMapper.to(space);
+
+        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
+            throw new ResourceNotFoundException("area", areaId);
+        }
+
+        if(!spaceRepository.existsByNameAndArea(spaceDto.getName(), area)) {
+            throw new ResourceNotFoundException("space", spaceId);
+        }
+
         return getSpace(spaceId);
     }
 
@@ -54,18 +67,6 @@ public class SpaceService {
 
     private Space getSpace(UUID spaceId) {
         return spaceRepository.findById(spaceId).orElseThrow(() -> new ResourceNotFoundException("space", spaceId));
-    }
-
-    private void checkLocationExists(UUID locationId) {
-        if (!locationRepository.existsById(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
-        }
-    }
-
-    private void checkAreaExists(UUID areaId) {
-        if (!areaRepository.existsById(areaId)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
     }
 }
 

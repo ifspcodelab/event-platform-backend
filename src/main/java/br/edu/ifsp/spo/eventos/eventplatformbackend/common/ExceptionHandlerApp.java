@@ -36,4 +36,13 @@ public class ExceptionHandlerApp {
         );
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ProblemDetail> handlerBusinessRuleException(BusinessRuleException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Business rule exception",
+                List.of(new Violation(ex.getBusinessRuleType().name(), ex.getMessage()))
+        );
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
 }

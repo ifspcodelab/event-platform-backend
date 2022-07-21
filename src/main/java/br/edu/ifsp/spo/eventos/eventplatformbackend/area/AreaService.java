@@ -20,9 +20,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AreaService {
 
-    private AreaRepository areaRepository;
-    private LocationRepository locationRepository;
-    private SpaceRepository spaceRepository;
+    private final AreaRepository areaRepository;
+    private final LocationRepository locationRepository;
+    private final SpaceRepository spaceRepository;
 
     public Area create(@RequestBody @Valid AreaCreateDto dto, @PathVariable UUID locationId) {
         Location location = getLocation(locationId);
@@ -32,6 +32,21 @@ public class AreaService {
         }
 
         Area area = new Area(dto.getName(), dto.getReference(), location);
+        return areaRepository.save(area);
+    }
+
+    public Area update(AreaCreateDto dto, UUID locationId, UUID areaId) {
+        Area area = getArea(areaId);
+
+        checkLocationExists(locationId);
+        checkAreaExists(areaId);
+        if(areaRepository.existsByNameAndIdNot(dto.getName(), areaId)) {
+            throw new ResourceAlreadyExistsException("area", "name", dto.getName());
+        }
+
+        area.setName(dto.getName());
+        area.setReference(dto.getReference());
+
         return areaRepository.save(area);
     }
 

@@ -10,5 +10,6 @@ import java.util.UUID;
 @Repository
 public interface AreaRepository extends JpaRepository<Area, UUID> {
     boolean existsByNameAndLocation(String name, Location location);
+    boolean existsByNameAndIdNot(String name, UUID areaId);
     List<Area> findAllByLocationId(UUID locationId);
 }

@@ -4,9 +4,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleException
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +17,7 @@ import java.util.UUID;
 @Slf4j
 public class EventService {
     private final EventRepository eventRepository;
+    private final SubeventRepository subeventRepository;
 
     public Event create(EventCreateDto dto) {
         if(eventRepository.existsByTitle(dto.getTitle())) {
@@ -53,6 +56,28 @@ public class EventService {
 
     public List<Event> findAll() {
         return eventRepository.findAll();
+    }
+
+    public void delete(UUID eventId) {
+        Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_STATUS_CANCELED);
+        }
+
+        if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_IN_PERIOD_REGISTRATION_START);
+        }
+
+        if(subeventRepository.existsByEventId(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_SUBEVENTS);
+        }
+
+        eventRepository.deleteById(eventId);
+
+        log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }
 
     private Event getEvent(UUID eventId) {

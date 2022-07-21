@@ -38,4 +38,11 @@ public class EventController {
 
         return ResponseEntity.ok(eventMapper.to(events));
     }
+
+    @DeleteMapping("{eventId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId) {
+        eventService.delete(eventId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

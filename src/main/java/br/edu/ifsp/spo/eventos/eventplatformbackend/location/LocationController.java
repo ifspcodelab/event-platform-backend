@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "api/v1/locations")
 @AllArgsConstructor
 public class LocationController {
-    private LocationService locationService;
+    private final LocationService locationService;
     private final LocationMapper locationMapper;
 
     @PostMapping
@@ -24,20 +24,27 @@ public class LocationController {
         return new ResponseEntity<>(locationDto, HttpStatus.CREATED);
     }
 
+    @PutMapping("{locationId}")
+    public ResponseEntity<LocationDto> update(@PathVariable UUID locationId, @RequestBody @Valid LocationCreateDto locationCreateDto) {
+        Location location = locationService.update(locationId, locationCreateDto);
+        LocationDto locationDto = locationMapper.to(location);
+        return ResponseEntity.ok(locationDto);
+    }
+
     @GetMapping()
     public ResponseEntity<List<LocationDto>> index() {
         List<Location> locations = locationService.findAll();
         List<LocationDto> locationsDto = locations.stream()
-                .map(location -> locationMapper.to(location))
+                .map(locationMapper::to)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(locationsDto, HttpStatus.OK);
+        return ResponseEntity.ok(locationsDto);
     }
 
     @GetMapping("{locationId}")
     public ResponseEntity<LocationDto> show(@PathVariable UUID locationId) {
         Location location = locationService.findById(locationId);
         LocationDto locationDto = locationMapper.to(location);
-        return new ResponseEntity<>(locationDto, HttpStatus.OK);
+        return ResponseEntity.ok(locationDto);
     }
 
     @DeleteMapping("{locationId}")

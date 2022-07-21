@@ -11,10 +11,10 @@ public class LocationCreateDto {
     @NotNull
     @NotBlank
     @Size(min = 4, max = 150)
-    private String name;
+    String name;
 
     @NotNull
     @NotBlank
     @Size(min = 20, max = 300)
-    private String address;
+    String address;
 }

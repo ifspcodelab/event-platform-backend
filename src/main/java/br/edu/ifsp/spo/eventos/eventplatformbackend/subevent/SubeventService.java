@@ -29,11 +29,11 @@ public class SubeventService {
         }
 
         if(dto.getExecutionPeriod().getStartDate().isBefore(event.getExecutionPeriod().getStartDate())) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_BEFORE_EVENT, "Subvent start date is before the start date of the event");
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_BEFORE_EVENT);
         }
 
         if(dto.getExecutionPeriod().getEndDate().isAfter(event.getExecutionPeriod().getEndDate())) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_AFTER_EVENT, "Subvent end date is after the end date of the event");
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_AFTER_EVENT);
         }
 
         Subevent subevent = new Subevent(

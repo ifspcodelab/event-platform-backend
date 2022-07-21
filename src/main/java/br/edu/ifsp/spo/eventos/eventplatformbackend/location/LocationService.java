@@ -27,7 +27,15 @@ public class LocationService {
     }
 
     public Location findById(UUID locationId) {
-        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
+        return getLocation(locationId);
     }
 
+    public void delete(UUID locationId) {
+        getLocation(locationId);
+        locationRepository.deleteById(locationId);
+    }
+
+    private Location getLocation(UUID locationId) {
+        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
+    }
 }

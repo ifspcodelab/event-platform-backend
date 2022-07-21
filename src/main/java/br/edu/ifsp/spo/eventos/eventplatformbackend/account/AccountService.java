@@ -50,9 +50,8 @@ public class AccountService {
 
     public TokensDto login(LoginCreateDto loginCreateDto){
         Account account = getAccount(loginCreateDto.getEmail());
-        //TODO: a account foi verificada?
-        //TODO: indicar erro de senha (texto plano por ora)
-        //TODO: criar db.migration
+        isVerified(account);
+        comparesPassword(account, loginCreateDto.getPassword());
 
         UUID refreshTokenId = UUID.randomUUID();
         String accessTokenString = jwtService.generateAccessToken(account);
@@ -61,7 +60,6 @@ public class AccountService {
         RefreshToken refreshToken = new RefreshToken(refreshTokenId, refreshTokenString, account);
 
         refreshTokenRepository.save(refreshToken);
-
 
         TokensDto tokensDto = new TokensDto(accessTokenString, refreshTokenString);
 
@@ -72,5 +70,22 @@ public class AccountService {
         return accountRepository.findByEmail(email).orElseThrow(
                 () -> new LoginException(String.format("Login Exception email %s not found", email))
         );
+    }
+
+    private void comparesPassword(Account account, String password)
+    {
+        boolean passwordComparison = account.getPassword().equals(password);
+        if (!passwordComparison)
+        {
+            throw new LoginException("Login Exception the entered password is incorrect");
+        }
+    }
+
+    private void isVerified(Account account)
+    {
+        if (!account.getVerified())
+        {
+            throw new LoginException(String.format("Login Exception the account for the email %s is not yet verified", account.getEmail()));
+        }
     }
 }

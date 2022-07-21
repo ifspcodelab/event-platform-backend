@@ -20,8 +20,8 @@ public class JwtService {
         Instant now = Instant.now();
 
         JWTCreator.Builder builder = JWT.create();
-        builder.withSubject(account.getId().toString());
         builder.withIssuer(jwtConfig.getIssuer());
+        builder.withSubject(account.getId().toString());
         builder.withIssuedAt(now);
         builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
         builder.withClaim("email", account.getEmail());
@@ -35,8 +35,8 @@ public class JwtService {
         Instant now = Instant.now();
 
         JWTCreator.Builder builder = JWT.create();
-        builder.withSubject(account.getId().toString());
         builder.withIssuer(jwtConfig.getIssuer());
+        builder.withSubject(account.getId().toString());
         builder.withIssuedAt(now);
         builder.withExpiresAt(now.plusSeconds(jwtConfig.getRefreshTokenExpiresIn()));
         builder.withJWTId(jwtId.toString());

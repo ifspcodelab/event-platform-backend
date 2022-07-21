@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.LoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,9 @@ public class ExceptionHandlerApp {
 
     @ExceptionHandler(LoginException.class)
     public ResponseEntity<Void> handlerLoginException(LoginException ex){
-        log.warn(ex.getReason());
+        log.warn(String.format(ex.getLoginExceptionType().getMessage(), ex.getEmail()));
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
+
+    //TODO: log refresh token
 }

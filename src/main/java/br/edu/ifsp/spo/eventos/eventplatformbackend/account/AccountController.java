@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/accounts")
@@ -26,13 +24,5 @@ public class AccountController {
         AccountDto accountDto = accountMapper.to(account);
 
         return new ResponseEntity<>(accountDto, HttpStatus.CREATED);
-    }
-
-    @PostMapping("login")
-    public ResponseEntity<TokensDto> login(@Valid @RequestBody LoginCreateDto loginCreateDto)
-    {
-        TokensDto tokensDto = accountService.login(loginCreateDto);
-
-        return new ResponseEntity<>(tokensDto, HttpStatus.OK);
     }
 }

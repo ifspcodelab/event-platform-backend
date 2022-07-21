@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.common.security;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import lombok.AllArgsConstructor;

@@ -39,4 +39,10 @@ public class LocationController {
         LocationDto locationDto = locationMapper.to(location);
         return new ResponseEntity<>(locationDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("{locationId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID locationId) {
+        locationService.delete(locationId);
+        return ResponseEntity.noContent().build();
+    }
 }

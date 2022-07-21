@@ -1,12 +1,14 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
 import lombok.Value;
 import org.hibernate.validator.constraints.URL;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
+
 @Value
 public class SubeventCreateDto {
     @NotNull
@@ -25,12 +27,8 @@ public class SubeventCreateDto {
     @NotBlank
     @Size(min = 1000, max = 5000)
     String presentation;
-
-    // TODO: validar datas de início e fim do subevento
-    @NotNull
-    LocalDate startDate;
-    @NotNull
-    LocalDate endDate;
+    @Valid
+    Period executionPeriod;
     @NotNull
     @URL
     String smallerImage;

@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -26,13 +28,20 @@ public class SubeventService {
             throw new ResourceAlreadyExistsException("subevent","slug", dto.getSlug());
         }
 
+        if(dto.getExecutionPeriod().getStartDate().isBefore(event.getExecutionPeriod().getStartDate())) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_BEFORE_EVENT, "Subvent start date is before the start date of the event");
+        }
+
+        if(dto.getExecutionPeriod().getEndDate().isAfter(event.getExecutionPeriod().getEndDate())) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_AFTER_EVENT, "Subvent end date is after the end date of the event");
+        }
+
         Subevent subevent = new Subevent(
                 dto.getTitle(),
                 dto.getSlug(),
                 dto.getSummary(),
                 dto.getPresentation(),
-                dto.getStartDate(),
-                dto.getEndDate(),
+                dto.getExecutionPeriod(),
                 dto.getSmallerImage(),
                 dto.getBiggerImage(),
                 event

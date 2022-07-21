@@ -1,13 +1,12 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -23,10 +22,18 @@ public class Event {
     private String slug;
     private String summary;
     private String presentation;
-    private LocalDate registrationStartDate;
-    private LocalDate registrationEndDate;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "startDate", column = @Column(name = "registration_start_date")),
+        @AttributeOverride(name = "endDate", column = @Column(name = "registration_end_date"))
+    })
+    private Period registrationPeriod;
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "startDate", column = @Column(name = "start_date")),
+        @AttributeOverride(name = "endDate", column = @Column(name = "end_date"))
+    })
+    private Period executionPeriod;
     private String smallerImage;
     private String biggerImage;
     @Enumerated(EnumType.STRING)
@@ -37,10 +44,8 @@ public class Event {
         String slug,
         String summary,
         String presentation,
-        LocalDate registrationStartDate,
-        LocalDate registrationEndDate,
-        LocalDate startDate,
-        LocalDate endDate,
+        Period registrationPeriod,
+        Period executionPeriod,
         String smallerImage,
         String biggerImage
     ) {
@@ -49,10 +54,8 @@ public class Event {
         this.slug = slug;
         this.summary = summary;
         this.presentation = presentation;
-        this.registrationStartDate = registrationStartDate;
-        this.registrationEndDate = registrationEndDate;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.registrationPeriod = registrationPeriod;
+        this.executionPeriod = executionPeriod;
         this.smallerImage = smallerImage;
         this.biggerImage = biggerImage;
         this.status = EventStatus.DRAFT;

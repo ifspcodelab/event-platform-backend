@@ -7,7 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResourceName {
     AREA("Area"),
-    SPACE("Space");
+    SPACE("Space"),
+    EVENT("Event"),
+    SUBEVENT("Subevent");
 
     private String name;
 }

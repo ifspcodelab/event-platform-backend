@@ -4,13 +4,16 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class SubeventService {
     private final SubeventRepository subeventRepository;
     private final EventRepository eventRepository;
@@ -48,17 +51,44 @@ public class SubeventService {
     }
 
     public Subevent findById(UUID eventId, UUID subeventId) {
-        // TODO: ERRO NA CHECAGEM DO RELACIONAMENTO ENTRE SUBEVENTO E EVENTO
-        checksEventExists(eventId);
-        checksIfSubeventIsAssociateToEvent(eventId);
+        Subevent subevent = getSubevent(subeventId);
 
-        return getSubevent(subeventId);
+        checksIfSubeventIsAssociateToEvent(subevent,eventId);
+
+        return subevent;
     }
 
     public List<Subevent> findAll(UUID eventId) {
         checksEventExists(eventId);
 
         return subeventRepository.findAllByEventId(eventId);
+    }
+
+    public void delete(UUID eventId, UUID subeventId) {
+        Subevent subevent = getSubevent(subeventId);
+        Event event = getEvent(eventId);
+
+        checksIfSubeventIsAssociateToEvent(subevent, eventId);
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_STATUS_CANCELED);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_WITH_PUBLISHED_STATUS_DELETE_IN_REGISTRATION_PERIOD);
+        }
+
+        subeventRepository.deleteById(subeventId);
+        log.info("Subevent deleted: id={}, title={}", subeventId, subevent.getTitle());
     }
 
     private Event getEvent(UUID eventId) {
@@ -75,8 +105,8 @@ public class SubeventService {
         }
     }
 
-    private void checksIfSubeventIsAssociateToEvent(UUID eventId) {
-        if (subeventRepository.existsByEventId(eventId)) {
+    private void checksIfSubeventIsAssociateToEvent(Subevent subevent, UUID eventId) {
+        if (!subevent.getEvent().getId().equals(eventId)) {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_IS_NOT_ASSOCIATED_EVENT);
         }
     }

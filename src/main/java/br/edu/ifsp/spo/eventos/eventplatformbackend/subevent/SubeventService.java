@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,11 +48,17 @@ public class SubeventService {
     }
 
     public Subevent findById(UUID eventId, UUID subeventId) {
-        Subevent subevent =  getSubevent(subeventId);
+        // TODO: ERRO NA CHECAGEM DO RELACIONAMENTO ENTRE SUBEVENTO E EVENTO
+        checksEventExists(eventId);
+        checksIfSubeventIsAssociateToEvent(eventId);
 
-        checksIfSubeventIsAssociateToEvent(subevent, eventId);
+        return getSubevent(subeventId);
+    }
 
-        return subevent;
+    public List<Subevent> findAll(UUID eventId) {
+        checksEventExists(eventId);
+
+        return subeventRepository.findAllByEventId(eventId);
     }
 
     private Event getEvent(UUID eventId) {
@@ -62,9 +69,15 @@ public class SubeventService {
         return subeventRepository.findById(subeventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), subeventId));
     }
 
-    private void checksIfSubeventIsAssociateToEvent(Subevent subevent, UUID eventId) {
-        if (!subevent.getEvent().getId().equals(eventId)) {
+    private void checksEventExists(UUID eventId) {
+        if(!eventRepository.existsById(eventId)) {
             throw new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId);
+        }
+    }
+
+    private void checksIfSubeventIsAssociateToEvent(UUID eventId) {
+        if (subeventRepository.existsByEventId(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_IS_NOT_ASSOCIATED_EVENT);
         }
     }
 }

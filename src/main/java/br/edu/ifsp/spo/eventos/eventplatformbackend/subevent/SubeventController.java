@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +32,13 @@ public class SubeventController {
         SubeventDto subeventDto = subeventMapper.to(subevent);
 
         return ResponseEntity.ok(subeventDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SubeventDto>> index(@PathVariable UUID eventId) {
+        List<Subevent> subevents = subeventService.findAll(eventId);
+
+        return ResponseEntity.ok(subeventMapper.to(subevents));
     }
 
 }

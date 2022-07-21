@@ -6,13 +6,12 @@ import lombok.Getter;
 public enum BusinessRuleType {
     EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END("Event registration end date is after execution end date of the event"),
     EVENT_REGISTRATION_START_AFTER_EVENT_EXECUTION_START("Event registration start date is after execution start date of the event"),
-    EVENT_DELETE_WITH_STATUS_CANCELED("It is not possible to delete an event with canceled status"),
-    EVENT_DELETE_IN_PERIOD_REGISTRATION_START("It is not possible to delete an event during the registration period"),
-    EVENT_DELETE_WITH_SUBEVENTS("It is not possible to delete an event with associated sub-events"),
-    EVENT_UPDATE_WITH_STATUS_CANCELED("It is not possible to update an event with canceled status"),
-    EVENT_UPDATE_AFTER_PERIOD_EXECUTION_END("It is not possible to update an event finished"),
-    SUBEVENT_BEFORE_EVENT(""),
-    SUBEVENT_AFTER_EVENT("");
+    EVENT_DELETE_WITH_CANCELED_STATUS("It is not possible to delete an event with canceled status"),
+    EVENT_DELETE_WITH_PUBLISHED_STATUS_IN_REGISTRATION_PERIOD("It is not possible to delete an event with published status during the registration period"),
+    EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("It is not possible to delete an event with published status after execution period"),
+    EVENT_DELETE_WITH_SUBEVENTS("It is not possible to delete an event with associated subevents"),
+    EVENT_UPDATE_WITH_CANCELED_STATUS("It is not possible to update an event with canceled status"),
+    EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("It is not possible to update an event with published status after execution period");
 
     String message;
 

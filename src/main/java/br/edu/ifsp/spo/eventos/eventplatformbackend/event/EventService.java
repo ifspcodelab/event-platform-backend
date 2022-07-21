@@ -59,13 +59,20 @@ public class EventService {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_STATUS_CANCELED);
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_CANCELED_STATUS);
         }
 
-        if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+            event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+                event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
                 event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
         ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_IN_PERIOD_REGISTRATION_START);
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_IN_REGISTRATION_PERIOD);
         }
 
         if(subeventRepository.existsByEventId(eventId)) {
@@ -97,11 +104,13 @@ public class EventService {
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_STATUS_CANCELED);
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if(event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_AFTER_PERIOD_EXECUTION_END);
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+            event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
         }
 
         event.setTitle(dto.getTitle());

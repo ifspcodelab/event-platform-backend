@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @Entity
@@ -21,7 +18,6 @@ public class Account {
     @Id
     private UUID id;
     private String name;
-    @Size(max = 350)
     private String email;
     private String cpf;
     private String password;

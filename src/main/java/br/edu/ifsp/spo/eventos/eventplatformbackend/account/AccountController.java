@@ -18,7 +18,6 @@ import java.util.UUID;
 public class AccountController {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
-    private final JwtService jwtService;
 
     @PostMapping
     public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) {
@@ -32,14 +31,8 @@ public class AccountController {
     @PostMapping("login")
     public ResponseEntity<TokensDto> login(@Valid @RequestBody LoginCreateDto loginCreateDto)
     {
-        Account account = accountService.login(loginCreateDto);
+        TokensDto tokensDto = accountService.login(loginCreateDto);
 
-
-
-        TokensDto tokensDto = new TokensDto(
-                jwtService.generateAccessToken(account),
-                jwtService.generateRefreshToken(account, UUID.randomUUID())
-        );
         return new ResponseEntity<>(tokensDto, HttpStatus.OK);
     }
 }

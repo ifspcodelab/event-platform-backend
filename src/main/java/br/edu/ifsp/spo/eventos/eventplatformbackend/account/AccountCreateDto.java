@@ -13,6 +13,7 @@ public class AccountCreateDto {
     String name;
     @NotNull
     @Email
+    @Size(max = 350)
     String email;
     @NotNull
     @CPF

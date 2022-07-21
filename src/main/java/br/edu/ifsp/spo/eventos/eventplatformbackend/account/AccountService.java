@@ -2,14 +2,21 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.LoginException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.RefreshToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.RefreshTokenRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtService jwtService;
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
 
@@ -41,12 +48,24 @@ public class AccountService {
         return account;
     }
 
-    public Account login(LoginCreateDto loginCreateDto){
+    public TokensDto login(LoginCreateDto loginCreateDto){
         Account account = getAccount(loginCreateDto.getEmail());
         //TODO: a account foi verificada?
-        //TODO: indicar erro de senha
+        //TODO: indicar erro de senha (texto plano por ora)
+        //TODO: criar db.migration
 
-        return account;
+        UUID refreshTokenId = UUID.randomUUID();
+        String accessTokenString = jwtService.generateAccessToken(account);
+        String refreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
+
+        RefreshToken refreshToken = new RefreshToken(refreshTokenId, refreshTokenString, account);
+
+        refreshTokenRepository.save(refreshToken);
+
+
+        TokensDto tokensDto = new TokensDto(accessTokenString, refreshTokenString);
+
+        return tokensDto;
     }
 
     private Account getAccount(String email){

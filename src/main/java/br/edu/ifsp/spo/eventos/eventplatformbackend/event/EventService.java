@@ -21,17 +21,11 @@ public class EventService {
         }
 
         if(dto.getRegistrationPeriod().getStartDate().isAfter(dto.getExecutionPeriod().getStartDate())) {
-            throw new BusinessRuleException(
-                    BusinessRuleType.EVENT_REGISTRATION_START_AFTER_EVENT_EXECUTION_START,
-                    "Event registration start date is after execution start date of the event"
-            );
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_START_AFTER_EVENT_EXECUTION_START);
         }
 
         if(dto.getRegistrationPeriod().getEndDate().isAfter(dto.getExecutionPeriod().getEndDate())) {
-            throw new BusinessRuleException(
-                    BusinessRuleType.EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END,
-                    "Event registration end date is after execution end date of the event"
-            );
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END);
         }
 
         Event event = new Event(

@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,7 +40,7 @@ public class ExceptionHandlerApp {
     public ResponseEntity<ProblemDetail> handlerBusinessRuleException(BusinessRuleException ex) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Business rule exception",
-                List.of(new Violation(ex.getBusinessRuleType().name(), ex.getMessage()))
+                List.of(new Violation(ex.getBusinessRuleType().name(), ex.getBusinessRuleType().getMessage()))
         );
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }

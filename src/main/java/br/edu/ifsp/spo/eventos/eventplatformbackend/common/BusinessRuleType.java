@@ -9,6 +9,8 @@ public enum BusinessRuleType {
     EVENT_DELETE_WITH_STATUS_CANCELED("It is not possible to delete an event with canceled status"),
     EVENT_DELETE_IN_PERIOD_REGISTRATION_START("It is not possible to delete an event during the registration period"),
     EVENT_DELETE_WITH_SUBEVENTS("It is not possible to delete an event with associated sub-events"),
+    EVENT_UPDATE_WITH_STATUS_CANCELED("It is not possible to update an event with canceled status"),
+    EVENT_UPDATE_AFTER_PERIOD_EXECUTION_END("It is not possible to update an event finished"),
     SUBEVENT_BEFORE_EVENT(""),
     SUBEVENT_AFTER_EVENT("");
 

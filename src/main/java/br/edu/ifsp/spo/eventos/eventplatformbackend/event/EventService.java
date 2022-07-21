@@ -80,6 +80,45 @@ public class EventService {
         log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }
 
+    public Event update(UUID eventId, EventCreateDto dto) {
+        Event event = getEvent(eventId);
+
+        if(eventRepository.existsByTitle(dto.getTitle())) {
+            throw new ResourceAlreadyExistsException("event", "title", dto.getTitle());
+        }
+
+        if(eventRepository.existsBySlug(dto.getSlug())) {
+            throw new ResourceAlreadyExistsException("event", "slug", dto.getSlug());
+        }
+
+        if(dto.getRegistrationPeriod().getStartDate().isAfter(dto.getExecutionPeriod().getStartDate())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_START_AFTER_EVENT_EXECUTION_START);
+        }
+
+        if(dto.getRegistrationPeriod().getEndDate().isAfter(dto.getExecutionPeriod().getEndDate())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END);
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_STATUS_CANCELED);
+        }
+
+        if(event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_AFTER_PERIOD_EXECUTION_END);
+        }
+
+        event.setTitle(dto.getTitle());
+        event.setSlug(dto.getSlug());
+        event.setSummary(dto.getSummary());
+        event.setPresentation(dto.getPresentation());
+        event.setRegistrationPeriod(dto.getRegistrationPeriod());
+        event.setExecutionPeriod(dto.getExecutionPeriod());
+        event.setSmallerImage(dto.getSmallerImage());
+        event.setBiggerImage(dto.getBiggerImage());
+
+        return eventRepository.save(event);
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("event", eventId));
     }

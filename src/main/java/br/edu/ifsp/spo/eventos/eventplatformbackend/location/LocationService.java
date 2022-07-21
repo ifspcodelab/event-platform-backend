@@ -1,10 +1,12 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.location;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -22,6 +24,10 @@ public class LocationService {
 
     public List<Location> findAll() {
         return locationRepository.findAll();
+    }
+
+    public Location findById(UUID locationId) {
+        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,5 +31,12 @@ public class LocationController {
                 .map(location -> locationMapper.to(location))
                 .collect(Collectors.toList());
         return new ResponseEntity<>(locationsDto, HttpStatus.OK);
+    }
+
+    @GetMapping("{locationId}")
+    public ResponseEntity<LocationDto> show(@PathVariable UUID locationId) {
+        Location location = locationService.findById(locationId);
+        LocationDto locationDto = locationMapper.to(location);
+        return new ResponseEntity<>(locationDto, HttpStatus.OK);
     }
 }

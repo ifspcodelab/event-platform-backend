@@ -7,6 +7,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundExcep
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -48,6 +49,10 @@ public class EventService {
 
     public Event findById(UUID eventId) {
         return getEvent(eventId);
+    }
+
+    public List<Event> findAll() {
+        return eventRepository.findAll();
     }
 
     private Event getEvent(UUID eventId) {

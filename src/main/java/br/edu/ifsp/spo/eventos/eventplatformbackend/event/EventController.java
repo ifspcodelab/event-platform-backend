@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,5 +30,12 @@ public class EventController {
         EventDto eventDto = eventMapper.to(event);
 
         return ResponseEntity.ok(eventDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<EventDto>> index() {
+        List<Event> events = eventService.findAll();
+
+        return ResponseEntity.ok(eventMapper.to(events));
     }
 }

@@ -46,7 +46,25 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
+    public Subevent findById(UUID eventId, UUID subeventId) {
+        Subevent subevent =  getSubevent(subeventId);
+
+        checksIfSubeventIsAssociateToEvent(subevent, eventId);
+
+        return subevent;
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId));
+    }
+
+    private Subevent getSubevent(UUID subeventId) {
+        return subeventRepository.findById(subeventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), subeventId));
+    }
+
+    private void checksIfSubeventIsAssociateToEvent(Subevent subevent, UUID eventId) {
+        if (!subevent.getEvent().getId().equals(eventId)) {
+            throw new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId);
+        }
     }
 }

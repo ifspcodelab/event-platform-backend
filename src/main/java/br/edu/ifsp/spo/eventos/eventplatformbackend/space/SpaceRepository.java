@@ -10,6 +10,7 @@ import java.util.UUID;
 @Repository
 public interface SpaceRepository extends JpaRepository<Space, UUID> {
     boolean existsByNameAndArea(String name, Area area);
+    boolean existsByNameAndIdNot(String name, UUID spaceId);
     boolean existsByAreaId(UUID areaId);
     List<Space> findAllByAreaId(UUID areaId);
 }

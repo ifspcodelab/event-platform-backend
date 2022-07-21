@@ -10,7 +10,6 @@ public class SpaceCreateDto {
     @NotNull
     @NotBlank
     @Size (min=4, max=100)
-    @Pattern(regexp = "^[0-9A-Za-záàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ,.\\s-]*$", message = "Campo nome deve conter apenas letras e números")
     String name;
     @NotNull
     @Min(value = 2)

@@ -1,12 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +14,10 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class SpaceService {
-    private SpaceRepository spaceRepository;
-    private AreaRepository areaRepository;
-    private LocationRepository locationRepository;
-    private SpaceMapper spaceMapper;
+    private final SpaceRepository spaceRepository;
+    private final AreaRepository areaRepository;
 
-    public Space create(SpaceCreateDto dto, UUID areaId, UUID locationId) {
+    public Space create(UUID locationId, UUID areaId, SpaceCreateDto dto) {
         Area area = getArea(areaId);
         checksIfAreaIsAssociateToLocation(area, locationId);
 
@@ -33,7 +29,24 @@ public class SpaceService {
         return spaceRepository.save(space);
     }
 
-    public List<Space> findAll(UUID areaId, UUID locationId) {
+    public Space update(UUID locationId, UUID areaId, UUID spaceId, SpaceCreateDto dto) {
+        Area area = getArea(areaId);
+        checksIfAreaIsAssociateToLocation(area, locationId);
+
+        Space space = getSpace(spaceId);
+        checksIfSpaceIsAssociateToArea(space, areaId);
+
+        if (spaceRepository.existsByNameAndIdNot(dto.getName(), spaceId)) {
+            throw new ResourceAlreadyExistsException("space", "name", dto.getName());
+        }
+
+        space.setName(dto.getName());
+        space.setCapacity(dto.getCapacity());
+        space.setType(dto.getType());
+        return spaceRepository.save(space);
+    }
+
+    public List<Space> findAll(UUID locationId, UUID areaId) {
         Area area = getArea(areaId);
         checksIfAreaIsAssociateToLocation(area, locationId);
         return spaceRepository.findAllByAreaId(areaId);
@@ -73,4 +86,3 @@ public class SpaceService {
         }
     }
 }
-

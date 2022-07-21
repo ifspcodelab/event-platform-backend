@@ -1,7 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
@@ -20,17 +19,11 @@ public class SpaceService {
     private SpaceRepository spaceRepository;
     private AreaRepository areaRepository;
     private LocationRepository locationRepository;
-    private AreaMapper areaMapper;
     private SpaceMapper spaceMapper;
 
     public Space create(SpaceCreateDto dto, UUID areaId, UUID locationId) {
-        Location location = getLocation(locationId);
         Area area = getArea(areaId);
-        AreaDto areaDto = areaMapper.to(area);
-
-        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
+        checksIfAreaIsAssociateToLocation(area, locationId);
 
         if(spaceRepository.existsByNameAndArea(dto.getName(), area)) {
             throw new ResourceAlreadyExistsException("space", "name", dto.getName());
@@ -40,56 +33,24 @@ public class SpaceService {
         return spaceRepository.save(space);
     }
 
-    public List<Space> findAll(UUID locationId, UUID areaId) {
-        Location location = getLocation(locationId);
+    public List<Space> findAll(UUID areaId, UUID locationId) {
         Area area = getArea(areaId);
-        AreaDto areaDto = areaMapper.to(area);
-
-        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
-
+        checksIfAreaIsAssociateToLocation(area, locationId);
         return spaceRepository.findAllByAreaId(areaId);
     }
 
     public Space findById(UUID locationId, UUID areaId, UUID spaceId) {
-        Location location = getLocation(locationId);
-        Area area = getArea(areaId);
-        AreaDto areaDto = areaMapper.to(area);
         Space space = getSpace(spaceId);
-        SpaceDto spaceDto = spaceMapper.to(space);
-
-        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
-
-        if(!spaceRepository.existsByNameAndArea(spaceDto.getName(), area)) {
-            throw new ResourceNotFoundException("space", spaceId);
-        }
-
-        return getSpace(spaceId);
+        checksIfSpaceIsAssociateToArea(space, areaId);
+        checksIfAreaIsAssociateToLocation(space.getArea(), locationId);
+        return space;
     }
 
     public void delete(UUID locationId, UUID areaId, UUID spaceId) {
-        Location location = getLocation(locationId);
-        Area area = getArea(areaId);
-        AreaDto areaDto = areaMapper.to(area);
         Space space = getSpace(spaceId);
-        SpaceDto spaceDto = spaceMapper.to(space);
-
-        if(!areaRepository.existsByNameAndLocation(areaDto.getName(), location)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
-
-        if(!spaceRepository.existsByNameAndArea(spaceDto.getName(), area)) {
-            throw new ResourceNotFoundException("space", spaceId);
-        }
-
+        checksIfSpaceIsAssociateToArea(space, areaId);
+        checksIfAreaIsAssociateToLocation(space.getArea(), locationId);
         spaceRepository.deleteById(spaceId);
-    }
-
-    private Location getLocation(UUID locationId) {
-        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
     }
 
     private Area getArea(UUID areaId) {
@@ -98,6 +59,18 @@ public class SpaceService {
 
     private Space getSpace(UUID spaceId) {
         return spaceRepository.findById(spaceId).orElseThrow(() -> new ResourceNotFoundException("space", spaceId));
+    }
+
+    private void checksIfSpaceIsAssociateToArea(Space space, UUID areaId) {
+        if (!space.getArea().getId().equals(areaId)) {
+            throw new ResourceNotFoundException("area", areaId);
+        }
+    }
+
+    private void checksIfAreaIsAssociateToLocation(Area area, UUID locationId) {
+        if (!area.getLocation().getId().equals(locationId)) {
+            throw new ResourceNotFoundException("location", locationId);
+        }
     }
 }
 

@@ -91,6 +91,48 @@ public class SubeventService {
         log.info("Subevent deleted: id={}, title={}", subeventId, subevent.getTitle());
     }
 
+    public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto) {
+        Subevent subevent = getSubevent(subeventId);
+        Event event = getEvent(eventId);
+        checksIfSubeventIsAssociateToEvent(subevent, eventId);
+
+        if(subeventRepository.existsByTitleAndEvent(dto.getTitle(), event)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(),"title", dto.getTitle());
+        }
+
+        if(subeventRepository.existsBySlugAndEvent(dto.getSlug(), event)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(), "slug", dto.getSlug());
+        }
+
+        if(dto.getExecutionPeriod().getStartDate().isBefore(event.getExecutionPeriod().getStartDate())) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_BEFORE_EVENT);
+        }
+
+        if(dto.getExecutionPeriod().getEndDate().isAfter(event.getExecutionPeriod().getEndDate())) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_AFTER_EVENT);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_CANCELED_STATUS);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
+
+        subevent.setTitle(dto.getTitle());
+        subevent.setSlug(dto.getSlug());
+        subevent.setSummary(dto.getSummary());
+        subevent.setPresentation(dto.getPresentation());
+        subevent.setExecutionPeriod(dto.getExecutionPeriod());
+        subevent.setSmallerImage(dto.getSmallerImage());
+        subevent.setBiggerImage(dto.getBiggerImage());
+
+        return subeventRepository.save(subevent);
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId));
     }

@@ -48,4 +48,11 @@ public class SubeventController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("{subeventId}")
+    public ResponseEntity<SubeventDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody SubeventCreateDto subeventCreateDto) {
+        Subevent subevent = subeventService.update(eventId, subeventId, subeventCreateDto);
+
+       return ResponseEntity.ok(subeventMapper.to(subevent));
+    }
+
 }

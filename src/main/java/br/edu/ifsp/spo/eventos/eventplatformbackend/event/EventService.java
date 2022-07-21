@@ -1,9 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +18,11 @@ public class EventService {
 
     public Event create(EventCreateDto dto) {
         if(eventRepository.existsByTitle(dto.getTitle())) {
-            throw new ResourceAlreadyExistsException("event", "title", dto.getTitle());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "title", dto.getTitle());
         }
 
         if(eventRepository.existsBySlug(dto.getSlug())) {
-            throw new ResourceAlreadyExistsException("event", "slug", dto.getSlug());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "slug", dto.getSlug());
         }
 
         if(dto.getRegistrationPeriod().getStartDate().isAfter(dto.getExecutionPeriod().getStartDate())) {
@@ -84,11 +81,11 @@ public class EventService {
         Event event = getEvent(eventId);
 
         if(eventRepository.existsByTitle(dto.getTitle())) {
-            throw new ResourceAlreadyExistsException("event", "title", dto.getTitle());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "title", dto.getTitle());
         }
 
         if(eventRepository.existsBySlug(dto.getSlug())) {
-            throw new ResourceAlreadyExistsException("event", "slug", dto.getSlug());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "slug", dto.getSlug());
         }
 
         if(dto.getRegistrationPeriod().getStartDate().isAfter(dto.getExecutionPeriod().getStartDate())) {

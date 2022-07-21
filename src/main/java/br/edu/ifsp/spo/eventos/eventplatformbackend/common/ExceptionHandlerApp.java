@@ -36,4 +36,16 @@ public class ExceptionHandlerApp {
         );
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(ResourceReferentialIntegrityException.class)
+    public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(ResourceReferentialIntegrityException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource referential integrity exception",
+                List.of(
+                        new Violation(ex.getArea().getName(), "Area resource"),
+                        new Violation(ex.getSpace().getName(), "Space resource")
+                )
+        );
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
 }

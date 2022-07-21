@@ -1,9 +1,12 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceReferentialIntegrityException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +22,7 @@ public class AreaService {
 
     private AreaRepository areaRepository;
     private LocationRepository locationRepository;
+    private SpaceRepository spaceRepository;
 
     public Area create(@RequestBody @Valid AreaCreateDto dto, @PathVariable UUID locationId) {
         Location location = getLocation(locationId);
@@ -44,6 +48,7 @@ public class AreaService {
     public void delete(UUID locationId, UUID areaId) {
         checkLocationExists(locationId);
         checkAreaExists(areaId);
+        checkSpaceExistsByAreaId(areaId);
         //TODO verificar se não existe nenhum espaço associado (existsByAreaId)
         areaRepository.deleteById(areaId);
     }
@@ -65,6 +70,12 @@ public class AreaService {
     private void checkAreaExists(UUID areaId) {
         if(!areaRepository.existsById(areaId)) {
             throw new ResourceNotFoundException("area", areaId);
+        }
+    }
+
+    private void checkSpaceExistsByAreaId(UUID areaId) {
+        if(spaceRepository.existsByAreaId(areaId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.AREA, ResourceName.SPACE);
         }
     }
 }

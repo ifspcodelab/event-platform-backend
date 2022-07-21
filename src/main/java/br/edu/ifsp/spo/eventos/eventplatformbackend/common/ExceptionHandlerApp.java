@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class ExceptionHandlerApp {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<List<Violation>> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
@@ -42,6 +44,13 @@ public class ExceptionHandlerApp {
                 "Business rule exception",
                 List.of(new Violation(ex.getBusinessRuleType().name(), ex.getBusinessRuleType().getMessage()))
         );
+
+        log.warn(
+            "Business rule exception: name={}, message={}",
+            ex.getBusinessRuleType().name(),
+            ex.getBusinessRuleType().getMessage()
+        );
+
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

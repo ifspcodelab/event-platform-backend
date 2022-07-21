@@ -30,10 +30,8 @@ public class EventCreateDto {
     @NotNull
     @Valid
     Period executionPeriod;
-    @NotNull
     @URL
     String smallerImage;
-    @NotNull
     @URL
     String biggerImage;
 }

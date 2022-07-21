@@ -3,11 +3,15 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class EventService {
     private final EventRepository eventRepository;
 
@@ -40,5 +44,13 @@ public class EventService {
         );
 
         return eventRepository.save(event);
+    }
+
+    public Event findById(UUID eventId) {
+        return getEvent(eventId);
+    }
+
+    private Event getEvent(UUID eventId) {
+        return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("event", eventId));
     }
 }

@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AreaService {
 
     private final AreaRepository areaRepository;
@@ -62,10 +64,11 @@ public class AreaService {
 
     public void delete(UUID locationId, UUID areaId) {
         checkLocationExists(locationId);
-        checkAreaExists(areaId);
+        Area area = getArea(areaId);
         checkSpaceExistsByAreaId(areaId);
         //TODO verificar se não existe nenhum espaço associado (existsByAreaId)
         areaRepository.deleteById(areaId);
+        log.info("Delete area id={}, name={}", areaId, area.getName());
     }
 
     private Location getLocation(UUID locationId) {

@@ -30,4 +30,3 @@ public class Area {
         this.location = location;
     }
 }
-

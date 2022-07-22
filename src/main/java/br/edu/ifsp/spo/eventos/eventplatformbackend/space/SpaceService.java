@@ -38,7 +38,7 @@ public class SpaceService {
         Space space = getSpace(spaceId);
         checkIfSpaceIsAssociateToArea(space, areaId);
 
-        if (spaceRepository.existsByNameAndIdNot(dto.getName(), spaceId)) {
+        if (spaceRepository.existsByNameAndAreaIdAndIdNot(dto.getName(), areaId, spaceId)) {
             throw new ResourceAlreadyExistsException("space", "name", dto.getName());
         }
 
@@ -70,11 +70,13 @@ public class SpaceService {
     }
 
     private Area getArea(UUID areaId) {
-        return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
+        return areaRepository.findById(areaId)
+                .orElseThrow(() -> new ResourceNotFoundException("area", areaId));
     }
 
     private Space getSpace(UUID spaceId) {
-        return spaceRepository.findById(spaceId).orElseThrow(() -> new ResourceNotFoundException("space", spaceId));
+        return spaceRepository.findById(spaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("space", spaceId));
     }
 
     private void checkIfSpaceIsAssociateToArea(Space space, UUID areaId) {

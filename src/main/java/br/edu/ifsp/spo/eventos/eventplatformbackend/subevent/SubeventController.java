@@ -69,4 +69,11 @@ public class SubeventController {
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }
 
+    @PatchMapping("{subeventId}/unpublish")
+    public ResponseEntity<SubeventDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        Subevent subevent = subeventService.unpublish(eventId, subeventId);
+
+        return ResponseEntity.ok(subeventMapper.to(subevent));
+    }
+
 }

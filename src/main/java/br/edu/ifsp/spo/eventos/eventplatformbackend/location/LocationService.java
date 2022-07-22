@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceReferentialIntegrityException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class LocationService {
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
@@ -47,11 +49,12 @@ public class LocationService {
     }
 
     public void delete(UUID locationId) {
-        getLocation(locationId);
+        Location location = getLocation(locationId);
         //TODO: verificar se existe áreas associadas
         checkAreaExistsByLocationId(locationId);
         locationRepository.deleteById(locationId);
         //TODO: criar um log de informação que foi deletado
+        log.info("Delete location id={}, name={}", locationId, location.getName());
     }
 
     private Location getLocation(UUID locationId) {

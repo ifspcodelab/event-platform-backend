@@ -66,4 +66,11 @@ public class EventController {
 
         return ResponseEntity.ok(eventMapper.to(event));
     }
+
+    @PatchMapping("{eventId}/unpublish")
+    public ResponseEntity<EventDto> unpublish(@PathVariable UUID eventId) {
+        Event event = eventService.unpublish(eventId);
+
+        return ResponseEntity.ok(eventMapper.to(event));
+    }
 }

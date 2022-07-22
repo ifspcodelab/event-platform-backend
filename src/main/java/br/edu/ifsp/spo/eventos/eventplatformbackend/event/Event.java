@@ -38,7 +38,7 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 
-    //TODO: adicionar lista de subeventos aqui e no migration
+    // TODO: adicionar lista de subeventos aqui e no migration
 
     public Event(
         String title,

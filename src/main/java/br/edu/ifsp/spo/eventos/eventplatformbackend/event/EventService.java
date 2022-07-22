@@ -46,14 +46,14 @@ public class EventService {
         }
 
         Event event = new Event(
-                dto.getTitle(),
-                dto.getSlug(),
-                dto.getSummary(),
-                dto.getPresentation(),
-                dto.getRegistrationPeriod(),
-                dto.getExecutionPeriod(),
-                dto.getSmallerImage(),
-                dto.getBiggerImage()
+            dto.getTitle(),
+            dto.getSlug(),
+            dto.getSummary(),
+            dto.getPresentation(),
+            dto.getRegistrationPeriod(),
+            dto.getExecutionPeriod(),
+            dto.getSmallerImage(),
+            dto.getBiggerImage()
         );
 
         return eventRepository.save(event);
@@ -152,8 +152,8 @@ public class EventService {
     public Event cancel(UUID eventId) {
         Event event = getEvent(eventId);
 
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_CANCELED_STATUS);
+        if(event.getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_DRAFT_STATUS);
         }
 
         if(event.getStatus().equals(EventStatus.PUBLISHED)) {
@@ -170,12 +170,14 @@ public class EventService {
             }
         }
 
-        if(event.getStatus().equals(EventStatus.DRAFT)) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_DRAFT_STATUS);
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_CANCELED_STATUS);
         }
 
         // TODO: cancelar todos os subeventos associados ao evento cancelado
         event.setStatus(EventStatus.CANCELED);
+
+        // TODO: adicionar um log para o cancelamento de um evento
 
         return eventRepository.save(event);
     }
@@ -200,6 +202,35 @@ public class EventService {
         }
 
         event.setStatus(EventStatus.PUBLISHED);
+        return eventRepository.save(event);
+    }
+
+    public Event unpublish(UUID eventId) {
+        Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UNPUBLISH_WITH_DRAFT_STATUS);
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().equals(LocalDate.now())
+            ) {
+                throw new BusinessRuleException(
+                    BusinessRuleType.EVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START
+                );
+            }
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UNPUBLISH_WITH_CANCELED_STATUS);
+        }
+
+        // TODO: despublicar todos os subeventos associados ao evento despublicado
+        event.setStatus(EventStatus.DRAFT);
+
+        // TODO: adicionar um log para o despublicamento de um evento
+
         return eventRepository.save(event);
     }
 

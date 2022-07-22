@@ -21,7 +21,9 @@ public enum BusinessRuleType {
     EVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to publish an event with draft status and the registration period start"),
     EVENT_PUBLISH_WITH_PUBLISHED_STATUS("It is not possible to publish an event with published status"),
     EVENT_PUBLISH_WITH_CANCELED_STATUS("It is not possible to publish an event with canceled status"),
-
+    EVENT_UNPUBLISH_WITH_DRAFT_STATUS("It is not possible to unpublish an event with draft status"),
+    EVENT_UNPUBLISH_WITH_CANCELED_STATUS("It is not possible to unpublish an event with canceled status"),
+    EVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to unpublish an event with published status and the registration period start"),
     SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Subevent execution period is before today"),
     SUBEVENT_BEFORE_EVENT("Subvent start date is before the start date of the event"),
     SUBEVENT_AFTER_EVENT("Subvent end date is after the end date of the event"),
@@ -38,7 +40,6 @@ public enum BusinessRuleType {
     SUBEVENT_PUBLISH_WITH_PUBLISHED_STATUS("It is not possible to publish an subevent with published status"),
     SUBEVENT_PUBLISH_WITH_CANCELED_STATUS("It is not possible to publish an subevent with canceled status"),
     SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to publish an subevent with draft status and the registration period start"),
-
     SUBEVENT_UNPUBLISH_WITH_DRAFT_STATUS("It is not possible to unpublish an subevent with draft status"),
     SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("It is not possible to unpublish an subevent with canceled status"),
     SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to unpublish an subevent with published status and the registration period start");

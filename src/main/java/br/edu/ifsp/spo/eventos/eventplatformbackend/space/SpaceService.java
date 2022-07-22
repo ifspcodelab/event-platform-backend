@@ -3,9 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,15 +55,15 @@ public class SpaceService {
 
     public Space findById(UUID locationId, UUID areaId, UUID spaceId) {
         Space space = getSpace(spaceId);
+        checkIfAreaIsAssociateToLocation(getArea(areaId), locationId);
         checkIfSpaceIsAssociateToArea(space, areaId);
-        checkIfAreaIsAssociateToLocation(space.getArea(), locationId);
         return space;
     }
 
     public void delete(UUID locationId, UUID areaId, UUID spaceId) {
         Space space = getSpace(spaceId);
+        checkIfAreaIsAssociateToLocation(getArea(areaId), locationId);
         checkIfSpaceIsAssociateToArea(space, areaId);
-        checkIfAreaIsAssociateToLocation(space.getArea(), locationId);
         spaceRepository.deleteById(spaceId);
         log.info("Delete space id={}, name={}", spaceId, space.getName());
     }
@@ -82,13 +80,13 @@ public class SpaceService {
 
     private void checkIfSpaceIsAssociateToArea(Space space, UUID areaId) {
         if (!space.getArea().getId().equals(areaId)) {
-            throw new ResourceNotFoundException(ResourceName.AREA, areaId);
+            throw new ResourceReferentialIntegrityException(ResourceName.SPACE, ResourceName.AREA);
         }
     }
 
     private void checkIfAreaIsAssociateToLocation(Area area, UUID locationId) {
         if (!area.getLocation().getId().equals(locationId)) {
-            throw new ResourceNotFoundException(ResourceName.LOCATION, locationId);
+            throw new ResourceNotExistsAssociationException(ResourceName.AREA, ResourceName.LOCATION);
         }
     }
 }

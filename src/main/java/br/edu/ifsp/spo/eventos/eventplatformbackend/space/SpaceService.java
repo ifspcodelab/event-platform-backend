@@ -23,7 +23,7 @@ public class SpaceService {
         Area area = getArea(areaId);
         checkIfAreaIsAssociateToLocation(area, locationId);
 
-        if(spaceRepository.existsByNameAndArea(dto.getName(), area)) {
+        if(spaceRepository.existsByNameAndAreaId(dto.getName(), areaId)) {
             throw new ResourceAlreadyExistsException("space", "name", dto.getName());
         }
 

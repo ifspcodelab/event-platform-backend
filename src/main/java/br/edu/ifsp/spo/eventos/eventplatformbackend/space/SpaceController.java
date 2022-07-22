@@ -34,10 +34,7 @@ public class SpaceController {
     @GetMapping
     public ResponseEntity<List<SpaceDto>> index(@PathVariable UUID locationId, @PathVariable UUID areaId) {
         List<Space> spaces = spaceService.findAll(locationId, areaId);
-        List<SpaceDto> spacesDto = spaces.stream()
-                .map(spaceMapper::to)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(spacesDto);
+        return ResponseEntity.ok(spaceMapper.to(spaces));
     }
 
     @GetMapping("{spaceId}")

@@ -50,10 +50,8 @@ public class LocationService {
 
     public void delete(UUID locationId) {
         Location location = getLocation(locationId);
-        //TODO: verificar se existe áreas associadas
         checkAreaExistsByLocationId(locationId);
         locationRepository.deleteById(locationId);
-        //TODO: criar um log de informação que foi deletado
         log.info("Delete location id={}, name={}", locationId, location.getName());
     }
 

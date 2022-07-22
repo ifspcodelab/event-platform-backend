@@ -25,6 +25,18 @@ public class EventService {
             throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "slug", dto.getSlug());
         }
 
+        if(dto.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            dto.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(dto.getExecutionPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            dto.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
         if(dto.getRegistrationPeriod().getStartDate().isAfter(dto.getExecutionPeriod().getStartDate())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_START_AFTER_EVENT_EXECUTION_START);
         }
@@ -93,6 +105,18 @@ public class EventService {
 
         if(eventRepository.existsBySlug(dto.getSlug())) {
             throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "slug", dto.getSlug());
+        }
+
+        if(dto.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            dto.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(dto.getExecutionPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            dto.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
         if(dto.getRegistrationPeriod().getStartDate().isAfter(dto.getExecutionPeriod().getStartDate())) {

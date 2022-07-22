@@ -12,7 +12,17 @@ public enum BusinessRuleType {
     SUBEVENT_DELETE_WITH_STATUS_CANCELED("It is not possible to delete an Subevent with canceled status"),
     SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("It is not possible to delete an subevent with published status after execution period"),
     SUBEVENT_UPDATE_WITH_CANCELED_STATUS("It is not possible to update an subevent with canceled status"),
-    SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("It is not possible to update an subevent with published status after execution period");
+    SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("It is not possible to update an subevent with published status after execution period"),
+    SUBEVENT_CANCEL_WITH_DRAFT_STATUS("It is not possible to cancel an subevent with draft status"),
+    SUBEVENT_CANCEL_WITH_CANCELED_STATUS("It is not possible to cancel an subevent with canceled status"),
+    SUBEVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_NOT_START("It is not possible to cancel an subevent with published status and the registration period not start"),
+    SUBEVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_END("It is not possible to cancel an subevent with published status and the execution period end"),
+    SUBEVENT_PUBLISH_WITH_PUBLISHED_STATUS("It is not possible to publish an subevent with published status"),
+    SUBEVENT_PUBLISH_WITH_CANCELED_STATUS("It is not possible to publish an subevent with canceled status"),
+    SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to publish an subevent with draft status and the registration period start"),
+    SUBEVENT_UNPUBLISH_WITH_DRAFT_STATUS("It is not possible to unpublish an subevent with draft status"),
+    SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("It is not possible to unpublish an subevent with canceled status"),
+    SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to unpublish an subevent with published status and the registration period start");
 
     private String message;
 

@@ -55,4 +55,11 @@ public class SubeventController {
        return ResponseEntity.ok(subeventMapper.to(subevent));
     }
 
+    @PatchMapping("{subeventId}/cancel")
+    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        Subevent subevent = subeventService.cancel(eventId, subeventId);
+
+        return ResponseEntity.ok(subeventMapper.to(subevent));
+    }
+
 }

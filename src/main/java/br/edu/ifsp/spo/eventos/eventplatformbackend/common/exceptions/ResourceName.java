@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ResourceName {
+    LOCATION("Location"),
     AREA("Area"),
-    LOCATION("Location");
+    SPACE("Space");
 
     private String name;
 }

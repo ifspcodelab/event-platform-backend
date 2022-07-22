@@ -1,10 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.location;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceReferentialIntegrityException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceReferentialIntegrityException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class LocationService {
 
     public Location create(LocationCreateDto dto) {
         if(locationRepository.existsByName(dto.getName())) {
-            throw new ResourceAlreadyExistsException("location", "name", dto.getName());
+            throw new ResourceAlreadyExistsException(ResourceName.LOCATION, "name", dto.getName());
         }
 
         Location location = new Location(dto.getName(), dto.getAddress());
@@ -32,7 +32,7 @@ public class LocationService {
         Location location = getLocation(locationId);
 
         if(locationRepository.existsByNameAndIdNot(dto.getName(), locationId)) {
-            throw new ResourceAlreadyExistsException("location", "name", dto.getName());
+            throw new ResourceAlreadyExistsException(ResourceName.LOCATION, "name", dto.getName());
         }
 
         location.setName(dto.getName());
@@ -56,7 +56,8 @@ public class LocationService {
     }
 
     private Location getLocation(UUID locationId) {
-        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
+        return locationRepository.findById(locationId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.LOCATION, locationId));
     }
 
     private void checkAreaExistsByLocationId(UUID locationId) {

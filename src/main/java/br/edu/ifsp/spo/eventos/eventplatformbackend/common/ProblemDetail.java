@@ -1,7 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
 
 import lombok.Value;
-
 import java.util.List;
 
 @Value

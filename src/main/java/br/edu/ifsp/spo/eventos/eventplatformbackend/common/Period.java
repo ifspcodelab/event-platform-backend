@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import javax.persistence.Embeddable;
-import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -18,9 +17,7 @@ import java.time.LocalDate;
 @Setter
 public class Period {
     @NotNull
-    @FutureOrPresent
     LocalDate startDate;
     @NotNull
-    @FutureOrPresent
     LocalDate endDate;
 }

@@ -17,51 +17,41 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
-public class ExceptionHandlerApp extends ResponseEntityExceptionHandler {
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+public class ExceptionHandlerApp {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<List<Violation>> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<Violation> violations = ex.getFieldErrors().stream()
                 .map(field -> new Violation(field.getField(), field.getDefaultMessage()))
                 .collect(Collectors.toList());
-        HttpServletRequest servletRequest = ((ServletWebRequest)request).getRequest();
-        log.warn("Bad request at {} {}", servletRequest.getMethod(), servletRequest.getRequestURI());
+
+        log.warn("Bad request at {} {}", request.getMethod(), request.getRequestURI());
         return new ResponseEntity(violations, HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    public ResponseEntity<List<Violation>> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-//        List<Violation> violations = ex.getFieldErrors().stream()
-//                .map(field -> new Violation(field.getField(), field.getDefaultMessage()))
-//                .collect(Collectors.toList());
-//        return new ResponseEntity(violations, HttpStatus.BAD_REQUEST);
-//    }
-
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource not found exception",
                 List.of(new Violation(ex.getResourceName(), ex.getMessage()))
         );
 
-        HttpServletRequest servletRequest = ((ServletWebRequest)request).getRequest();
-        log.warn("Resource not found at {} {}", servletRequest.getMethod(), servletRequest.getRequestURI());
+        log.warn("Resource not found at {} {}", request.getMethod(), request.getRequestURI());
         return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ProblemDetail> handlerResourceAlreadyExistsException(ResourceAlreadyExistsException ex, WebRequest request) {
+    public ResponseEntity<ProblemDetail> handlerResourceAlreadyExistsException(ResourceAlreadyExistsException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource already exists exception",
                 List.of(new Violation(ex.getResourceName(), ex.getMessage()))
         );
 
-        HttpServletRequest servletRequest = ((ServletWebRequest)request).getRequest();
-        log.warn("Resource already exists at {} {}", servletRequest.getMethod(), servletRequest.getRequestURI());
+        log.warn("Resource already exists at {} {}", request.getMethod(), request.getRequestURI());
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ResourceReferentialIntegrityException.class)
-    public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(ResourceReferentialIntegrityException ex) {
+    public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(ResourceReferentialIntegrityException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource referential integrity exception",
                 List.of(
@@ -69,6 +59,8 @@ public class ExceptionHandlerApp extends ResponseEntityExceptionHandler {
                         new Violation(ex.getRelated().getName(), "Related resource")
                 )
         );
+
+        log.warn("Resource referential integrity at {} {}", request.getMethod(), request.getRequestURI());
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

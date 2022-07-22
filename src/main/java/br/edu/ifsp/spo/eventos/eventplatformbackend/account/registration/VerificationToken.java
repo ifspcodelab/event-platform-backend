@@ -1,5 +1,6 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

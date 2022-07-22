@@ -1,5 +1,9 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
-public class AccountService {
+public class RegistrationService {
     private final AccountRepository accountRepository;
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
@@ -28,8 +32,6 @@ public class AccountService {
                 dto.getPassword(),
                 dto.getAgreed()
         );
-
-        account.setVerified(true);
 
         account = accountRepository.save(account);
 

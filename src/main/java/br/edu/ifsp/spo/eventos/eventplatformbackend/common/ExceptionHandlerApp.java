@@ -21,7 +21,8 @@ public class ExceptionHandlerApp {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex) {
-        ProblemDetail problemDetail = new ProblemDetail("Resource not found exception", List.of(new Violation(ex.getResourceName(), ex.getMessage())));
+        ProblemDetail problemDetail = new ProblemDetail("Resource not found exception",
+                List.of(new Violation(ex.getResourceName(), ex.getMessage())));
         return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
     }
 
@@ -29,7 +30,16 @@ public class ExceptionHandlerApp {
     public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceAlreadyExistsException ex) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource already exists exception",
-                List.of(new Violation(ex.getResourceName(), ex.getMessage()))
+                List.of(new Violation(ex.getResourceName(), ex.getMessage())));
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ResourceReferentialIntegrityException.class)
+    public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(ResourceReferentialIntegrityException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource referential integrity exception",
+                List.of(new Violation(ex.getLocation().getName(), "Location resource"),
+                        new Violation(ex.getArea().getName(), "Area resource"))
         );
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }

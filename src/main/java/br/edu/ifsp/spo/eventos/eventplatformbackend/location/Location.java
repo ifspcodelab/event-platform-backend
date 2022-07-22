@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name ="locations")
+@Table(name = "locations")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

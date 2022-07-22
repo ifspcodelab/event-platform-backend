@@ -6,8 +6,8 @@ import java.util.UUID;
 
 @Getter
 public class ResourceNotFoundException extends RuntimeException {
-    private String resourceName;
-    private String message;
+    private final String resourceName;
+    private final String message;
 
     public ResourceNotFoundException(String resourceName, UUID resourceId) {
         super();

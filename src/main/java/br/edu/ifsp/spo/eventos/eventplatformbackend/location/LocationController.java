@@ -34,10 +34,7 @@ public class LocationController {
     @GetMapping()
     public ResponseEntity<List<LocationDto>> index() {
         List<Location> locations = locationService.findAll();
-        List<LocationDto> locationsDto = locations.stream()
-                .map(locationMapper::to)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(locationsDto);
+        return ResponseEntity.ok(locationMapper.to(locations));
     }
 
     @GetMapping("{locationId}")

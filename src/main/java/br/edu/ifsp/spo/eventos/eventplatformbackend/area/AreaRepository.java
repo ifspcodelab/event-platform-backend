@@ -11,4 +11,5 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
     boolean existsByNameAndLocationId(String name, UUID locationId);
     boolean existsByNameAndLocationIdAndIdNot(String name, UUID locationId, UUID areaId);
     List<Area> findAllByLocationId(UUID locationId);
+    boolean existsByLocationId(UUID locationId);
 }

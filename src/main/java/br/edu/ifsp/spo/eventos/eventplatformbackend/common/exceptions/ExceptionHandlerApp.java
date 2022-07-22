@@ -70,14 +70,14 @@ public class ExceptionHandlerApp {
     @ExceptionHandler(ResourceNotExistsAssociationException.class)
     public ResponseEntity<ProblemDetail> resourceNotExistsAssociationException(ResourceNotExistsAssociationException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
-                "Resource not exists association exception",
+                String.format("Resource not exists association exception or %s not exists", ex.getRelated().getName()),
                 List.of(
                         new Violation(ex.getPrimary().getName(), "Primary resource"),
                         new Violation(ex.getRelated().getName(), "Related resource")
                 )
         );
 
-        log.warn("Resource not exists association exception at {} {}", request.getMethod(), request.getRequestURI());
+        log.warn("Resource not exists association exception at {} {} or {} not exists", request.getMethod(), request.getRequestURI(), ex.getPrimary().getName());
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

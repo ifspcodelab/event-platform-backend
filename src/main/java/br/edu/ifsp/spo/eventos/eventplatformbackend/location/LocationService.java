@@ -1,7 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.location;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceReferentialIntegrityException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LocationService {
     private final LocationRepository locationRepository;
+    private final AreaRepository areaRepository;
 
     public Location create(LocationCreateDto dto) {
         if(locationRepository.existsByName(dto.getName())) {
@@ -45,12 +49,18 @@ public class LocationService {
     public void delete(UUID locationId) {
         getLocation(locationId);
         //TODO: verificar se existe áreas associadas
-
+        checkAreaExistsByLocationId(locationId);
         locationRepository.deleteById(locationId);
         //TODO: criar um log de informação que foi deletado
     }
 
     private Location getLocation(UUID locationId) {
         return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
+    }
+
+    private void checkAreaExistsByLocationId(UUID locationId) {
+        if(areaRepository.existsByLocationId(locationId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.LOCATION, ResourceName.AREA);
+        }
     }
 }

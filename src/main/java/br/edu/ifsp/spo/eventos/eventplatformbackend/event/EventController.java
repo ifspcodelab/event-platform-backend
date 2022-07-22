@@ -59,4 +59,11 @@ public class EventController {
 
         return ResponseEntity.ok(eventMapper.to(event));
     }
+
+    @PatchMapping("{eventId}/publish")
+    public ResponseEntity<EventDto> publish(@PathVariable UUID eventId) {
+        Event event = eventService.publish(eventId);
+
+        return ResponseEntity.ok(eventMapper.to(event));
+    }
 }

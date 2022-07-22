@@ -81,8 +81,8 @@ public class EventService {
         }
 
         if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-                event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
         ) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_IN_REGISTRATION_PERIOD);
         }
@@ -159,13 +159,13 @@ public class EventService {
         if(event.getStatus().equals(EventStatus.PUBLISHED)) {
             if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now())) {
                 throw new BusinessRuleException(
-                        BusinessRuleType.EVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_NOT_START
+                    BusinessRuleType.EVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_NOT_START
                 );
             }
 
             if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
                 throw new BusinessRuleException(
-                        BusinessRuleType.EVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_END
+                    BusinessRuleType.EVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_END
                 );
             }
         }
@@ -177,6 +177,29 @@ public class EventService {
         // TODO: cancelar todos os subeventos associados ao evento cancelado
         event.setStatus(EventStatus.CANCELED);
 
+        return eventRepository.save(event);
+    }
+
+    public Event publish(UUID eventId) {
+        Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.DRAFT)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(
+                    BusinessRuleType.EVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START
+                );
+            }
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_PUBLISH_WITH_PUBLISHED_STATUS);
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_PUBLISH_WITH_CANCELED_STATUS);
+        }
+
+        event.setStatus(EventStatus.PUBLISHED);
         return eventRepository.save(event);
     }
 

@@ -17,10 +17,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class Period {
-    @FutureOrPresent
     @NotNull
     LocalDate startDate;
-    @FutureOrPresent
     @NotNull
     LocalDate endDate;
 }

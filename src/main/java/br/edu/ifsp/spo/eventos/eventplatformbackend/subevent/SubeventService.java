@@ -29,6 +29,12 @@ public class SubeventService {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(), "slug", dto.getSlug());
         }
 
+        if(dto.getExecutionPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            dto.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
         if(dto.getExecutionPeriod().getStartDate().isBefore(event.getExecutionPeriod().getStartDate())) {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_BEFORE_EVENT);
         }
@@ -102,6 +108,12 @@ public class SubeventService {
 
         if(subeventRepository.existsBySlugAndEvent(dto.getSlug(), event)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(), "slug", dto.getSlug());
+        }
+
+        if(dto.getExecutionPeriod().getStartDate().isBefore(LocalDate.now()) ||
+            dto.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
         if(dto.getExecutionPeriod().getStartDate().isBefore(event.getExecutionPeriod().getStartDate())) {

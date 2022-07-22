@@ -149,6 +149,37 @@ public class EventService {
         return eventRepository.save(event);
     }
 
+    public Event cancel(UUID eventId) {
+        Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_CANCELED_STATUS);
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now())) {
+                throw new BusinessRuleException(
+                        BusinessRuleType.EVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_NOT_START
+                );
+            }
+
+            if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(
+                        BusinessRuleType.EVENT_CANCEL_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_END
+                );
+            }
+        }
+
+        if(event.getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_DRAFT_STATUS);
+        }
+
+        // TODO: cancelar todos os subeventos associados ao evento cancelado
+        event.setStatus(EventStatus.CANCELED);
+
+        return eventRepository.save(event);
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("event", eventId));
     }

@@ -52,4 +52,11 @@ public class EventController {
 
         return ResponseEntity.ok(eventMapper.to(event));
     }
+
+    @PatchMapping("{eventId}/cancel")
+    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId) {
+        Event event = eventService.cancel(eventId);
+
+        return ResponseEntity.ok(eventMapper.to(event));
+    }
 }

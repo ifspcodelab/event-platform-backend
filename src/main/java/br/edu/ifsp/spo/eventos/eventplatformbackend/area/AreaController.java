@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/v1/locations/{locationId}/areas")
@@ -34,10 +33,7 @@ public class AreaController {
     @GetMapping
     public ResponseEntity<List<AreaDto>> index(@PathVariable UUID locationId) {
         List<Area> areas = areaService.findAll(locationId);
-        List<AreaDto> areasDto = areas.stream()
-                .map(areaMapper::to)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(areasDto);
+        return ResponseEntity.ok(areaMapper.to(areas));
     }
 
     @GetMapping("{areaId}")

@@ -16,7 +16,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Area {
-
     @Id
     private UUID id;
     private String name;

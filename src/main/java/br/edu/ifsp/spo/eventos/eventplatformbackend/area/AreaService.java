@@ -1,9 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceReferentialIntegrityException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
@@ -18,7 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Slf4j
 public class AreaService {
-
     private final AreaRepository areaRepository;
     private final LocationRepository locationRepository;
     private final SpaceRepository spaceRepository;
@@ -26,8 +22,8 @@ public class AreaService {
     public Area create(UUID locationId, AreaCreateDto dto) {
         Location location = getLocation(locationId);
 
-        if(areaRepository.existsByNameAndLocation(dto.getName(), location)) {
-            throw new ResourceAlreadyExistsException("area", "name", dto.getName());
+        if(areaRepository.existsByNameAndLocationId(dto.getName(), locationId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.AREA, "name", dto.getName());
         }
 
         Area area = new Area(dto.getName(), dto.getReference(), location);
@@ -38,8 +34,8 @@ public class AreaService {
         Area area = getArea(areaId);
         checkAreaExistsByLocationId(area, locationId);
 
-        if(areaRepository.existsByNameAndIdNot(dto.getName(), areaId)) {
-            throw new ResourceAlreadyExistsException("area", "name", dto.getName());
+        if(areaRepository.existsByNameAndLocationIdAndIdNot(dto.getName(), locationId, areaId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.AREA, "name", dto.getName());
         }
 
         area.setName(dto.getName());
@@ -62,30 +58,25 @@ public class AreaService {
         Area area = getArea(areaId);
         checkAreaExistsByLocationId(area, locationId);
         checkSpaceExistsByAreaId(areaId);
-        //TODO verificar se não existe nenhum espaço associado (existsByAreaId)
         areaRepository.deleteById(areaId);
         log.info("Delete area id={}, name={}", areaId, area.getName());
     }
 
     private Location getLocation(UUID locationId) {
-        return locationRepository.findById(locationId).orElseThrow(() -> new ResourceNotFoundException("location", locationId));
+        return locationRepository.findById(locationId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.LOCATION, locationId));
     }
 
     private Area getArea(UUID areaId) {
-        return areaRepository.findById(areaId).orElseThrow(() -> new ResourceNotFoundException("area", areaId));
+        return areaRepository.findById(areaId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.AREA, areaId));
     }
 
     private void checkLocationExists(UUID locationId) {
         if(!locationRepository.existsById(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
+            throw new ResourceNotFoundException(ResourceName.LOCATION, locationId);
         }
     }
-
-//    private void checkAreaExists(UUID areaId) {
-//        if(!areaRepository.existsById(areaId)) {
-//            throw new ResourceNotFoundException("area", areaId);
-//        }
-//    }
 
     private void checkSpaceExistsByAreaId(UUID areaId) {
         if(spaceRepository.existsByAreaId(areaId)) {
@@ -95,7 +86,7 @@ public class AreaService {
 
     private void checkAreaExistsByLocationId(Area area, UUID locationId) {
         if (!area.getLocation().getId().equals(locationId)) {
-            throw new ResourceNotFoundException("location", locationId);
+            throw new ResourceNotExistsAssociationException(ResourceName.AREA, ResourceName.LOCATION);
         }
     }
 }

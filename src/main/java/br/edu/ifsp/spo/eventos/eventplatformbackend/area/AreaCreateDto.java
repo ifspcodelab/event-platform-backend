@@ -11,7 +11,6 @@ public class AreaCreateDto {
     @Size(min = 4, max = 80)
     String name;
 
-    //TODO: definir regexp que aceita apenas letras e números
     @Size(min = 4, max = 150)
     String reference;
 }

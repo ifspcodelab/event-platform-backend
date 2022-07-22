@@ -172,6 +172,30 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
+    public Subevent publish(UUID eventId, UUID subeventId) {
+        Subevent subevent = getSubevent(subeventId);
+        checksIfSubeventIsAssociateToEvent(subevent, eventId);
+
+        if(subevent.getStatus().equals(EventStatus.DRAFT)) {
+            if(subevent.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    subevent.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START);
+            }
+        }
+
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_PUBLISHED_STATUS);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_CANCELED_STATUS);
+        }
+
+        subevent.setStatus(EventStatus.PUBLISHED);
+        return subeventRepository.save(subevent);
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId));
     }

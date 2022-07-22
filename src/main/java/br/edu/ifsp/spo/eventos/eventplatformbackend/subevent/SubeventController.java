@@ -62,4 +62,11 @@ public class SubeventController {
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }
 
+    @PatchMapping("{subeventId}/publish")
+    public ResponseEntity<SubeventDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        Subevent subevent = subeventService.publish(eventId, subeventId);
+
+        return ResponseEntity.ok(subeventMapper.to(subevent));
+    }
+
 }

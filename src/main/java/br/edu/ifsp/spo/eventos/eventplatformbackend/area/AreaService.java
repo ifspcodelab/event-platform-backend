@@ -10,10 +10,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +23,7 @@ public class AreaService {
     private final LocationRepository locationRepository;
     private final SpaceRepository spaceRepository;
 
-    public Area create(@RequestBody @Valid AreaCreateDto dto, @PathVariable UUID locationId) {
+    public Area create(UUID locationId, AreaCreateDto dto) {
         Location location = getLocation(locationId);
 
         if(areaRepository.existsByNameAndLocation(dto.getName(), location)) {
@@ -37,18 +34,16 @@ public class AreaService {
         return areaRepository.save(area);
     }
 
-    public Area update(AreaCreateDto dto, UUID locationId, UUID areaId) {
+    public Area update(UUID locationId, UUID areaId, AreaCreateDto dto) {
         Area area = getArea(areaId);
+        checkAreaExistsByLocationId(area, locationId);
 
-        checkLocationExists(locationId);
-        checkAreaExists(areaId);
         if(areaRepository.existsByNameAndIdNot(dto.getName(), areaId)) {
             throw new ResourceAlreadyExistsException("area", "name", dto.getName());
         }
 
         area.setName(dto.getName());
         area.setReference(dto.getReference());
-
         return areaRepository.save(area);
     }
 
@@ -58,13 +53,14 @@ public class AreaService {
     }
 
     public Area findById(UUID locationId, UUID areaId) {
-        checkLocationExists(locationId);
-        return getArea(areaId);
+        Area area = getArea(areaId);
+        checkAreaExistsByLocationId(area, locationId);
+        return area;
     }
 
     public void delete(UUID locationId, UUID areaId) {
-        checkLocationExists(locationId);
         Area area = getArea(areaId);
+        checkAreaExistsByLocationId(area, locationId);
         checkSpaceExistsByAreaId(areaId);
         //TODO verificar se não existe nenhum espaço associado (existsByAreaId)
         areaRepository.deleteById(areaId);
@@ -85,15 +81,21 @@ public class AreaService {
         }
     }
 
-    private void checkAreaExists(UUID areaId) {
-        if(!areaRepository.existsById(areaId)) {
-            throw new ResourceNotFoundException("area", areaId);
-        }
-    }
+//    private void checkAreaExists(UUID areaId) {
+//        if(!areaRepository.existsById(areaId)) {
+//            throw new ResourceNotFoundException("area", areaId);
+//        }
+//    }
 
     private void checkSpaceExistsByAreaId(UUID areaId) {
         if(spaceRepository.existsByAreaId(areaId)) {
             throw new ResourceReferentialIntegrityException(ResourceName.AREA, ResourceName.SPACE);
+        }
+    }
+
+    private void checkAreaExistsByLocationId(Area area, UUID locationId) {
+        if (!area.getLocation().getId().equals(locationId)) {
+            throw new ResourceNotFoundException("location", locationId);
         }
     }
 }

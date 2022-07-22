@@ -6,7 +6,6 @@ import javax.validation.constraints.*;
 
 @Value
 public class AreaCreateDto {
-
     @NotNull
     @NotBlank
     @Size(min = 4, max = 80)

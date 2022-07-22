@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public class ResourceReferentialIntegrityException extends RuntimeException {
-    private final ResourceName area;
-    private final ResourceName space;
+    private final ResourceName primary;
+    private final ResourceName related;
 
-    public ResourceReferentialIntegrityException(ResourceName area, ResourceName space) {
+    public ResourceReferentialIntegrityException(ResourceName primary, ResourceName related) {
         super();
-        this.area = area;
-        this.space = space;
+        this.primary = primary;
+        this.related = related;
     }
 }

@@ -33,26 +33,30 @@ public class ExceptionHandlerApp extends ResponseEntityExceptionHandler {
 //        List<Violation> violations = ex.getFieldErrors().stream()
 //                .map(field -> new Violation(field.getField(), field.getDefaultMessage()))
 //                .collect(Collectors.toList());
-//        ex.
-//        log.warn("bad request ");
 //        return new ResponseEntity(violations, HttpStatus.BAD_REQUEST);
 //    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex) {
+    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource not found exception",
                 List.of(new Violation(ex.getResourceName(), ex.getMessage()))
         );
+
+        HttpServletRequest servletRequest = ((ServletWebRequest)request).getRequest();
+        log.warn("Resource not found at {} {}", servletRequest.getMethod(), servletRequest.getRequestURI());
         return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceAlreadyExistsException ex) {
+    public ResponseEntity<ProblemDetail> handlerResourceAlreadyExistsException(ResourceAlreadyExistsException ex, WebRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource already exists exception",
                 List.of(new Violation(ex.getResourceName(), ex.getMessage()))
         );
+
+        HttpServletRequest servletRequest = ((ServletWebRequest)request).getRequest();
+        log.warn("Resource already exists at {} {}", servletRequest.getMethod(), servletRequest.getRequestURI());
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
@@ -61,8 +65,8 @@ public class ExceptionHandlerApp extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource referential integrity exception",
                 List.of(
-                        new Violation(ex.getArea().getName(), "Area resource"),
-                        new Violation(ex.getSpace().getName(), "Space resource")
+                        new Violation(ex.getPrimary().getName(), "Primary resource"),
+                        new Violation(ex.getRelated().getName(), "Related resource")
                 )
         );
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);

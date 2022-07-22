@@ -19,15 +19,14 @@ public class AreaController {
 
     @PostMapping
     public ResponseEntity<AreaDto> create(@PathVariable UUID locationId, @Valid @RequestBody AreaCreateDto areaCreateDto) {
-        System.out.println(locationId);
-        Area area = areaService.create(areaCreateDto, locationId);
+        Area area = areaService.create(locationId, areaCreateDto);
         AreaDto areaDto = areaMapper.to(area);
         return new ResponseEntity<>(areaDto, HttpStatus.CREATED);
     }
 
     @PutMapping("{areaId}")
-    public ResponseEntity<AreaDto> update(@Valid @RequestBody AreaCreateDto dto, @PathVariable UUID locationId, @PathVariable UUID areaId) {
-        Area area = areaService.update(dto, locationId, areaId);
+    public ResponseEntity<AreaDto> update(@PathVariable UUID locationId, @PathVariable UUID areaId, @Valid @RequestBody AreaCreateDto areaCreateDto) {
+        Area area = areaService.update(locationId, areaId, areaCreateDto);
         AreaDto areaDto = areaMapper.to(area);
         return ResponseEntity.ok(areaDto);
     }

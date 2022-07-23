@@ -1,0 +1,3 @@
+INSERT INTO locations VALUES ('5607ddd3-31ed-4435-bd61-23133d2f3381', 'IFSP Campus São Paulo', 'Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010');
+INSERT INTO locations VALUES ('643a60d9-468c-44b9-a9f8-0b4314eec646', 'IFSP Campus Guarulhos', 'Av. Salgado Filho, 3501 - Centro, Guarulhos - SP, 07115-000');
+INSERT INTO locations VALUES ('1acf9806-495f-4aeb-82b3-4aa3313de2d9', 'Shopping D', 'Av. Cruzeiro do Sul, 1100 - Canindé, São Paulo - SP, 03033-020');

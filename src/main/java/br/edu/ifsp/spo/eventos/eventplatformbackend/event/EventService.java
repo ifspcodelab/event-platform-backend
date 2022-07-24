@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class EventService {
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
+    private final SubeventService subeventService;
 
     public Event create(EventCreateDto dto) {
         if(eventRepository.existsByTitle(dto.getTitle())) {
@@ -174,8 +176,8 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_CANCEL_WITH_CANCELED_STATUS);
         }
 
-        // TODO: cancelar todos os subeventos associados ao evento cancelado
         event.setStatus(EventStatus.CANCELED);
+        subeventService.cancelAllByEventId(eventId);
 
         // TODO: adicionar um log para o cancelamento de um evento
 
@@ -226,8 +228,8 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_UNPUBLISH_WITH_CANCELED_STATUS);
         }
 
-        // TODO: despublicar todos os subeventos associados ao evento despublicado
         event.setStatus(EventStatus.DRAFT);
+        subeventService.unpublishAllByEventId(eventId);
 
         // TODO: adicionar um log para o despublicamento de um evento
 

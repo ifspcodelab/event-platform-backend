@@ -6,7 +6,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -168,6 +170,7 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.CANCELED);
+        // TODO: ADICIONAR LOG
         return subeventRepository.save(subevent);
     }
 
@@ -217,6 +220,42 @@ public class SubeventService {
 
         subevent.setStatus(EventStatus.DRAFT);
         return subeventRepository.save(subevent);
+    }
+
+    public void cancelAllByEventId(UUID eventId) {
+        getEvent(eventId);
+
+        List<Subevent> subevents = new ArrayList<>();
+        for (Subevent subevent : this.findAll(eventId)) {
+
+            if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                    (subevent.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    subevent.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())) &&
+                    (subevent.getExecutionPeriod().getEndDate().isAfter(LocalDate.now()) ||
+                            subevent.getExecutionPeriod().getEndDate().isEqual(LocalDate.now()))
+            ) {
+                subevent.setStatus(EventStatus.CANCELED);
+                subevents.add(subevent);
+            }
+        }
+        subeventRepository.saveAll(subevents);
+    }
+
+    public void unpublishAllByEventId(UUID eventId) {
+        getEvent(eventId);
+
+        List<Subevent> subevents = new ArrayList<>();
+        for (Subevent subevent : this.findAll(eventId)) {
+
+            if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                    subevent.getEvent().getRegistrationPeriod().getStartDate().isAfter(LocalDate.now())
+            ) {
+                subevent.setStatus(EventStatus.DRAFT);
+                subevents.add(subevent);
+            }
+
+        }
+        subeventRepository.saveAll(subevents);
     }
 
     private Event getEvent(UUID eventId) {

@@ -170,7 +170,8 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.CANCELED);
-        // TODO: ADICIONAR LOG
+        log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
+
         return subeventRepository.save(subevent);
     }
 

@@ -240,6 +240,24 @@ public class SubeventService {
         }
         subeventRepository.saveAll(subevents);
     }
+
+    public void unpublishAllByEventId(UUID eventId) {
+        getEvent(eventId);
+        List<Subevent> subevents = new ArrayList<>();
+
+        for (Subevent subevent : this.findAll(eventId)) {
+
+            if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                    subevent.getEvent().getRegistrationPeriod().getStartDate().isAfter(LocalDate.now())
+            ) {
+                subevent.setStatus(EventStatus.DRAFT);
+                subevents.add(subevent);
+            }
+
+        }
+        subeventRepository.saveAll(subevents);
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId));
     }

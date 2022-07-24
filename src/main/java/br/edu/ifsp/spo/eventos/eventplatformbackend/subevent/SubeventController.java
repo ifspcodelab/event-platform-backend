@@ -42,7 +42,7 @@ public class SubeventController {
     }
 
     @DeleteMapping("{subeventId}")
-    public ResponseEntity<List<SubeventDto>> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
         subeventService.delete(eventId, subeventId);
 
         return ResponseEntity.noContent().build();

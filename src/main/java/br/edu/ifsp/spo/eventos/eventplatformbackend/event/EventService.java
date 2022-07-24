@@ -179,7 +179,7 @@ public class EventService {
         event.setStatus(EventStatus.CANCELED);
         subeventService.cancelAllByEventId(eventId);
 
-        // TODO: adicionar um log para o cancelamento de um evento
+        log.info("Event canceled: id={}, title={}", eventId, event.getTitle());
 
         return eventRepository.save(event);
     }
@@ -230,8 +230,6 @@ public class EventService {
 
         event.setStatus(EventStatus.DRAFT);
         subeventService.unpublishAllByEventId(eventId);
-
-        // TODO: adicionar um log para o despublicamento de um evento
 
         return eventRepository.save(event);
     }

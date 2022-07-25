@@ -38,6 +38,8 @@ public class PasswordResetService {
         PasswordResetToken passwordResetToken =
                 new PasswordResetToken(account, accountConfig.getPasswordResetTokenExpiresIn());
         tokenRepo.save(passwordResetToken);
+        log.info("Password Reset: token generated for account {}", dto.getEmail());
+        log.debug("Token value: {}", passwordResetToken.getToken());
     }
 
     @Transactional
@@ -55,6 +57,8 @@ public class PasswordResetService {
         Account account = passwordResetToken.getAccount();
         account.setPassword(passwordEncoder.encode(dto.getPassword()));
         accountRepository.save(account);
+        log.info("Password Reset: password update for account: {}", account.getEmail());
         tokenRepo.deleteById(passwordResetToken.getId());
+        log.info("Password Reset: reset token deleted");
     }
 }

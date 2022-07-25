@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,10 @@ public class AccountService {
     @Transactional
     public Account create(AccountCreateDto dto) {
         if(accountRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceAlreadyExistsException("account", "e-mail", dto.getEmail());
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "e-mail", dto.getEmail());
         }
         if(accountRepository.existsByCpf(dto.getCpf())) {
-            throw new ResourceAlreadyExistsException("account", "cpf", dto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "cpf", dto.getCpf());
         }
 
         Account account = new Account(

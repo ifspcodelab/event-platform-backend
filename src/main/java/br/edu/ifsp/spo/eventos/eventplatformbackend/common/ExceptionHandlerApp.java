@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.LoginException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,11 +41,16 @@ public class ExceptionHandlerApp {
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(LoginException.class)
-    public ResponseEntity<Void> handlerLoginException(LoginException ex){
-        log.warn(String.format(ex.getLoginExceptionType().getMessage(), ex.getEmail()));
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Void> handlerLoginException(AuthenticationException ex){
+        log.warn(String.format(ex.getAuthenticationExceptionType().getMessage(), ex.getEmail()));
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
     //TODO: log refresh token
+    @ExceptionHandler(AlgorithmMismatchException.class)
+    public ResponseEntity<Void> handlerAlgorithmMismatchException(AlgorithmMismatchException ex){
+        log.warn("Algorithm Mismatch Exception: ", ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
 }

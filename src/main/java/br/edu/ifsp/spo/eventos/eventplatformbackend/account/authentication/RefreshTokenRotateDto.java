@@ -1,13 +1,14 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
+import lombok.Data;
 import lombok.Value;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Value
-public class LogoutCreateDto {
+@Data
+public class RefreshTokenRotateDto {
     @NotNull
     @NotBlank
-    String accessToken;
+    String refreshToken;
 }

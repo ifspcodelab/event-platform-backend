@@ -26,11 +26,11 @@ public class AuthenticationService {
         Account account = getAccount(loginCreateDto.getEmail());
 
         if (!account.getVerified()) {
-            throw new LoginException(LoginExceptionType.UNVERIFIED_ACCOUNT, account.getEmail());
+            throw new AuthenticationException(AuthenticationExceptionType.UNVERIFIED_ACCOUNT, account.getEmail());
         }
 
         if (!passwordEncoder.matches(loginCreateDto.getPassword(), account.getPassword())) {
-            throw new LoginException(LoginExceptionType.INCORRECT_PASSWORD, loginCreateDto.getEmail());
+            throw new AuthenticationException(AuthenticationExceptionType.INCORRECT_PASSWORD, loginCreateDto.getEmail());
         }
 
         refreshTokenRepository.deleteAllByAccountId(account.getId());
@@ -50,12 +50,6 @@ public class AuthenticationService {
         return tokensDto;
     }
 
-    private Account getAccount(String email) {
-        return accountRepository.findByEmail(email).orElseThrow(
-                () -> new LoginException(LoginExceptionType.NONEXISTENT_ACCOUNT, email)
-        );
-    }
-
     @Transactional
     public void logout(String accessToken) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
@@ -65,5 +59,49 @@ public class AuthenticationService {
         refreshTokenRepository.deleteAllByAccountId(accountId);
 
         log.info("Successful logout for the email {}", accountEmail);
+    }
+
+    @Transactional
+    public TokensDto rotateRefreshToken(RefreshTokenRotateDto refreshTokenRotateDto) {
+        String refreshTokenString = refreshTokenRotateDto.getRefreshToken();
+
+        DecodedJWT decodedToken = jwtService.decodeToken(refreshTokenString);
+
+        UUID tokenId = UUID.fromString(decodedToken.getId());
+        UUID accountId = UUID.fromString(decodedToken.getSubject());
+
+        Account account = getAccount(accountId);
+
+        if(!refreshTokenRepository.existsById(tokenId)) {
+            throw new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_TOKEN, account.getEmail());
+        }
+
+        refreshTokenRepository.deleteAllByAccountId(accountId);
+
+        UUID refreshTokenId = UUID.randomUUID();
+        String newAccessTokenString = jwtService.generateAccessToken(account);
+        String newRefreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
+
+        RefreshToken refreshToken = new RefreshToken(refreshTokenId, newRefreshTokenString, account);
+
+        refreshTokenRepository.save(refreshToken);
+
+        TokensDto tokensDto = new TokensDto(newAccessTokenString, newRefreshTokenString);
+
+        log.info("Successful token rotation for the email {}", account.getEmail());
+
+        return tokensDto;
+    }
+
+    private Account getAccount(String email) {
+        return accountRepository.findByEmail(email).orElseThrow(
+                () -> new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_EMAIL, email)
+        );
+    }
+
+    private Account getAccount(UUID id) {
+        return accountRepository.findById(id).orElseThrow(
+                () -> new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_ID, id.toString())
+        );
     }
 }

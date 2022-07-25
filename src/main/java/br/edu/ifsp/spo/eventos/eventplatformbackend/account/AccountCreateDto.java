@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Name;
 import lombok.Value;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.*;
 public class AccountCreateDto {
     @NotNull
     @NotBlank
+    @Name
     @Size(min = 5, max = 256)
     String name;
     @NotNull

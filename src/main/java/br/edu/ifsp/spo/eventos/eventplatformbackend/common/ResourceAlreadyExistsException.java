@@ -2,8 +2,6 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
 
 import lombok.Getter;
 
-import java.util.UUID;
-
 @Getter
 public class ResourceAlreadyExistsException extends RuntimeException {
     private String resourceName;

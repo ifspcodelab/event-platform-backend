@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class ExceptionHandlerApp {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<List<Violation>> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
@@ -34,6 +37,16 @@ public class ExceptionHandlerApp {
                 "Resource already exists exception",
                 List.of(new Violation(ex.getResourceName(), ex.getMessage()))
         );
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<ProblemDetail> handlerRegistrationException(RegistrationException ex) {
+        String message = String.format(ex.getRegistrationRuleType().getMessage(), ex.getEmail());
+        ProblemDetail problemDetail = new ProblemDetail(ex.getRegistrationRuleType().name(), List.of());
+
+        log.warn(message);
+
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

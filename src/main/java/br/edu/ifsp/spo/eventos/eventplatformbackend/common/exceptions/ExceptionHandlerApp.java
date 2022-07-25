@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,6 +77,22 @@ public class ExceptionHandlerApp {
         );
 
         log.warn("Resource not exists association exception at {} {}", request.getMethod(), request.getRequestURI());
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ProblemDetail> handlerBusinessRuleException(BusinessRuleException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Business rule exception",
+                List.of(new Violation(ex.getBusinessRuleType().name(), ex.getBusinessRuleType().getMessage()))
+        );
+
+        log.warn(
+                "Business rule exception: name={}, message={}",
+                ex.getBusinessRuleType().name(),
+                ex.getBusinessRuleType().getMessage()
+        );
+
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

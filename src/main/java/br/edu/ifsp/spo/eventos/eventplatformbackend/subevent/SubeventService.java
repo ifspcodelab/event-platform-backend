@@ -273,7 +273,7 @@ public class SubeventService {
 
     private Subevent getSubevent(UUID subeventId) {
         return subeventRepository.findById(subeventId)
-            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, subeventId));
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
     }
 
     private void checksEventExists(UUID eventId) {

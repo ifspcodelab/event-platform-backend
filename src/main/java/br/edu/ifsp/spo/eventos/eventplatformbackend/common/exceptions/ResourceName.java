@@ -10,7 +10,8 @@ public enum ResourceName {
     AREA("Area"),
     SPACE("Space"),
     EVENT("Event"),
-    SUBEVENT("Subevent");
+    SUBEVENT("Subevent"),
+    ACCOUNT("Account");
 
     private String name;
 }

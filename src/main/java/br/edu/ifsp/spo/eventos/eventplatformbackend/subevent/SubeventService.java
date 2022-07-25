@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +171,8 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.CANCELED);
-        // TODO: ADICIONAR LOG
+        log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
+
         return subeventRepository.save(subevent);
     }
 
@@ -195,6 +197,8 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.PUBLISHED);
+
+        log.info("Subevent published: id={}, title={}", subeventId, subevent.getTitle());
         return subeventRepository.save(subevent);
     }
 
@@ -219,9 +223,12 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.DRAFT);
+
+        log.info("Subevent unpublished: id={}, title={}", subeventId, subevent.getTitle());
         return subeventRepository.save(subevent);
     }
 
+    @Transactional
     public void cancelAllByEventId(UUID eventId) {
         getEvent(eventId);
 
@@ -241,10 +248,11 @@ public class SubeventService {
         subeventRepository.saveAll(subevents);
     }
 
+    @Transactional
     public void unpublishAllByEventId(UUID eventId) {
         getEvent(eventId);
-
         List<Subevent> subevents = new ArrayList<>();
+
         for (Subevent subevent : this.findAll(eventId)) {
 
             if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&

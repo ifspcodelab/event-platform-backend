@@ -204,6 +204,9 @@ public class EventService {
         }
 
         event.setStatus(EventStatus.PUBLISHED);
+
+        log.info("Event published: id={}, title={}", eventId, event.getTitle());
+
         return eventRepository.save(event);
     }
 
@@ -230,6 +233,8 @@ public class EventService {
 
         event.setStatus(EventStatus.DRAFT);
         subeventService.unpublishAllByEventId(eventId);
+
+        log.info("Event unpublished: id={}, title={}", eventId, event.getTitle());
 
         return eventRepository.save(event);
     }

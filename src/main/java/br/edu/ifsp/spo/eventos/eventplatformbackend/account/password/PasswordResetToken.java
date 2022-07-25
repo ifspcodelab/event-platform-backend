@@ -1,6 +1,7 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,10 @@ public class PasswordResetToken {
         this.token = UUID.randomUUID();
         this.expiresIn = Instant.now().plusSeconds(durationInSeconds);
         this.account = account;
+    }
+
+    public boolean isExpired(){
+        return this.expiresIn.isBefore(Instant.now());
     }
 
 }

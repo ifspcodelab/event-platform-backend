@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.validators;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.ValidPeriod;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

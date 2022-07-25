@@ -1,16 +1,13 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import lombok.Value;
 import org.hibernate.validator.constraints.URL;
-
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Value
-public class SubeventCreateDto {
+public class EventCreateDto {
     @NotNull
     @NotBlank
     @Size(min = 3, max = 50)
@@ -27,12 +24,14 @@ public class SubeventCreateDto {
     @NotBlank
     @Size(min = 1000, max = 5000)
     String presentation;
+    @NotNull
+    @Valid
+    Period registrationPeriod;
+    @NotNull
     @Valid
     Period executionPeriod;
-    @NotNull
     @URL
     String smallerImage;
-    @NotNull
     @URL
     String biggerImage;
 }

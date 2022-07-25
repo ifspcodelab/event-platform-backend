@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
 import lombok.Getter;
 

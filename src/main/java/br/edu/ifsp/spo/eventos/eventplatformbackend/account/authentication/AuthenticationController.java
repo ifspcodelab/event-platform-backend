@@ -3,10 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -38,4 +35,11 @@ public class AuthenticationController {
     //TODO: 0. o refreshToken existe?
     //TODO: 1. caso sim, apagar o refreshToken
     //TODO: 2. fazer o log (info logout, caso necessário criar type, etc)
+
+    @DeleteMapping("logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken) {
+        authenticationService.logout(accessToken.replace("Bearer ", ""));
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

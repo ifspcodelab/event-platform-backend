@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,9 +50,20 @@ public class AuthenticationService {
         return tokensDto;
     }
 
-    private Account getAccount(String email){
+    private Account getAccount(String email) {
         return accountRepository.findByEmail(email).orElseThrow(
                 () -> new LoginException(LoginExceptionType.NONEXISTENT_ACCOUNT, email)
         );
+    }
+
+    @Transactional
+    public void logout(String accessToken) {
+        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+        UUID accountId = UUID.fromString(decodedToken.getSubject());
+        String accountEmail = decodedToken.getClaim("email").asString();
+
+        refreshTokenRepository.deleteAllByAccountId(accountId);
+
+        log.info("Successful logout for the email {}", accountEmail);
     }
 }

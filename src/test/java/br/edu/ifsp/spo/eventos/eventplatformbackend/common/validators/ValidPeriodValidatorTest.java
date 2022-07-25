@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.validators;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

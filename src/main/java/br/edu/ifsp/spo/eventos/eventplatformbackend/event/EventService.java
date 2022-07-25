@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
 import lombok.AllArgsConstructor;
@@ -20,11 +20,11 @@ public class EventService {
 
     public Event create(EventCreateDto dto) {
         if(eventRepository.existsByTitle(dto.getTitle())) {
-            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "title", dto.getTitle());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT, "title", dto.getTitle());
         }
 
         if(eventRepository.existsBySlug(dto.getSlug())) {
-            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "slug", dto.getSlug());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT, "slug", dto.getSlug());
         }
 
         if(dto.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
@@ -102,11 +102,11 @@ public class EventService {
         Event event = getEvent(eventId);
 
         if(eventRepository.existsByTitle(dto.getTitle())) {
-            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "title", dto.getTitle());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT, "title", dto.getTitle());
         }
 
         if(eventRepository.existsBySlug(dto.getSlug())) {
-            throw new ResourceAlreadyExistsException(ResourceName.EVENT.getName(), "slug", dto.getSlug());
+            throw new ResourceAlreadyExistsException(ResourceName.EVENT, "slug", dto.getSlug());
         }
 
         if(dto.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
@@ -240,6 +240,7 @@ public class EventService {
     }
 
     private Event getEvent(UUID eventId) {
-        return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("event", eventId));
+        return eventRepository.findById(eventId)
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
     }
 }

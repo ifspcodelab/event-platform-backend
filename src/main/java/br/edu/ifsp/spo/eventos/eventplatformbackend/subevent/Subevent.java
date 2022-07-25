@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

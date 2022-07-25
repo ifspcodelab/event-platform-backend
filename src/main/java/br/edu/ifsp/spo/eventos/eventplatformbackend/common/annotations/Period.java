@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.common;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.ValidPeriod;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import lombok.AllArgsConstructor;
@@ -24,11 +24,11 @@ public class SubeventService {
         Event event = getEvent(eventId);
 
         if(subeventRepository.existsByTitleAndEvent(dto.getTitle(), event)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(),"title", dto.getTitle());
+            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
         }
 
         if(subeventRepository.existsBySlugAndEvent(dto.getSlug(), event)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(), "slug", dto.getSlug());
+            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT, "slug", dto.getSlug());
         }
 
         if(dto.getExecutionPeriod().getStartDate().isBefore(LocalDate.now()) ||
@@ -105,11 +105,11 @@ public class SubeventService {
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
         if(subeventRepository.existsByTitleAndEvent(dto.getTitle(), event)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(),"title", dto.getTitle());
+            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
         }
 
         if(subeventRepository.existsBySlugAndEvent(dto.getSlug(), event)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT.getName(), "slug", dto.getSlug());
+            throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT, "slug", dto.getSlug());
         }
 
         if(dto.getExecutionPeriod().getStartDate().isBefore(LocalDate.now()) ||
@@ -267,16 +267,18 @@ public class SubeventService {
     }
 
     private Event getEvent(UUID eventId) {
-        return eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId));
+        return eventRepository.findById(eventId)
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
     }
 
     private Subevent getSubevent(UUID subeventId) {
-        return subeventRepository.findById(subeventId).orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT.getName(), subeventId));
+        return subeventRepository.findById(subeventId)
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, subeventId));
     }
 
     private void checksEventExists(UUID eventId) {
         if(!eventRepository.existsById(eventId)) {
-            throw new ResourceNotFoundException(ResourceName.EVENT.getName(), eventId);
+            throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
         }
     }
 

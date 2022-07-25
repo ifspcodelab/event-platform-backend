@@ -8,7 +8,9 @@ import lombok.Getter;
 public enum ResourceName {
     LOCATION("Location"),
     AREA("Area"),
-    SPACE("Space");
+    SPACE("Space"),
+    EVENT("Event"),
+    SUBEVENT("Subevent");
 
     private String name;
 }

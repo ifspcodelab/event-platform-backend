@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import lombok.Data;
 import java.util.UUID;
 

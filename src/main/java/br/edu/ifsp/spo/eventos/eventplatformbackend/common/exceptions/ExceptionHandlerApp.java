@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -101,5 +102,15 @@ public class ExceptionHandlerApp {
     public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
         return ResponseEntity.accepted().build();
+    }
+
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<ProblemDetail> handlerRegistrationException(RegistrationException ex) {
+        String message = String.format(ex.getRegistrationRuleType().getMessage(), ex.getEmail());
+        ProblemDetail problemDetail = new ProblemDetail(ex.getRegistrationRuleType().name(), List.of());
+
+        log.warn(message);
+
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

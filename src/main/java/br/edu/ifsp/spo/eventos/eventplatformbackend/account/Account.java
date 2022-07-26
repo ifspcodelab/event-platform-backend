@@ -23,7 +23,7 @@ public class Account {
     private String password;
     private Boolean agreed;
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private AccountRole role;
     private Boolean verified;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
@@ -33,7 +33,7 @@ public class Account {
         this.cpf = cpf;
         this.password = password;
         this.agreed = agreed;
-        this.role = UserRole.ATTENDANT;
+        this.role = AccountRole.ATTENDANT;
         this.verified = false;
     }
 }

@@ -10,6 +10,6 @@ public enum AuthenticationExceptionType {
     INCORRECT_PASSWORD("Login Exception: the entered password is incorrect for the email=%s"),
     NONEXISTENT_ACCOUNT_BY_EMAIL("Login Exception: the account for the email=%s not found"),
     NONEXISTENT_ACCOUNT_BY_ID("Login Exception: the account for the id=%s not found"),
-    NONEXISTENT_TOKEN("Refresh Token Rotation Exception: a refresh token for the email=%s does not exist");
+    NONEXISTENT_TOKEN("Refresh Token Rotation Exception: the specified refresh token for the email=%s does not exist");
     String message;
 }

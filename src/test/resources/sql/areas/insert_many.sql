@@ -1,0 +1,3 @@
+INSERT INTO areas VALUES ('29eb3ccf-711d-40f2-954c-3f2616a6cf36', 'Bloco A', 'Perto da entrada', '5607ddd3-31ed-4435-bd61-23133d2f3381');
+INSERT INTO areas VALUES ('7e2afd2b-53e0-4d2d-bdd2-5e9a79a3b376', 'Bloco H', 'Perto da biblioteca', '5607ddd3-31ed-4435-bd61-23133d2f3381');
+INSERT INTO areas VALUES ('2c10e71a-1479-43f2-af76-aee9e9ca7db7', 'Terreo', 'Entrada da Marginal', '1acf9806-495f-4aeb-82b3-4aa3313de2d9');

@@ -3,7 +3,7 @@ CREATE TABLE accounts(
     name VARCHAR NOT NULL,
     email VARCHAR NOT NULL UNIQUE,
     cpf VARCHAR NOT NULL UNIQUE,
-    password VARCHAR NOT NULL,
+    password CHAR(60) NOT NULL,
     agreed BOOLEAN NOT NULL,
     role VARCHAR NOT NULL,
     verified BOOLEAN NOT NULL,

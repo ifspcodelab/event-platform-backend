@@ -15,10 +15,15 @@ spring:
     open-in-view: false
     generate-ddl: false
 
-
 account:
   verification-token-expires-in: 900
   password-reset-token-expires-in: 900
+
+jwt:
+  issuer: event-platform
+  secret: ${JWT_SECRET:81ad58d0-eea6-44a0-a765-a8fb8b2e39c1}
+  access-token-expires-in: ${JWT_ACCESS_TOKEN_EXPIRES_IN:900}
+  refresh-token-expires-in: ${JWT_REFRESH_TOKEN_EXPIRES_IN:86400}
 
 logging:
   level:
@@ -28,9 +33,3 @@ logging:
         ifsp:
           spo:
             eventos: ${APP_LOGGING_LEVEL:TRACE}
-
-jwt:
-  issuer: event-platform
-  secret: ${JWT_SECRET:81ad58d0-eea6-44a0-a765-a8fb8b2e39c1}
-  access-token-expires-in: ${JWT_ACCESS_TOKEN_EXPIRES_IN:900}
-  refresh-token-expires-in: ${JWT_REFRESH_TOKEN_EXPIRES_IN:86400}

@@ -1,7 +1,11 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -112,5 +116,30 @@ public class ExceptionHandlerApp {
         log.warn(message);
 
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Void> handlerLoginException(AuthenticationException ex){
+        log.warn(String.format(ex.getAuthenticationExceptionType().getMessage(), ex.getEmail()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+    @ExceptionHandler(AlgorithmMismatchException.class)
+    public ResponseEntity<Void> handlerAlgorithmMismatchException(AlgorithmMismatchException ex){
+        log.warn("Algorithm Mismatch Exception", ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(SignatureVerificationException.class)
+    public ResponseEntity<Void> handlerSignatureVerificationException(SignatureVerificationException ex){
+        log.warn("Signature Verification Exception", ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ProblemDetail> handlerTokenExpiredException(TokenExpiredException ex){
+        ProblemDetail problemDetail = new ProblemDetail("Token Expired", List.of());
+        log.warn("Token Expired Exception");
+        return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
 }

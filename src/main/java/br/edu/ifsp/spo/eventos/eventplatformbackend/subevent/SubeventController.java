@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/{eventId}/sub-events")
+@RequestMapping("api/v1/events/{eventId}/sub-events")
 @AllArgsConstructor
 public class SubeventController {
     private final SubeventService subeventService;

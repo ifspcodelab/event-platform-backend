@@ -16,14 +16,12 @@ import static org.hamcrest.Matchers.equalTo;
 public class EditAreaApiTest {
     @LocalServerPort
     private int localPort;
-    private String areasURI;
     private String areaURI;
 
     @BeforeEach
     public void beforeEach() {
         baseURI = "http://localhost";
         port = localPort;
-        areasURI = "/api/v1/locations/{locationId}/areas";
         areaURI = "/api/v1/locations/{locationId}/areas/{areaId}";
     }
 
@@ -52,7 +50,10 @@ public class EditAreaApiTest {
                 .statusCode(200)
                 .body("id", notNullValue())
                 .body("name", equalTo("Bloco A superior"))
-                .body("reference", equalTo("Segundo andar"));
+                .body("reference", equalTo("Segundo andar"))
+                .body("location.id", notNullValue())
+                .body("location.name", equalTo("IFSP Campus São Paulo"))
+                .body("location.address", equalTo("Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"));
     }
 
     @Test
@@ -80,7 +81,10 @@ public class EditAreaApiTest {
                 .statusCode(200)
                 .body("id", notNullValue())
                 .body("name", equalTo("Bloco A"))
-                .body("reference", equalTo("Piso superior"));
+                .body("reference", equalTo("Piso superior"))
+                .body("location.id", notNullValue())
+                .body("location.name", equalTo("IFSP Campus São Paulo"))
+                .body("location.address", equalTo("Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"));
     }
 
 

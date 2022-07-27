@@ -16,14 +16,12 @@ import static org.hamcrest.Matchers.equalTo;
 public class DeleteAreaApiTest {
     @LocalServerPort
     private int localPort;
-    private String areasURI;
     private String areaURI;
 
     @BeforeEach
     public void beforeEach() {
         baseURI = "http://localhost";
         port = localPort;
-        areasURI = "/api/v1/locations/{locationId}/areas";
         areaURI = "/api/v1/locations/{locationId}/areas/{areaId}";
     }
 

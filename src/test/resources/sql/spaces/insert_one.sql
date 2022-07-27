@@ -1,1 +1,1 @@
-INSERT INTO spaces VALUES ('a7118369-b18b-48e9-b172-ba23be91d9d5','Sala 308','15','Laboratorio','29eb3ccf-711d-40f2-954c-3f2616a6cf36');
+INSERT INTO spaces VALUES ('a7118369-b18b-48e9-b172-ba23be91d9d5','Sala 308','15','LABORATORY','29eb3ccf-711d-40f2-954c-3f2616a6cf36');

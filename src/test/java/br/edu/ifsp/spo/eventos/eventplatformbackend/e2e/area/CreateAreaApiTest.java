@@ -17,14 +17,12 @@ public class CreateAreaApiTest {
     @LocalServerPort
     private int localPort;
     private String areasURI;
-    private String areaURI;
 
     @BeforeEach
     public void beforeEach() {
         baseURI = "http://localhost";
         port = localPort;
         areasURI = "/api/v1/locations/{locationId}/areas";
-        areaURI = "/api/v1/locations/{locationId}/areas/{areaId}";
     }
 
     @Test
@@ -51,7 +49,9 @@ public class CreateAreaApiTest {
                 .body("id", notNullValue())
                 .body("name", equalTo("Bloco A"))
                 .body("reference", equalTo("Perto da entrada"))
-                .body("location", notNullValue());
+                .body("location.id", notNullValue())
+                .body("location.name", equalTo("IFSP Campus São Paulo"))
+                .body("location.address", equalTo("Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"));
     }
 
     @Test

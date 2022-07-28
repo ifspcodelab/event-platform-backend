@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.e2e.area;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.e2e.location;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,61 +10,56 @@ import org.springframework.test.context.jdbc.Sql;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.equalTo;
 
+
+// https://www.javadoc.io/doc/io.rest-assured/rest-assured/4.5.1/index.html
+// https://github.com/rest-assured/rest-assured/wiki/Usage
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AreaDetailsApiTest {
+public class LocationDetailsApiTest {
     @LocalServerPort
     private int localPort;
-    private String areaURI;
-    private String areaSpacesURI;
+    private String locationURI;
+    private String locationAreasURI;
 
     @BeforeEach
     public void beforeEach() {
         baseURI = "http://localhost";
         port = localPort;
-        areaURI = "/api/v1/locations/{locationId}/areas/{areaId}";
-        areaSpacesURI = "/api/v1/locations/{locationId}/areas/{areaId}/spaces";
+        locationURI = "/api/v1/locations/{locationId}";
+        locationAreasURI = "/api/v1/locations/{locationId}/areas";
     }
 
     @Test
-    @DisplayName("GET /locations/{locationId}/areas/{areaId} ")
+    @DisplayName("GET /locations/{locationId}")
     @Sql("/sql/delete_all_tables.sql")
-    @Sql("/sql/locations/insert_one.sql")
-    @Sql("/sql/areas/insert_one.sql")
-    public void getArea() {
+    @Sql("/sql/locations/insert_many.sql")
+    public void getLocation() {
         given()
             .contentType(ContentType.JSON)
             .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
             .log().all()
         .when()
-            .get(areaURI)
+            .get(locationURI)
         .then()
             .log().all()
             .assertThat()
                 .statusCode(200)
                 .body("id", notNullValue())
-                .body("name", equalTo("Bloco A"))
-                .body("reference", equalTo("Perto da entrada"))
-                .body("location.id", notNullValue())
-                .body("location.name", equalTo("IFSP Campus São Paulo"))
-                .body("location.address", equalTo("Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"));
+                .body("name", equalTo("IFSP Campus São Paulo"))
+                .body("address", equalTo("Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"));
     }
 
     @Test
-    @DisplayName("GET /locations/{locationId}/areas/{areaId} - not found")
+    @DisplayName("GET /locations/{locationId} - not found")
     @Sql("/sql/delete_all_tables.sql")
-    @Sql("/sql/locations/insert_one.sql")
-    @Sql("/sql/areas/insert_one.sql")
-    public void getAreaNotFound() {
+    @Sql("/sql/locations/insert_many.sql")
+    public void getLocationNotFound() {
         given()
             .contentType(ContentType.JSON)
-            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-            .pathParam("areaId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
+            .pathParam("locationId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
             .log().all()
         .when()
-            .get(areaURI)
+            .get(locationURI)
         .then()
             .log().all()
             .assertThat()
@@ -74,38 +69,35 @@ public class AreaDetailsApiTest {
     }
 
     @Test
-    @DisplayName("GET /locations/{locationId}/areas/{areaId}/spaces - empty list")
+    @DisplayName("GET /locations/{locationId}/areas - empty list")
     @Sql("/sql/delete_all_tables.sql")
     @Sql("/sql/locations/insert_one.sql")
-    @Sql("/sql/areas/insert_one.sql")
-    public void getAllAreaSpacesEmptyList() {
+    public void getAllAreasEmptyList() {
         given()
             .contentType(ContentType.JSON)
             .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
             .log().all()
         .when()
-            .get(areaSpacesURI)
+            .get(locationAreasURI)
         .then()
             .log().all()
             .assertThat()
                 .statusCode(200)
                 .body("$", hasSize(0));
     }
+
     @Test
-    @DisplayName("GET /locations/{locationId}/areas/{areaId}/spaces  - one space inside list")
+    @DisplayName("GET /locations/{locationId}/areas  - one area inside list")
     @Sql("/sql/delete_all_tables.sql")
     @Sql("/sql/locations/insert_one.sql")
     @Sql("/sql/areas/insert_one.sql")
-    @Sql("/sql/spaces/insert_one.sql")
-    public void getListOneSpace() {
+    public void getListOneArea() {
         given()
             .contentType(ContentType.JSON)
             .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
             .log().all()
         .when()
-            .get(areaSpacesURI)
+                .get(locationAreasURI)
         .then()
             .log().all()
             .assertThat()
@@ -114,19 +106,17 @@ public class AreaDetailsApiTest {
     }
 
     @Test
-    @DisplayName("GET /locations/{locationId}/areas/{areaId}/spaces  - multiple spaces inside list")
+    @DisplayName("GET /locations/{locationId}/areas  - multiple areas inside list")
     @Sql("/sql/delete_all_tables.sql")
-    @Sql("/sql/locations/insert_one.sql")
-    @Sql("/sql/areas/insert_one.sql")
-    @Sql("/sql/spaces/insert_many.sql")
-    public void getListMultipleSpaces() {
+    @Sql("/sql/locations/insert_many.sql")
+    @Sql("/sql/areas/insert_many.sql")
+    public void getListMultipleAreas() {
         given()
             .contentType(ContentType.JSON)
             .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
             .log().all()
         .when()
-            .get(areaSpacesURI)
+            .get(locationAreasURI)
         .then()
             .log().all()
             .assertThat()

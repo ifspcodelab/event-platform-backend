@@ -69,22 +69,22 @@ public class CreateSpaceApiTest {
     @Sql("/sql/spaces/insert_one.sql")
     public void postSpacesAlreadyExists() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .body("""
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+            .body("""
                 {
                     "name": "Sala 308",
                     "capacity": 20,
                     "type":"CLASSROOM"
                 }
             """)
-                .log().all()
-                .when()
-                .post(spacesURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .log().all()
+        .when()
+            .post(spacesURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(409)
                 .body("title", equalTo("Resource already exists exception"))
                 .body("violations", hasSize(1));
@@ -97,22 +97,22 @@ public class CreateSpaceApiTest {
     @Sql("/sql/areas/insert_many.sql")
     public void postSpacesLocationNotFound() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
-                .body("""
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
+            .body("""
                 {
                     "name": "Sala 308",
                     "capacity": 15,
                     "type": "LABORATORY"
                  }
             """)
-                .log().all()
-                .when()
-                .post(spacesURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .log().all()
+        .when()
+            .post(spacesURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(404)
                 .body("title", equalTo("Resource not found exception"))
                 .body("violations", hasSize(1));

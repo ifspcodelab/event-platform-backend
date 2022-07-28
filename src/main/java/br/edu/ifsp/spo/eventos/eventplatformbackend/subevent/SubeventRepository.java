@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

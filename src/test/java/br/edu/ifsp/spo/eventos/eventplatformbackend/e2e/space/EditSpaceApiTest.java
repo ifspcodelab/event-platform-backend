@@ -33,23 +33,23 @@ public class EditSpaceApiTest {
     @Sql("/sql/spaces/insert_one.sql")
     public void putSpaces() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
-                .body("""
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+            .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
+            .body("""
                  {
                     "name": "Laboratório de Matemática",
                     "capacity": 20,
                     "type": "CLASSROOM"
                  }
             """)
-                .log().all()
-                .when()
-                .put(spaceURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .log().all()
+        .when()
+            .put(spaceURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(200)
                 .body("id", notNullValue())
                 .body("name", equalTo("Laboratório de Matemática"))
@@ -71,23 +71,23 @@ public class EditSpaceApiTest {
     @Sql("/sql/spaces/insert_one.sql")
     public void putSpacesChangeCapacityOnly() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
-                .body("""
-                             {
-                                "name": "Sala 308",
-                                "capacity": 20,
-                                "type": "LABORATORY"
-                             }
-                        """)
-                .log().all()
-                .when()
-                .put(spaceURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+            .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
+            .body("""
+                 {
+                    "name": "Sala 308",
+                    "capacity": 20,
+                    "type": "LABORATORY"
+                 }
+            """)
+            .log().all()
+        .when()
+            .put(spaceURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(200)
                 .body("id", notNullValue())
                 .body("name", equalTo("Sala 308"))
@@ -109,23 +109,23 @@ public class EditSpaceApiTest {
     @Sql("/sql/spaces/insert_one.sql")
     public void putSpacessChangeTypeOnly() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
-                .body("""
-                             {
-                                "name": "Sala 308",
-                                "capacity": 15,
-                                "type": "CLASSROOM"
-                             }
-                        """)
-                .log().all()
-                .when()
-                .put(spaceURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+            .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
+            .body("""
+                 {
+                    "name": "Sala 308",
+                    "capacity": 15,
+                    "type": "CLASSROOM"
+                 }
+            """)
+            .log().all()
+        .when()
+            .put(spaceURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(200)
                 .body("id", notNullValue())
                 .body("name", equalTo("Sala 308"))
@@ -147,23 +147,23 @@ public class EditSpaceApiTest {
     @Sql("/sql/spaces/insert_one.sql")
     public void putSpacessChangeCapacityAndType() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
-                .body("""
-                             {
-                                "name": "Sala 308",
-                                "capacity": 25,
-                                "type": "CLASSROOM"
-                             }
-                        """)
-                .log().all()
-                .when()
-                .put(spaceURI)
-                .then()
-                .log().all()
-                .assertThat()
+             .contentType(ContentType.JSON)
+             .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+             .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+             .pathParam("spaceId", "a7118369-b18b-48e9-b172-ba23be91d9d5")
+             .body("""
+                  {
+                     "name": "Sala 308",
+                     "capacity": 25,
+                     "type": "CLASSROOM"
+                  }
+             """)
+             .log().all()
+        .when()
+             .put(spaceURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(200)
                 .body("id", notNullValue())
                 .body("name", equalTo("Sala 308"))
@@ -186,23 +186,23 @@ public class EditSpaceApiTest {
     @Sql("/sql/spaces/insert_many.sql")
     public void putSpacesAlreadyExists() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .pathParam("spaceId", "28eaddf0-f12a-47e8-838d-48ecfe900a10")
-                .body("""
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+            .pathParam("spaceId", "28eaddf0-f12a-47e8-838d-48ecfe900a10")
+            .body("""
                  {
                     "name": "Sala 308",
                     "capacity": 30,
                     "type": "CLASSROOM"
                  }
             """)
-                .log().all()
-                .when()
-                .put(spaceURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .log().all()
+        .when()
+            .put(spaceURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(409)
                 .body("title", equalTo("Resource already exists exception"))
                 .body("violations", hasSize(1));
@@ -216,23 +216,23 @@ public class EditSpaceApiTest {
     @Sql("/sql/spaces/insert_one.sql")
     public void putSpacesNotFound() {
         given()
-                .contentType(ContentType.JSON)
-                .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
-                .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
-                .pathParam("spaceId", "a6118369-b18b-48e9-b172-ba23be91d9d5")
-                .body("""
+            .contentType(ContentType.JSON)
+            .pathParam("locationId", "5607ddd3-31ed-4435-bd61-23133d2f3381")
+            .pathParam("areaId", "29eb3ccf-711d-40f2-954c-3f2616a6cf36")
+            .pathParam("spaceId", "a6118369-b18b-48e9-b172-ba23be91d9d5")
+            .body("""
                  {
                     "name": "Laboratório de Matemática",
                     "capacity": 15,
                     "type": "LABORATORY"
                  }
             """)
-                .log().all()
-                .when()
-                .put(spaceURI)
-                .then()
-                .log().all()
-                .assertThat()
+            .log().all()
+        .when()
+            .put(spaceURI)
+        .then()
+            .log().all()
+            .assertThat()
                 .statusCode(404)
                 .body("title", equalTo("Resource not found exception"))
                 .body("violations", hasSize(1));

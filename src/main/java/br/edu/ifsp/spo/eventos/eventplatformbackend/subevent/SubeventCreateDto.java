@@ -17,7 +17,6 @@ public class SubeventCreateDto {
     String title;
     @NotNull
     @NotBlank
-    @Size(min = 1)
     String slug;
     @NotNull
     @NotBlank

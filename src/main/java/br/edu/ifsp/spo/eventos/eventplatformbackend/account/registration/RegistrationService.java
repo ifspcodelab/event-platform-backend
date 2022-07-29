@@ -34,7 +34,7 @@ public class RegistrationService {
         }
 
         Account account = new Account(
-                dto.getName(),
+                dto.getName().strip(),
                 dto.getEmail(),
                 dto.getCpf(),
                 passwordEncoder.encode(dto.getPassword()),

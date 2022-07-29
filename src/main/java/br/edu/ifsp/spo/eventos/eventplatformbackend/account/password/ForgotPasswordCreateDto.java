@@ -11,5 +11,8 @@ public class ForgotPasswordCreateDto {
     @NotNull
     @Email
     String email;
+
+    @NotNull
+    String userCaptcha;
 }
 

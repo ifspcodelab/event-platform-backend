@@ -102,4 +102,10 @@ public class ExceptionHandlerApp {
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
         return ResponseEntity.accepted().build();
     }
+
+    @ExceptionHandler(RecaptchaException.class)
+    public ResponseEntity<Void> handlerInvalidRecaptcha(RecaptchaException ex){
+        log.warn(String.format(ex.getRecaptchaExceptionType().getMessage(), ex.getEmail()));
+        return ResponseEntity.accepted().build();
+    }
 }

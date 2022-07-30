@@ -36,5 +36,5 @@ jwt:
   refresh-token-expires-in: ${JWT_REFRESH_TOKEN_EXPIRES_IN:86400}
 
 recaptcha:
-  secret: ${RECAPTCHA_SECRET:6LewiiwhAAAAAN4ag0w7S8GYZDIn7IQGDwMoiVzC}
-  site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
+  secret: ${RECAPTCHA_SECRET}
+  site : ${RECAPTCHA_SITE}

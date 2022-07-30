@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class RecaptchaResponseDto {
 
     private boolean success;
-    private String challenge_ts;
+    private LocalDate challenge_ts;
     private String hostname;
 
 }

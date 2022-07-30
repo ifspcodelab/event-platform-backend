@@ -13,6 +13,6 @@ public class ForgotPasswordCreateDto {
     String email;
 
     @NotNull
-    String userCaptcha;
+    String userRecaptcha;
 }
 

@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
+
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,13 +12,11 @@ import javax.validation.Valid;
 @AllArgsConstructor
 @CrossOrigin(origins = "*")
 public class PasswordResetController {
-
     private final PasswordResetService passwordResetService;
 
-
     @PostMapping("forgot")
-    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordCreateDto forgotPasswordCreateDto) throws InterruptedException {
-        passwordResetService.createResetPasswordRequest(forgotPasswordCreateDto);
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordCreateDto dto) throws InterruptedException {
+        passwordResetService.createResetPasswordRequest(dto);
         return ResponseEntity.accepted().build();
 
     }
@@ -26,7 +24,6 @@ public class PasswordResetController {
     @PostMapping("reset")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetDto dto){
         passwordResetService.resetPassword(dto);
-
         return ResponseEntity.noContent().build();
     }
 

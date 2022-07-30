@@ -20,21 +20,27 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ExceptionHandlerApp {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<List<Violation>> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<List<Violation>> handlerMethodArgumentNotValidException(
+        MethodArgumentNotValidException ex,
+        HttpServletRequest request
+    ) {
         List<Violation> violations = ex.getFieldErrors().stream()
-                .map(field -> new Violation(field.getField(), field.getDefaultMessage()))
-                .collect(Collectors.toList());
+            .map(field -> new Violation(field.getField(), field.getDefaultMessage()))
+            .collect(Collectors.toList());
 
         log.warn("Bad request at {} {}", request.getMethod(), request.getRequestURI());
         return new ResponseEntity(violations, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
-        String message = "Resource not found with id " + ex.getResourceId();
+    public ResponseEntity<ProblemDetail> handlerResourceNotFoundException(
+        ResourceNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        String message = "Recurso não encontrado com id " + ex.getResourceId();
         ProblemDetail problemDetail = new ProblemDetail(
-                "Resource not found exception",
-                List.of(new Violation(ex.getResourceName().getName(), message))
+            "Resource not found exception",
+            List.of(new Violation(ex.getResourceName().getName(), message))
         );
 
         log.warn("Resource not found at {} {}", request.getMethod(), request.getRequestURI());
@@ -42,16 +48,19 @@ public class ExceptionHandlerApp {
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ProblemDetail> handlerResourceAlreadyExistsException(ResourceAlreadyExistsException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handlerResourceAlreadyExistsException(
+        ResourceAlreadyExistsException ex,
+        HttpServletRequest request
+    ) {
         String message = String.format(
-                "Resource %s already exists with %s %s",
-                ex.getResourceName().getName(),
-                ex.getResourceAttribute(),
-                ex.getResourceAttributeValue()
+            "Recurso %s já existe com %s %s",
+            ex.getResourceName().getName(),
+            ex.getResourceAttribute(),
+            ex.getResourceAttributeValue()
         );
         ProblemDetail problemDetail = new ProblemDetail(
-                "Resource already exists exception",
-                List.of(new Violation(ex.getResourceName().getName(), message))
+            "Resource already exists exception",
+            List.of(new Violation(ex.getResourceName().getName(), message))
         );
 
         log.warn("Resource already exists at {} {}", request.getMethod(), request.getRequestURI());
@@ -59,13 +68,16 @@ public class ExceptionHandlerApp {
     }
 
     @ExceptionHandler(ResourceReferentialIntegrityException.class)
-    public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(ResourceReferentialIntegrityException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(
+        ResourceReferentialIntegrityException ex,
+        HttpServletRequest request
+    ) {
         ProblemDetail problemDetail = new ProblemDetail(
-                "Resource referential integrity exception",
-                List.of(
-                        new Violation(ex.getPrimary().getName(), "Primary resource"),
-                        new Violation(ex.getRelated().getName(), "Related resource")
-                )
+            "Resource referential integrity exception",
+            List.of(
+                new Violation(ex.getPrimary().getName(), "Recurso principal"),
+                new Violation(ex.getRelated().getName(), "Recurso relacionado")
+            )
         );
 
         log.warn("Resource referential integrity at {} {}", request.getMethod(), request.getRequestURI());
@@ -73,30 +85,38 @@ public class ExceptionHandlerApp {
     }
 
     @ExceptionHandler(ResourceNotExistsAssociationException.class)
-    public ResponseEntity<ProblemDetail> resourceNotExistsAssociationException(ResourceNotExistsAssociationException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> resourceNotExistsAssociationException(
+        ResourceNotExistsAssociationException ex,
+        HttpServletRequest request
+    ) {
         ProblemDetail problemDetail = new ProblemDetail(
-                String.format("Resource not exists association exception or %s not exists", ex.getRelated().getName()),
-                List.of(
-                        new Violation(ex.getPrimary().getName(), "Primary resource"),
-                        new Violation(ex.getRelated().getName(), "Related resource")
-                )
+            String.format("Resource not exists association exception or %s not exists", ex.getRelated().getName()),
+            List.of(
+                new Violation(ex.getPrimary().getName(), "Recurso principal"),
+                new Violation(ex.getRelated().getName(), "Recurso relacionado")
+            )
         );
 
-        log.warn("Resource not exists association exception at {} {} or {} not exists", request.getMethod(), request.getRequestURI(), ex.getPrimary().getName());
+        log.warn(
+            "Resource not exists association exception at {} {} or {} not exists",
+            request.getMethod(),
+            request.getRequestURI(),
+            ex.getPrimary().getName()
+        );
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ProblemDetail> handlerBusinessRuleException(BusinessRuleException ex) {
         ProblemDetail problemDetail = new ProblemDetail(
-                "Business rule exception",
-                List.of(new Violation(ex.getBusinessRuleType().name(), ex.getBusinessRuleType().getMessage()))
+            "Business rule exception",
+            List.of(new Violation(ex.getBusinessRuleType().name(), ex.getBusinessRuleType().getMessage()))
         );
 
         log.warn(
-                "Business rule exception: name={}, message={}",
-                ex.getBusinessRuleType().name(),
-                ex.getBusinessRuleType().getMessage()
+            "Business rule exception: name={}, message={}",
+            ex.getBusinessRuleType().name(),
+            ex.getBusinessRuleType().getMessage()
         );
 
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);

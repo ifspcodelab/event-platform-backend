@@ -8,23 +8,14 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @AllArgsConstructor
 public class RecaptchaService {
-
     private RestTemplate restTemplate;
     private RecaptchaConfig config;
 
     public boolean isValid(String recaptcha){
-        return restTemplate.getForObject(
-                buildRequestURL(recaptcha),
-                RecaptchaResponseDto.class)
-                .isSuccess();
+        return restTemplate.getForObject(buildRequestURL(recaptcha), RecaptchaResponseDto.class).isSuccess();
     }
 
     public String buildRequestURL(String recaptcha){
-        return (
-                config.getSite() +
-                "?secret=" +
-                config.getSecret() +
-                "&response=" +
-                recaptcha);
+        return config.getSite() + "?secret=" + config.getSecret() + "&response=" + recaptcha;
     }
 }

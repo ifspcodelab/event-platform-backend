@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Password;
 import lombok.Value;
 
 import javax.validation.constraints.NotBlank;
@@ -17,6 +18,7 @@ public class PasswordResetDto {
 
     @NotNull
     @Size(min = 8, max = 64)
+    @Password
     String password;
 
     @NotNull

@@ -29,4 +29,6 @@ public class AccountCreateDto {
     @NotNull
     @AssertTrue(message = "Os termos devem estar aceitos")
     Boolean agreed;
+    @NotNull
+    String userRecaptcha;
 }

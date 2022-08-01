@@ -142,4 +142,10 @@ public class ExceptionHandlerApp {
         log.warn("Token Expired Exception");
         return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(RecaptchaException.class)
+    public ResponseEntity<Void> handlerInvalidRecaptcha(RecaptchaException ex){
+        log.warn(String.format(ex.getRecaptchaExceptionType().getMessage(), ex.getEmail()));
+        return ResponseEntity.accepted().build();
+    }
 }

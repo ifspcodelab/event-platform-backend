@@ -56,23 +56,6 @@ public class SpeakerService {
         return getSpeaker(speakerId);
     }
 
-    private Speaker getSpeaker(UUID speakerId) {
-        return speakerRepository.findById(speakerId)
-            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SPEAKER, speakerId));
-    }
-
-    private Speaker dtoToSpeaker(SpeakerCreateDto dto) {
-        return new Speaker(
-            dto.getName(),
-            dto.getEmail(),
-            dto.getCpf(),
-            dto.getCurriculum(),
-            dto.getLattes(),
-            dto.getLinkedin(),
-            dto.getPhoneNumber()
-        );
-    }
-
     public Speaker update(UUID speakerId, SpeakerCreateDto dto) {
         Speaker speaker = getSpeaker(speakerId);
 
@@ -105,5 +88,28 @@ public class SpeakerService {
         speaker = speakerRepository.save(speaker);
 
         return speaker;
+    }
+
+    public void delete(UUID speakerId) {
+        Speaker speaker = getSpeaker(speakerId);
+        speakerRepository.deleteById(speakerId);
+        log.info("Delete speaker id={}, name={}, email={}", speaker.getId(), speaker.getName(), speaker.getEmail());
+    }
+
+    private Speaker getSpeaker(UUID speakerId) {
+        return speakerRepository.findById(speakerId)
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SPEAKER, speakerId));
+    }
+
+    private Speaker dtoToSpeaker(SpeakerCreateDto dto) {
+        return new Speaker(
+            dto.getName(),
+            dto.getEmail(),
+            dto.getCpf(),
+            dto.getCurriculum(),
+            dto.getLattes(),
+            dto.getLinkedin(),
+            dto.getPhoneNumber()
+        );
     }
 }

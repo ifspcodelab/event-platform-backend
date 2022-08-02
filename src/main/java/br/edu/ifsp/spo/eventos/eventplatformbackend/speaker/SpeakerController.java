@@ -35,4 +35,10 @@ public class SpeakerController {
         SpeakerDto speakerDto = speakerMapper.to(speaker);
         return ResponseEntity.ok(speakerDto);
     }
+
+    @DeleteMapping("{speakerId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID speakerId) {
+        speakerService.delete(speakerId);
+        return ResponseEntity.noContent().build();
+    }
 }

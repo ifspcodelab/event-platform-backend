@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -27,17 +25,30 @@ public class SpeakerService {
             throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "email", dto.getEmail());
         }
 
+        Speaker speaker = dtoToSpeaker(dto);
+
         if(dto.getAccountId() != null) {
             Account account = accountRepository
                 .findById(dto.getAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, dto.getAccountId()));
 
-            Speaker speaker = dtoToSpeaker(dto);
             speaker.setAccount(account);
-            return speakerRepository.save(speaker);
+            speakerRepository.save(speaker);
+
+            log.info(
+                "Speaker with name={}, email={} and accountId={} was created",
+                speaker.getName(), speaker.getEmail(), account.getId()
+            );
+
+            return speaker;
         }
 
-        return speakerRepository.save(dtoToSpeaker(dto));
+        speakerRepository.save(speaker);
+
+        log.info("Speaker with name={} and email={} was created", speaker.getName(), speaker.getEmail());
+        log.warn("Speaker created without account association");
+
+        return speaker;
     }
 
     private Speaker dtoToSpeaker(SpeakerCreateDto dto) {

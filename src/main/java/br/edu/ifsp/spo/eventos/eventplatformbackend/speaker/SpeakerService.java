@@ -7,6 +7,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -54,6 +56,10 @@ public class SpeakerService {
 
     public Speaker findById(UUID speakerId) {
         return getSpeaker(speakerId);
+    }
+
+    public Page<Speaker> findAll(Pageable pageable) {
+        return speakerRepository.findAll(pageable);
     }
 
     public Speaker update(UUID speakerId, SpeakerCreateDto dto) {

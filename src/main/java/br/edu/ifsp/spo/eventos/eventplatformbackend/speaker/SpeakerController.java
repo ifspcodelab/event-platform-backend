@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,12 @@ public class SpeakerController {
         Speaker speaker = speakerService.update(speakerId, dto);
         SpeakerDto speakerDto = speakerMapper.to(speaker);
         return ResponseEntity.ok(speakerDto);
+    }
+
+    @GetMapping()
+    public ResponseEntity<Page<SpeakerDto>> index(Pageable pageable) {
+        Page<Speaker> speakers = speakerService.findAll(pageable);
+        return ResponseEntity.ok(speakers.map(speakerMapper::to));
     }
 
     @GetMapping("{speakerId}")

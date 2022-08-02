@@ -34,16 +34,9 @@ public class Activity {
     @ManyToOne
     private Subevent subevent;
 
-    public Activity(
-            String title,
-            String slug,
-            String description,
-            ActivityType type,
-            boolean isOnline,
-            boolean needRegistration,
-            Event event,
-            Subevent subevent
-    ) {
+
+
+    public Activity(String title, String slug, String description, ActivityType type, boolean isOnline, boolean needRegistration, Event event) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.slug = slug;
@@ -53,6 +46,5 @@ public class Activity {
         this.isOnline = isOnline;
         this.needRegistration = needRegistration;
         this.event = event;
-        this.subevent = subevent;
     }
 }

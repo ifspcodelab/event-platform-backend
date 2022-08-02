@@ -1,8 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.Value;
 
 import javax.validation.Valid;
@@ -26,19 +23,10 @@ public class ActivityCreateDto {
     @Valid
     @NotNull
     ActivityType activityType;
-    @Valid
-    @NotNull
-    EventStatus eventStatus;
-    @Valid
-    @NotNull
-    Event event;
-    @Valid
-    Subevent subevent;
     @NotNull
     @NotBlank
     boolean isOnline;
     @NotNull
     @NotBlank
     boolean needRegistration;
-
 }

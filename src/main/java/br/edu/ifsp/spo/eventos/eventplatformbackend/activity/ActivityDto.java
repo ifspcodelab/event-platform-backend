@@ -12,9 +12,9 @@ public class ActivityDto {
     String slug;
     String description;
     ActivityType type;
-    EventStatus eventStatus;
-    Event event;
-    Subevent subevent;
+    EventStatus status;
     boolean isOnline;
     boolean needRegistration;
+    Event event;
+    Subevent subevent;
 }

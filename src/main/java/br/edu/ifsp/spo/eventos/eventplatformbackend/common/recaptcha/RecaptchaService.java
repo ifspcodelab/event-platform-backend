@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.regex.Pattern;
-
 @Service
 @AllArgsConstructor
 public class RecaptchaService {
@@ -15,18 +13,10 @@ public class RecaptchaService {
     private RecaptchaConfig config;
 
     public boolean isValid(String recaptcha){
-        return restTemplate.getForObject(
-                buildRequestURL(recaptcha),
-                RecaptchaResponseDto.class)
-                .isSuccess();
+        return restTemplate.getForObject(buildRequestURL(recaptcha), RecaptchaResponseDto.class).isSuccess();
     }
 
     public String buildRequestURL(String recaptcha){
-        return (
-                config.getSite() +
-                "?secret=" +
-                config.getSecret() +
-                "&response=" +
-                recaptcha);
+        return config.getSite() + "?secret=" + config.getSecret() + "&response=" + recaptcha;
     }
 }

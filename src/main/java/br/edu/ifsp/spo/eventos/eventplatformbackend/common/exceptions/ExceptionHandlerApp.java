@@ -146,6 +146,8 @@ public class ExceptionHandlerApp {
     @ExceptionHandler(RecaptchaException.class)
     public ResponseEntity<Void> handlerInvalidRecaptcha(RecaptchaException ex){
         log.warn(String.format(ex.getRecaptchaExceptionType().getMessage(), ex.getEmail()));
-        return ResponseEntity.accepted().build();
+        ProblemDetail problemDetail = new ProblemDetail("Invalid recaptcha", List.of());
+        log.warn("Invalid recaptcha exception");
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

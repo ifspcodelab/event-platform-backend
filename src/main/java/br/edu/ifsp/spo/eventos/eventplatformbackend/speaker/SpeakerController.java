@@ -1,8 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +20,13 @@ public class SpeakerController {
         Speaker speaker = speakerService.create(dto);
         SpeakerDto speakerDto = speakerMapper.to(speaker);
         return new ResponseEntity<>(speakerDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("{speakerId}")
+    public ResponseEntity<SpeakerDto> update(@PathVariable UUID speakerId, @RequestBody @Valid SpeakerCreateDto dto) {
+        Speaker speaker = speakerService.update(speakerId, dto);
+        SpeakerDto speakerDto = speakerMapper.to(speaker);
+        return ResponseEntity.ok(speakerDto);
     }
 
     @GetMapping("{speakerId}")

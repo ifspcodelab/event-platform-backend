@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface SpeakerRepository extends JpaRepository<Speaker, UUID> {
     boolean existsByCpf(String cpf);
     boolean existsByEmail(String email);
+    boolean existsByCpfAndIdNot(String cpf, UUID speakerId);
+    boolean existsByEmailAndIdNot(String email, UUID speakerId);
 }

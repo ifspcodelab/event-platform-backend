@@ -5,7 +5,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,5 +71,39 @@ public class SpeakerService {
             dto.getLinkedin(),
             dto.getPhoneNumber()
         );
+    }
+
+    public Speaker update(UUID speakerId, SpeakerCreateDto dto) {
+        Speaker speaker = getSpeaker(speakerId);
+
+        if(speakerRepository.existsByCpfAndIdNot(dto.getCpf(), speakerId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "cpf", dto.getName());
+        }
+
+        if(speakerRepository.existsByEmailAndIdNot(dto.getEmail(), speakerId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "email", dto.getName());
+        }
+
+        speaker.setName(dto.getName());
+        speaker.setEmail(dto.getEmail());
+        speaker.setCpf(dto.getCpf());
+        speaker.setCurriculum(dto.getCurriculum());
+        speaker.setLattes(dto.getLattes());
+        speaker.setLinkedin(dto.getLinkedin());
+        speaker.setPhoneNumber(dto.getPhoneNumber());
+
+
+        if(dto.getAccountId() != null) {
+            Account account = accountRepository.findById(dto.getAccountId())
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, dto.getAccountId()));
+
+            speaker.setAccount(account);
+        }
+
+        log.info("Speaker name={} and email={} was updated", speaker.getName(), speaker.getEmail());
+
+        speaker = speakerRepository.save(speaker);
+
+        return speaker;
     }
 }

@@ -34,7 +34,7 @@ public class EditEventApiTest {
         given()
             .contentType(ContentType.JSON)
             .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
-            .body(eventBody.getValidEditedEvent())
+            .body(eventBody.getValidCompleteEditedEvent())
             .log().all()
         .when()
             .put(eventURI)
@@ -83,7 +83,7 @@ public class EditEventApiTest {
         given()
             .contentType(ContentType.JSON)
             .pathParam("eventId", "05110533-ea4a-4db5-8fa6-fd9de2b7be7f")
-            .body(eventBody.getValidEditedEvent())
+            .body(eventBody.getValidCompleteEditedEvent())
             .log().all()
         .when()
             .put(eventURI)
@@ -103,7 +103,107 @@ public class EditEventApiTest {
         given()
             .contentType(ContentType.JSON)
             .pathParam("eventId", "05110533-ea4a-4db5-8fa6-fd9de2b7be7f")
-            .body(eventBody.getValidEditedEvent())
+            .body(eventBody.getValidCompleteEditedEvent())
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+                .statusCode(409)
+                .body("title", equalTo("Business rule exception"))
+                .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - published event already ended")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_many.sql")
+    public void putEventsEditeStartedPublichedEvent() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "8ae2bd06-7358-4700-a20e-af4da8ae6c36")
+            .body(eventBody.getValidCompleteEditedEvent())
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+                .statusCode(409)
+                .body("title", equalTo("Business rule exception"))
+                .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - registration start after event start")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_one.sql")
+    public void putEventsInvalidRegistrationStartDate() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
+            .body(eventBody.getEventBodyWithRegistrationStartDateAfterEventStartDate())
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+                .statusCode(409)
+                .body("title", equalTo("Business rule exception"))
+                .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - registration end after event end")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_one.sql")
+    public void putEventsInvalidRegistrationEndDate() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
+            .body(eventBody.getEventBodyWithRegistrationEndDateAfterEventEndDate())
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+                .statusCode(409)
+                .body("title", equalTo("Business rule exception"))
+                .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - registration start before today")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_one.sql")
+    public void putEventsRegistrationStartDateBeforeToday() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
+            .body(eventBody.getEventBodyWithRegistrationDateBeforeToday())
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+                .assertThat()
+                .statusCode(409)
+                .body("title", equalTo("Business rule exception"))
+                .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - execution start before today")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_one.sql")
+    public void putEventsExecutionStartDateBeforeToday() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
+            .body(eventBody.getEventBodyWithExecutionDateBeforeToday())
             .log().all()
         .when()
             .put(eventURI)

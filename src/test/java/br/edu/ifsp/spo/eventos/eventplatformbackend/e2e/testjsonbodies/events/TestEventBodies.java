@@ -101,7 +101,7 @@ public class TestEventBodies {
         );
     }
 
-    public String getValidEditedEvent(){
+    public String getValidCompleteEditedEvent(){
         return getEventBodyToEdit(
                 getValidTitle(),
                 getValidSlug(),
@@ -111,6 +111,19 @@ public class TestEventBodies {
                 getValidRegistrationEndDate(),
                 getValidEventStartDate(),
                 getValidEventEndDate()
+        );
+    }
+
+    public String getValidSummayAndPresentationEditedEvent(){
+        return getEventBodyToEdit(
+                "SEDCITEC",
+                "sedcitec",
+                getValidSummary(),
+                getValidPresentation(),
+                "2022-07-28",
+                "2022-08-28",
+                "2022-09-05",
+                "2022-09-09"
         );
     }
 

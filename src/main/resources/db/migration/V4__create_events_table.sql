@@ -11,5 +11,6 @@ CREATE TABLE events(
       smaller_image VARCHAR,
       bigger_image VARCHAR,
       status VARCHAR NOT NULL,
+      cancellation_message TEXT,
       CONSTRAINT events_pk PRIMARY KEY (id)
 )

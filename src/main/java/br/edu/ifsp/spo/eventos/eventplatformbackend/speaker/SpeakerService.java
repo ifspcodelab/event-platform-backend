@@ -5,9 +5,12 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -28,8 +31,7 @@ public class SpeakerService {
         Speaker speaker = dtoToSpeaker(dto);
 
         if(dto.getAccountId() != null) {
-            Account account = accountRepository
-                .findById(dto.getAccountId())
+            Account account = accountRepository.findById(dto.getAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, dto.getAccountId()));
 
             speaker.setAccount(account);
@@ -49,6 +51,15 @@ public class SpeakerService {
         log.warn("Speaker created without account association");
 
         return speaker;
+    }
+
+    public Speaker findById(UUID speakerId) {
+        return getSpeaker(speakerId);
+    }
+
+    private Speaker getSpeaker(UUID speakerId) {
+        return speakerRepository.findById(speakerId)
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SPEAKER, speakerId));
     }
 
     private Speaker dtoToSpeaker(SpeakerCreateDto dto) {

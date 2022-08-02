@@ -151,7 +151,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Event cancel(UUID eventId) {
+    public Event cancel(UUID eventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
@@ -177,6 +177,7 @@ public class EventService {
         }
 
         event.setStatus(EventStatus.CANCELED);
+        event.setCancellationMessage(cancellationMessageCreateDto.getReason());
         subeventService.cancelAllByEventId(eventId);
 
         log.info("Event canceled: id={}, title={}", eventId, event.getTitle());

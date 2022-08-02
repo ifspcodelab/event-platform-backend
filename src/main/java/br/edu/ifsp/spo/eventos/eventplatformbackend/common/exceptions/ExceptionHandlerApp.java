@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
@@ -140,8 +141,21 @@ public class ExceptionHandlerApp {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Void> handlerLoginException(AuthenticationException ex){
+        ProblemDetail problemDetail = new ProblemDetail("", List.of());
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.UNVERIFIED_ACCOUNT)) {
+            problemDetail = new ProblemDetail(
+                    String.format("The account for this email is not yet verified"),
+                    List.of()
+            );
+        }
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.INCORRECT_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    String.format("Incorrect email or password", ex.getEmail()),
+                    List.of()
+            );
+        }
         log.warn(String.format(ex.getAuthenticationExceptionType().getMessage(), ex.getEmail()));
-        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(AlgorithmMismatchException.class)

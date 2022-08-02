@@ -24,9 +24,7 @@ public class ActivityCreateDto {
     @NotNull
     ActivityType activityType;
     @NotNull
-    @NotBlank
     boolean isOnline;
     @NotNull
-    @NotBlank
     boolean needRegistration;
 }

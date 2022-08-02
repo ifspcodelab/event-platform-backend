@@ -10,6 +10,7 @@ CREATE TABLE subevents(
        bigger_image VARCHAR,
        status VARCHAR NOT NULL,
        event_id UUID NOT NULL,
+       cancellation_message TEXT,
        CONSTRAINT subevents_pk PRIMARY KEY (id),
        CONSTRAINT events_fk FOREIGN KEY (event_id) REFERENCES events(id)
 )

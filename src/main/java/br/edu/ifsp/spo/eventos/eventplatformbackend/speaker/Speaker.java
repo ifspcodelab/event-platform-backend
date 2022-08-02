@@ -24,7 +24,30 @@ public class Speaker {
     private String curriculum;
     private String lattes;
     private String linkedin;
-    private String phone_number;
+    private String phoneNumber;
     @OneToOne
     private Account account;
+
+    public Speaker(String name, String email, String cpf, String curriculum, String lattes, String linkedin, String phoneNumber) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.email = email;
+        this.cpf = cpf;
+        this.curriculum = curriculum;
+        this.lattes = lattes;
+        this.linkedin = linkedin;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Speaker(String name, String email, String cpf, String curriculum, String lattes, String linkedin, String phoneNumber, Account account) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.email = email;
+        this.cpf = cpf;
+        this.curriculum = curriculum;
+        this.lattes = lattes;
+        this.linkedin = linkedin;
+        this.phoneNumber = phoneNumber;
+        this.account = account;
+    }
 }

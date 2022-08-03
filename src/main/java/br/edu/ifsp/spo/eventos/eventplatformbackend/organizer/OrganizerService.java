@@ -1,7 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
@@ -10,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,6 +25,10 @@ public class OrganizerService {
 
         Organizer organizer = new Organizer(organizerDto.getType(), account, event);
         return organizerRepository.save(organizer);
+    }
+
+    public List<Organizer> findAll(UUID eventId) {
+        return organizerRepository.findAllByEventId(eventId);
     }
 
     private Account getAccount(UUID accountId) {

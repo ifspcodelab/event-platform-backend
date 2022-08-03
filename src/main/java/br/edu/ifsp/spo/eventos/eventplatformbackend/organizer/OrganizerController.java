@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,4 +24,12 @@ public class OrganizerController {
         OrganizerDto organizerDto = organizerMapper.to(organizer);
         return new ResponseEntity<>(organizerDto, HttpStatus.CREATED);
     }
+
+    @GetMapping
+    public ResponseEntity<List<OrganizerDto>> index(@PathVariable UUID eventId) {
+        List<Organizer> organizers = organizerService.findAll(eventId);
+        List<OrganizerDto> organizersDto = organizerMapper.to(organizers);
+        return new ResponseEntity<>(organizersDto, HttpStatus.OK);
+    }
+
 }

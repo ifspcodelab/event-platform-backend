@@ -31,6 +31,16 @@ public class OrganizerService {
         return organizerRepository.findAllByEventId(eventId);
     }
 
+    public void delete(UUID eventId, UUID organizerId) {
+        Organizer organizer = getOrganizer(organizerId);
+        organizerRepository.delete(organizer);
+    }
+
+    private Organizer getOrganizer(UUID organizerId) {
+        return organizerRepository.findById(organizerId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ORGANIZER, organizerId));
+    }
+
     private Account getAccount(UUID accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, accountId));

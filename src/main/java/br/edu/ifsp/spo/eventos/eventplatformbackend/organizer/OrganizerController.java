@@ -30,4 +30,10 @@ public class OrganizerController {
         List<Organizer> organizers = organizerService.findAll(eventId);
         return ResponseEntity.ok(organizerMapper.to(organizers));
     }
+
+    @DeleteMapping("{organizerId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID organizerId) {
+        organizerService.delete(eventId, organizerId);
+        return ResponseEntity.noContent().build();
+    }
 }

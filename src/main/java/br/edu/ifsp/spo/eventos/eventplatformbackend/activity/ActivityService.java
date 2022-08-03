@@ -7,6 +7,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,5 +35,9 @@ public class ActivityService {
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
+    }
+
+    public List<Activity> findALl (UUID eventId) {
+        return activityRepository.findAllByEventId(eventId);
     }
 }

@@ -73,8 +73,24 @@ public class ActivityService {
     }
 
     public Activity publish(UUID eventId, UUID activityId) {
+        Event event = getEvent(eventId);
         Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+
+        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS);
+        }
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
         activity.setStatus(EventStatus.PUBLISHED);
+
         return activityRepository.save(activity);
     }
 

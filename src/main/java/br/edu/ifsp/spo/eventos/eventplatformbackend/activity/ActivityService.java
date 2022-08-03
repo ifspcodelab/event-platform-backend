@@ -32,6 +32,20 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
+    public Activity update(UUID eventId, UUID activityId, ActivityCreateDto dto) {
+//        Event event = getEvent(eventId);
+        Activity activity = getActivity(activityId);
+
+        activity.setTitle(dto.getTitle());
+        activity.setSlug(dto.getSlug());
+        activity.setDescription(dto.getDescription());
+        activity.setType(dto.getActivityType());
+        activity.setOnline(dto.isOnline());
+        activity.setNeedRegistration(dto.isNeedRegistration());
+
+        return activityRepository.save(activity);
+    }
+
     public List<Activity> findALl(UUID eventId) {
         return activityRepository.findAllByEventId(eventId);
     }

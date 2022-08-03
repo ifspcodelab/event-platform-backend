@@ -23,6 +23,13 @@ public class ActivityController {
         return new ResponseEntity<>(activityDto, HttpStatus.CREATED);
     }
 
+    @PutMapping("activities/{activityId}")
+    public ResponseEntity<ActivityDto> uptade(@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
+        Activity activity = activityService.update(eventId, activityId, activityCreateDto);
+        ActivityDto activityDto = activityMapper.to(activity);
+        return ResponseEntity.ok(activityDto);
+    }
+
     @GetMapping("activities")
     public ResponseEntity<List<ActivityDto>> index (@PathVariable UUID eventId) {
         List<Activity> activities = activityService.findALl(eventId);

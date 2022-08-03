@@ -28,8 +28,6 @@ public class OrganizerController {
     @GetMapping
     public ResponseEntity<List<OrganizerDto>> index(@PathVariable UUID eventId) {
         List<Organizer> organizers = organizerService.findAll(eventId);
-        List<OrganizerDto> organizersDto = organizerMapper.to(organizers);
-        return new ResponseEntity<>(organizersDto, HttpStatus.OK);
+        return ResponseEntity.ok(organizerMapper.to(organizers));
     }
-
 }

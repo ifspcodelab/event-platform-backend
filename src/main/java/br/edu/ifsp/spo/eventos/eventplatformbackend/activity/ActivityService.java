@@ -121,7 +121,8 @@ public class ActivityService {
 
     public Activity findById(UUID eventId, UUID activityId) {
         Activity activity = getActivity(activityId);
-        //TODO - verificar se atividade existe associada ao evento
+        checksEventExists(eventId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
         return activity;
     }
 

@@ -30,6 +30,12 @@ public class ActivityController {
         return ResponseEntity.ok(activityDto);
     }
 
+    @PatchMapping("activities/{activityId}/publish")
+    public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.publish(eventId, activityId);
+        return ResponseEntity.ok(activityMapper.to(activity));
+    }
+
     @GetMapping("activities")
     public ResponseEntity<List<ActivityDto>> index (@PathVariable UUID eventId) {
         List<Activity> activities = activityService.findALl(eventId);

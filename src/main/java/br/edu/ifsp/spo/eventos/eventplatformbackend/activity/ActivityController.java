@@ -35,4 +35,10 @@ public class ActivityController {
         ActivityDto activityDto = activityMapper.to(activity);
         return ResponseEntity.ok(activityDto);
     }
+
+    @DeleteMapping("activities/{activityId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID activityId) {
+        activityService.delete(eventId, activityId);
+        return ResponseEntity.noContent().build();
+    }
 }

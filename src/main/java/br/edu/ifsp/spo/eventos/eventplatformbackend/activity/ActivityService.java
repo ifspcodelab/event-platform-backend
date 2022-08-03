@@ -32,11 +32,6 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    private Event getEvent(UUID eventId) {
-        return eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
-    }
-
     public List<Activity> findALl(UUID eventId) {
         return activityRepository.findAllByEventId(eventId);
     }
@@ -45,6 +40,16 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         //TODO - verificar se atividade existe associada ao evento
         return activity;
+    }
+
+    public void delete(UUID eventId, UUID activityId) {
+        Activity activity = getActivity(activityId);
+        activityRepository.delete(activity);
+    }
+
+    private Event getEvent(UUID eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
     }
 
     private Activity getActivity(UUID activityId) {

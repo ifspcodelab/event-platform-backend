@@ -46,8 +46,21 @@ public class ActivityService {
     }
 
     public Activity update(UUID eventId, UUID activityId, ActivityCreateDto dto) {
-//        Event event = getEvent(eventId);
+        Event event = getEvent(eventId);
         Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+
+        if(activityRepository.existsByTitleIgnoreCaseAndEventIdAndIdNot(dto.getTitle(), eventId, activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY,"title", dto.getTitle());
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
 
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
@@ -94,5 +107,11 @@ public class ActivityService {
     private Activity getActivity(UUID activityId) {
         return activityRepository.findById(activityId)
         .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACTIVITY, activityId));
+    }
+
+    private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
+        if (!activity.getEvent().getId().equals(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_EVENT);
+        }
     }
 }

@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     List<Activity> findAllByEventId (UUID eventId);
     boolean existsByTitleIgnoreCaseAndEventId(String title, UUID eventId);
+    boolean existsByTitleIgnoreCaseAndEventIdAndIdNot(String title, UUID eventId, UUID activityId);
 }

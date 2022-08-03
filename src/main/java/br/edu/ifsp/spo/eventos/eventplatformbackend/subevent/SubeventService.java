@@ -147,7 +147,7 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
-    public Subevent cancel(UUID eventId, UUID subeventId) {
+    public Subevent cancel(UUID eventId, UUID subeventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -171,6 +171,7 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.CANCELED);
+        subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
 
         return subeventRepository.save(subevent);

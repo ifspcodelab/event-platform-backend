@@ -76,17 +76,16 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_CANCELED_STATUS);
         }
 
-        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-            event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
-        }
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+            }
 
-        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-            event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-            event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_IN_REGISTRATION_PERIOD);
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
         }
 
         if(subeventRepository.existsByEventId(eventId)) {

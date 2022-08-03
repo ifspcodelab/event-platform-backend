@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
@@ -18,11 +19,11 @@ public class OrganizerService {
     private AccountRepository accountRepository;
     private EventRepository eventRepository;
 
-    public Organizer create(UUID accountId, UUID eventId, OrganizerCreateDto dto) {
-        Account account = getAccount(accountId);
+    public Organizer create(UUID eventId, OrganizerCreateDto organizerDto) {
+        Account account = getAccount(organizerDto.getAccountId());
         Event event = getEvent(eventId);
 
-        Organizer organizer = new Organizer(dto.getType(), account, event);
+        Organizer organizer = new Organizer(organizerDto.getType(), account, event);
         return organizerRepository.save(organizer);
     }
 

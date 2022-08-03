@@ -115,6 +115,7 @@ public class ActivityService {
     }
 
     public List<Activity> findALl(UUID eventId) {
+        checksEventExists(eventId);
         return activityRepository.findAllByEventId(eventId);
     }
 
@@ -142,6 +143,12 @@ public class ActivityService {
     private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
         if (!activity.getEvent().getId().equals(eventId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_EVENT);
+        }
+    }
+
+    private void checksEventExists(UUID eventId) {
+        if(!eventRepository.existsById(eventId)) {
+            throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
         }
     }
 }

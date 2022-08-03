@@ -1,12 +1,13 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,18 @@ public class ActivityService {
 
     public Activity create(UUID eventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
+
+        if(activityRepository.existsByTitleIgnoreCaseAndEventId(dto.getTitle(), eventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "title", dto.getTitle());
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
 
         Activity activity = new Activity(
                 dto.getTitle(),

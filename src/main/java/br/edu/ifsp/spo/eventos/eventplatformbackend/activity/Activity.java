@@ -27,23 +27,21 @@ public class Activity {
     private ActivityType type;
     @Enumerated(EnumType.STRING)
     private EventStatus status;
-    private boolean isOnline;
+    private boolean online;
     private boolean needRegistration;
     @ManyToOne
     private Event event;
     @ManyToOne
     private Subevent subevent;
 
-
-
-    public Activity(String title, String slug, String description, ActivityType type, boolean isOnline, boolean needRegistration, Event event) {
+    public Activity(String title, String slug, String description, ActivityType type, boolean online, boolean needRegistration, Event event) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.slug = slug;
         this.description = description;
         this.type = type;
         this.status = EventStatus.DRAFT;
-        this.isOnline = isOnline;
+        this.online = online;
         this.needRegistration = needRegistration;
         this.event = event;
     }

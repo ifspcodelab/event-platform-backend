@@ -5,7 +5,7 @@ CREATE TABLE activities(
    description VARCHAR NOT NULL,
    type VARCHAR NOT NULL,
    status VARCHAR NOT NULL,
-   is_online BOOLEAN NOT NULL,
+   online BOOLEAN NOT NULL,
    need_registration BOOLEAN NOT NULL,
    event_id UUID NOT NULL,
    subevent_id UUID,

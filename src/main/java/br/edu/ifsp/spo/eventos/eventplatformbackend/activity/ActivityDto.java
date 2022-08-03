@@ -17,7 +17,7 @@ public class ActivityDto {
     String description;
     ActivityType type;
     EventStatus status;
-    boolean isOnline;
+    boolean online;
     boolean needRegistration;
     Event event;
     Subevent subevent;

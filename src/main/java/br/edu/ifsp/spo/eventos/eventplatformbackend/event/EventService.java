@@ -77,10 +77,6 @@ public class EventService {
         }
 
         if(event.getStatus().equals(EventStatus.PUBLISHED)) {
-            if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
-            }
-
             if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
                 event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
             ) {
@@ -128,14 +124,30 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END);
         }
 
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if(!dto.getSlug().equals(event.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
+
+                if(!dto.getRegistrationPeriod().getStartDate().isEqual(event.getRegistrationPeriod().getStartDate())) {
+                    throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_RERISTRATION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
+                }
+
+                if(!dto.getExecutionPeriod().getStartDate().isEqual(event.getExecutionPeriod().getStartDate())) {
+                    throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
+
+            if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+            }
         }
 
-        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-            event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
         event.setTitle(dto.getTitle());

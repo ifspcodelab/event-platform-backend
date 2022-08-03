@@ -52,6 +52,12 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
+    public Activity unpublish(UUID eventId, UUID activityId) {
+        Activity activity = getActivity(activityId);
+        activity.setStatus(EventStatus.DRAFT);
+        return activityRepository.save(activity);
+    }
+
     public List<Activity> findALl(UUID eventId) {
         return activityRepository.findAllByEventId(eventId);
     }

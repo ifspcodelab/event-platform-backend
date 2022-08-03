@@ -36,6 +36,12 @@ public class ActivityController {
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
+    @PatchMapping("activities/{activityId}/unpublish")
+    public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.unpublish(eventId, activityId);
+        return ResponseEntity.ok(activityMapper.to(activity));
+    }
+
     @GetMapping("activities")
     public ResponseEntity<List<ActivityDto>> index (@PathVariable UUID eventId) {
         List<Activity> activities = activityService.findALl(eventId);

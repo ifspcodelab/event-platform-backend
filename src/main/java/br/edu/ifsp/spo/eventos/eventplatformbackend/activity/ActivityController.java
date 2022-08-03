@@ -16,16 +16,23 @@ public class ActivityController {
     private final ActivityService activityService;
     private final ActivityMapper activityMapper;
 
-    @PostMapping("{activities}")
+    @PostMapping("activities")
     public ResponseEntity<ActivityDto> create (@PathVariable UUID eventId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
         Activity activity = activityService.create(eventId, activityCreateDto);
         ActivityDto activityDto = activityMapper.to(activity);
         return new ResponseEntity<>(activityDto, HttpStatus.CREATED);
     }
 
-    @GetMapping("{activities}")
+    @GetMapping("activities")
     public ResponseEntity<List<ActivityDto>> index (@PathVariable UUID eventId) {
         List<Activity> activities = activityService.findALl(eventId);
         return ResponseEntity.ok(activityMapper.to(activities));
+    }
+
+    @GetMapping("activities/{activityId}")
+    public ResponseEntity<ActivityDto> show(@PathVariable UUID eventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.findById(eventId, activityId);
+        ActivityDto activityDto = activityMapper.to(activity);
+        return ResponseEntity.ok(activityDto);
     }
 }

@@ -37,7 +37,18 @@ public class ActivityService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
     }
 
-    public List<Activity> findALl (UUID eventId) {
+    public List<Activity> findALl(UUID eventId) {
         return activityRepository.findAllByEventId(eventId);
+    }
+
+    public Activity findById(UUID eventId, UUID activityId) {
+        Activity activity = getActivity(activityId);
+        //TODO - verificar se atividade existe associada ao evento
+        return activity;
+    }
+
+    private Activity getActivity(UUID activityId) {
+        return activityRepository.findById(activityId)
+        .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACTIVITY, activityId));
     }
 }

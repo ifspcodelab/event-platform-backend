@@ -26,6 +26,7 @@ public enum BusinessRuleType {
     EVENT_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar de um evento em rascunho"),
     EVENT_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar de um evento cancelado"),
     EVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("Não é possível despublicar um evento publicado que o seu período de inscrições ja tenha iniciado"),
+    SUBEVENT_CREATE_WITH_EVENT_WITH_CANCELED_STATUS("Não é possível criar um subevento com seu evento cancelado"),
     SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução está no passado"),
     SUBEVENT_BEFORE_EVENT("Data de início do subevento é anterior à data de início do evento"),
     SUBEVENT_AFTER_EVENT("A data de fim do subevento é posterior à data de fim do evento"),

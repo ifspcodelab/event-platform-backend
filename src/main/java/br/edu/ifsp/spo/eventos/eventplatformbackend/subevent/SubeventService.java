@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ public class SubeventService {
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_CREATE_WITH_EVENT_WITH_CANCELED_STATUS);
+        }
 
         if(subeventRepository.existsByTitleAndEventId(dto.getTitle(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
@@ -82,17 +87,13 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
-                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
-        }
+        //TODO: COLOCAR EM UM MESMO IF
 
         if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
                 event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
                 event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
         ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_WITH_PUBLISHED_STATUS_DELETE_IN_REGISTRATION_PERIOD);
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_WITH_PUBLISHED_STATUS_DELETE_AFTER_REGISTRATION_PERIOD_START);
         }
 
         subeventRepository.deleteById(subeventId);
@@ -135,6 +136,8 @@ public class SubeventService {
         ) {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
         }
+
+        //TODO: ADICIONAR A MESMA VALIDAÇÃO DE EVENTOS
 
         subevent.setTitle(dto.getTitle());
         subevent.setSlug(dto.getSlug());
@@ -179,6 +182,8 @@ public class SubeventService {
     public Subevent publish(UUID eventId, UUID subeventId) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
+
+        //TODO: PODE PUBLICAR UM SUBEVENTO CUJO EVENTO ESTEJA EM RASCUNHO?
 
         if(subevent.getStatus().equals(EventStatus.DRAFT)) {
             if(subevent.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||

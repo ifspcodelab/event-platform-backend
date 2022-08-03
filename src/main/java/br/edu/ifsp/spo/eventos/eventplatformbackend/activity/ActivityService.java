@@ -90,12 +90,26 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.PUBLISHED);
-
         return activityRepository.save(activity);
     }
 
     public Activity unpublish(UUID eventId, UUID activityId) {
+        Event event = getEvent(eventId);
         Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+
+        if(activity.getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS);
+        }
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
         activity.setStatus(EventStatus.DRAFT);
         return activityRepository.save(activity);
     }

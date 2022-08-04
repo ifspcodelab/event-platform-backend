@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,12 +32,10 @@ public class SpeakerService {
 
         Speaker speaker = dtoToSpeaker(dto);
 
-        if(dto.getAccountId() != null) {
-            Account account = accountRepository.findById(dto.getAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, dto.getAccountId()));
-
-            speaker.setAccount(account);
-            speakerRepository.save(speaker);
+        Optional<Account> optionalAccount = accountRepository.findByCpf(dto.getCpf());
+        if(optionalAccount.isPresent()) {
+            Account account = optionalAccount.get();
+            speaker.setAccount(account); speakerRepository.save(speaker);
 
             log.info(
                 "Speaker with name={}, email={} and accountId={} was created",
@@ -49,7 +48,7 @@ public class SpeakerService {
         speakerRepository.save(speaker);
 
         log.info("Speaker with name={} and email={} was created", speaker.getName(), speaker.getEmail());
-        log.warn("Speaker created without account association");
+        log.info("Speaker created without account association");
 
         return speaker;
     }
@@ -81,17 +80,14 @@ public class SpeakerService {
         speaker.setLinkedin(dto.getLinkedin());
         speaker.setPhoneNumber(dto.getPhoneNumber());
 
-
-        if(dto.getAccountId() != null) {
-            Account account = accountRepository.findById(dto.getAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, dto.getAccountId()));
-
+        Optional<Account> optionalAccount = accountRepository.findByCpf(dto.getCpf());
+        if(optionalAccount.isPresent()) {
+            Account account = optionalAccount.get();
             speaker.setAccount(account);
         }
 
-        log.info("Speaker name={} and email={} was updated", speaker.getName(), speaker.getEmail());
-
         speaker = speakerRepository.save(speaker);
+        log.info("Speaker with name={} and email={} was updated", speaker.getName(), speaker.getEmail());
 
         return speaker;
     }

@@ -36,4 +36,4 @@ jwt:
 
 recaptcha:
   secret: ${RECAPTCHA_SECRET}
-  site : ${RECAPTCHA_SITE}
+  site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}

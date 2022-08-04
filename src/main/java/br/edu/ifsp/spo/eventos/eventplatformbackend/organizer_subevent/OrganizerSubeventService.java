@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -26,6 +27,10 @@ public class OrganizerSubeventService {
         Account account = getAccount(dto.getAccountId());
         Event event = getEvent(eventId);
         Subevent subevent = getSubevent(subeventId);
+
+        if(organizerSubeventRepository.existsByAccountAndEventId(account, eventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "account", account.getName());
+        }
 
         OrganizerSubevent organizerSubevent = new OrganizerSubevent(dto.getOrganizerSubeventType(), account, event, subevent);
         return organizerSubeventRepository.save(organizerSubevent);

@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,13 +24,6 @@ public class ActivityController {
         return new ResponseEntity<>(activityDto, HttpStatus.CREATED);
     }
 
-    @PutMapping("sub-events/{subeventId}/activities/{activityId}")
-    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
-        Activity activity = activityService.update(eventId, subeventId, activityId, activityCreateDto);
-        ActivityDto activityDto = activityMapper.to(activity);
-        return ResponseEntity.ok(activityDto);
-    }
-
     @PostMapping("sub-events/{subeventId}/activities")
     public ResponseEntity<ActivityDto> create (@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
         Activity activity = activityService.create(eventId, subeventId, activityCreateDto);
@@ -44,11 +38,22 @@ public class ActivityController {
         return ResponseEntity.ok(activityDto);
     }
 
-
+    @PutMapping("sub-events/{subeventId}/activities/{activityId}")
+    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
+        Activity activity = activityService.update(eventId, subeventId, activityId, activityCreateDto);
+        ActivityDto activityDto = activityMapper.to(activity);
+        return ResponseEntity.ok(activityDto);
+    }
 
     @PatchMapping("activities/{activityId}/publish")
     public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID activityId) {
         Activity activity = activityService.publish(eventId, activityId);
+        return ResponseEntity.ok(activityMapper.to(activity));
+    }
+
+    @PatchMapping("sub-events/{subeventId}/activities/{activityId}/publish")
+    public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.publish(eventId, subeventId, activityId);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 

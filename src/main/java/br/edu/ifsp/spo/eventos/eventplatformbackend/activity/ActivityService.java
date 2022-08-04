@@ -116,7 +116,7 @@ public class ActivityService {
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
-        }
+        } // TODO mudar o nome dessa validação
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS);
@@ -128,6 +128,21 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.DRAFT);
         return activityRepository.save(activity);
+    }
+
+    public Activity cancel(UUID eventId, UUID activityId) {
+        Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+
+        if(activity.getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_DRAFT_STATUS);
+        }
+
+        // TODO validações
+
+        activity.setStatus(EventStatus.CANCELED);
+        return activityRepository.save(activity);
+
     }
 
     public List<Activity> findALl(UUID eventId) {

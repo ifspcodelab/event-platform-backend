@@ -24,7 +24,7 @@ public class ActivityController {
     }
 
     @PutMapping("activities/{activityId}")
-    public ResponseEntity<ActivityDto> uptade(@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
+    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
         Activity activity = activityService.update(eventId, activityId, activityCreateDto);
         ActivityDto activityDto = activityMapper.to(activity);
         return ResponseEntity.ok(activityDto);
@@ -39,6 +39,12 @@ public class ActivityController {
     @PatchMapping("activities/{activityId}/unpublish")
     public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID activityId) {
         Activity activity = activityService.unpublish(eventId, activityId);
+        return ResponseEntity.ok(activityMapper.to(activity));
+    }
+
+    @PatchMapping("activities/{activityId}/cancel")
+    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.cancel(eventId, activityId);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 

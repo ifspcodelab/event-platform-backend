@@ -7,5 +7,6 @@ CREATE TABLE accounts(
     agreed BOOLEAN NOT NULL,
     role VARCHAR NOT NULL,
     verified BOOLEAN NOT NULL,
+    registration_timestamp TIMESTAMP NOT NULL,
     CONSTRAINT accounts_pk PRIMARY KEY (id)
 )

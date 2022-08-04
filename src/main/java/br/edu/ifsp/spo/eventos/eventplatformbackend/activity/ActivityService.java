@@ -32,9 +32,9 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-        }
+        } // MUDAR ESSA VALIDAÇÃO?
 
         Activity activity = new Activity(
                 dto.getTitle(),
@@ -66,7 +66,11 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_CANCELED_STATUS);
+        }
+
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -97,7 +101,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -122,7 +126,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -135,19 +139,14 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
 
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_CANCEL_STATUS);
+        }
         if(activity.getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_DRAFT_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_CANCEL_STATUS);
-        }
-
-        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-        }
-
-        if(event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())) {
+        if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
@@ -177,8 +176,20 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
+        if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+                event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+           event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY); // UTILIZAR OUTRA BUSINESS RULE
         }
 
         activityRepository.delete(activity);

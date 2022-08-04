@@ -42,6 +42,7 @@ public class OrganizerService {
 
     public void delete(UUID eventId, UUID organizerId) {
         Organizer organizer = getOrganizer(organizerId);
+        checkEventExists(eventId);
         organizerRepository.delete(organizer);
     }
 

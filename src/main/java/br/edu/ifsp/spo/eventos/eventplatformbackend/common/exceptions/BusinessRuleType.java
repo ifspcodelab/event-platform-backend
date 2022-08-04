@@ -44,6 +44,7 @@ public enum BusinessRuleType {
     SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("It is not possible to unpublish an subevent with canceled status"),
     SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to unpublish an subevent with published status and the registration period start"),
     ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS("It is not possible to create an activity with a canceled event"),
+    ACTIVITY_CREATE_WITH_SUBEVENT_CANCELED_STATUS("It is not possible to create an activity with a canceled subevent"),
     ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS("It is not possible to update an activity with a canceled event"),
     ACTIVITY_PUBLISH_WITH_EVENT_CANCELED_STATUS("It is not possible to publish an activity with a canceled event"),
     ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS("It is not possible to unpublish an activity with a canceled event"),

@@ -45,4 +45,17 @@ public class Activity {
         this.needRegistration = needRegistration;
         this.event = event;
     }
+
+    public Activity(String title, String slug, String description, ActivityType type, boolean online, boolean needRegistration, Event event, Subevent subevent) {
+        this.id = UUID.randomUUID();
+        this.title = title;
+        this.slug = slug;
+        this.description = description;
+        this.type = type;
+        this.status = EventStatus.DRAFT;
+        this.online = online;
+        this.needRegistration = needRegistration;
+        this.event = event;
+        this.subevent = subevent;
+    }
 }

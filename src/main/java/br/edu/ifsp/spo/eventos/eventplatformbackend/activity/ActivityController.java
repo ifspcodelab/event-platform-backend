@@ -23,6 +23,13 @@ public class ActivityController {
         return new ResponseEntity<>(activityDto, HttpStatus.CREATED);
     }
 
+    @PostMapping("sub-events/{subeventId}/activities")
+    public ResponseEntity<ActivityDto> create (@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
+        Activity activity = activityService.create(eventId, subeventId, activityCreateDto);
+        ActivityDto activityDto = activityMapper.to(activity);
+        return new ResponseEntity<>(activityDto, HttpStatus.CREATED);
+    }
+
     @PutMapping("activities/{activityId}")
     public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
         Activity activity = activityService.update(eventId, activityId, activityCreateDto);

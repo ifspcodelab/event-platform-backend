@@ -4,6 +4,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final EventRepository eventRepository;
+    private final SubeventRepository subeventRepository;
 
     public Activity create(UUID eventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
@@ -44,6 +48,41 @@ public class ActivityService {
                 dto.isOnline(),
                 dto.isNeedRegistration(),
                 event
+        );
+
+        return activityRepository.save(activity);
+    }
+
+    public Activity create(UUID eventId, UUID subeventId, ActivityCreateDto dto) {
+        Event event = getEvent(eventId);
+        Subevent subevent = getSubEvent(subeventId);
+        checkIfEventIsAssociateToSubEvent(eventId, subevent);
+
+        if(activityRepository.existsByTitleIgnoreCaseAndSubeventId(dto.getTitle(), subeventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "title", dto.getTitle());
+        }
+
+        if(activityRepository.existsBySlugAndSubeventId(dto.getSlug(), subeventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
+        }
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) { // SUBEVENT ESTÁ COM OUTRO STATUS, APAGAR
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_SUBEVENT_CANCELED_STATUS);
+        }
+
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        } // MUDAR ESSA VALIDAÇÃO?
+
+        Activity activity = new Activity(
+                dto.getTitle(),
+                dto.getSlug(),
+                dto.getDescription(),
+                dto.getActivityType(),
+                dto.isOnline(),
+                dto.isNeedRegistration(),
+                event,
+                subevent
         );
 
         return activityRepository.save(activity);
@@ -198,6 +237,17 @@ public class ActivityService {
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
+    }
+
+    private Subevent getSubEvent(UUID subeventId) {
+        return subeventRepository.findById(subeventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
+    }
+
+    private void checkIfEventIsAssociateToSubEvent(UUID eventId, Subevent subevent) {
+        if (!subevent.getEvent().getId().equals(eventId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.SUBEVENT, ResourceName.EVENT);
+        }
     }
 
     private Activity getActivity(UUID activityId) {

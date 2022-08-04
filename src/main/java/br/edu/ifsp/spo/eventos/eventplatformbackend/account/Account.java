@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -23,8 +24,9 @@ public class Account {
     private String password;
     private Boolean agreed;
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private AccountRole role;
     private Boolean verified;
+    private Instant registrationTimestamp;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
         this.id = UUID.randomUUID();
@@ -33,7 +35,8 @@ public class Account {
         this.cpf = cpf;
         this.password = password;
         this.agreed = agreed;
-        this.role = UserRole.ATTENDANT;
+        this.role = AccountRole.ATTENDANT;
         this.verified = false;
+        this.registrationTimestamp = Instant.now();
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/{eventId}/sub-events")
+@RequestMapping("api/v1/events/{eventId}/sub-events")
 @AllArgsConstructor
 public class SubeventController {
     private final SubeventService subeventService;
@@ -56,8 +56,8 @@ public class SubeventController {
     }
 
     @PatchMapping("{subeventId}/cancel")
-    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
-        Subevent subevent = subeventService.cancel(eventId, subeventId);
+    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Subevent subevent = subeventService.cancel(eventId, subeventId, cancellationMessageCreateDto);
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }

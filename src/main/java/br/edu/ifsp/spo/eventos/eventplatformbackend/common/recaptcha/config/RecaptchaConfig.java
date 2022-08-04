@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class RecaptchaConfig {
-
     private String secret;
     private String site;
-
-
 }

@@ -101,11 +101,11 @@ public class EventService {
     public Event update(UUID eventId, EventCreateDto dto) {
         Event event = getEvent(eventId);
 
-        if(eventRepository.existsByTitle(dto.getTitle())) {
+        if(eventRepository.existsByTitleAndIdNot(dto.getTitle(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.EVENT, "title", dto.getTitle());
         }
 
-        if(eventRepository.existsBySlug(dto.getSlug())) {
+        if(eventRepository.existsBySlugAndIdNot(dto.getSlug(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.EVENT, "slug", dto.getSlug());
         }
 
@@ -151,7 +151,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Event cancel(UUID eventId) {
+    public Event cancel(UUID eventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
@@ -177,6 +177,7 @@ public class EventService {
         }
 
         event.setStatus(EventStatus.CANCELED);
+        event.setCancellationMessage(cancellationMessageCreateDto.getReason());
         subeventService.cancelAllByEventId(eventId);
 
         log.info("Event canceled: id={}, title={}", eventId, event.getTitle());

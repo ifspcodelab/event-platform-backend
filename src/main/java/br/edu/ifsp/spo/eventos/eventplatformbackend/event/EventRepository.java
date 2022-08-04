@@ -7,5 +7,7 @@ import java.util.UUID;
 @Repository
 public interface EventRepository extends JpaRepository<Event, UUID> {
     boolean existsByTitle(String title);
+    boolean existsByTitleAndIdNot(String title, UUID eventId);
     boolean existsBySlug(String slug);
+    boolean existsBySlugAndIdNot(String slug, UUID eventId);
 }

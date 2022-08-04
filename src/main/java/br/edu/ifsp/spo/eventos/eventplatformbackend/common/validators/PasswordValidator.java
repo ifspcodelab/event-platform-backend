@@ -16,6 +16,6 @@ public class PasswordValidator implements ConstraintValidator<Password, String> 
         if(value.isBlank()) {
             return false;
         }
-        return value.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\x20-\\x2F\\x3A-\\x40\\x5B-\\x60\\x7B-\\x7EáàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ])[\\x20-\\x7FáàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ]{8,64}$");
+        return value.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{8,64}$");
     }
 }

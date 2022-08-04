@@ -1,0 +1,1 @@
+INSERT INTO locations VALUES ('5607ddd3-31ed-4435-bd61-23133d2f3381', 'IFSP Campus São Paulo', 'Rua Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010');

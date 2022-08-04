@@ -36,4 +36,8 @@ public class SpeakerCreateDto {
     @NotBlank
     @Size(min = 8)
     String phoneNumber;
+
+    public String getCpf() {
+        return cpf.replace(".", "").replace("-", "");
+    }
 }

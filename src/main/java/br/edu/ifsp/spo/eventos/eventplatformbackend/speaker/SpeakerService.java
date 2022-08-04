@@ -65,11 +65,11 @@ public class SpeakerService {
         Speaker speaker = getSpeaker(speakerId);
 
         if(speakerRepository.existsByCpfAndIdNot(dto.getCpf(), speakerId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "cpf", dto.getName());
+            throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "cpf", dto.getCpf());
         }
 
         if(speakerRepository.existsByEmailAndIdNot(dto.getEmail(), speakerId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "email", dto.getName());
+            throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "email", dto.getEmail());
         }
 
         speaker.setName(dto.getName());

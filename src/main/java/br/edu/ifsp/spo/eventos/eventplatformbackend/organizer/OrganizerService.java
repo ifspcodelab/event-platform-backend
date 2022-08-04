@@ -36,6 +36,7 @@ public class OrganizerService {
     }
 
     public List<Organizer> findAll(UUID eventId) {
+        checkEventExists(eventId);
         return organizerRepository.findAllByEventId(eventId);
     }
 
@@ -57,5 +58,11 @@ public class OrganizerService {
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
+    }
+
+    private void checkEventExists(UUID eventId) {
+        if(!eventRepository.existsById(eventId)) {
+            throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
+        }
     }
 }

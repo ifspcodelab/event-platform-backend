@@ -63,7 +63,7 @@ public class ActivityService {
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS);
         }
 
         if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
@@ -93,6 +93,10 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
         }
 
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_CANCELED_STATUS);
+        }
+
         if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
@@ -112,6 +116,10 @@ public class ActivityService {
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS);
         }
 
         if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
@@ -135,12 +143,17 @@ public class ActivityService {
     }
 
     public void delete(UUID eventId, UUID activityId) {
+        Event event = getEvent(eventId);
         checksEventExists(eventId);
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
         }
 
         activityRepository.delete(activity);

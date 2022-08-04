@@ -51,6 +51,7 @@ public enum BusinessRuleType {
     ACTIVITY_CANCEL_WITH_DRAFT_STATUS("It is not possible to cancel an activity with draft status"),
     ACTIVITY_CANCEL_WITH_CANCEL_STATUS("It is not possible to cancel an activity with cancel status"),
     ACTIVITY_IS_NOT_ASSOCIATED_EVENT("Activity is not associated to event"),
+    ACTIVITY_IS_NOT_ASSOCIATED_SUBEVENT("Activity is not associated to subevent"),
     ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS("It is not possible to publish an activity with published status"),
     ACTIVITY_PUBLISH_WITH_CANCELED_STATUS("It is not possible to publish an activity with canceled status"),
     ACTIVITY_UPDATE_WITH_CANCELED_STATUS("It is not possible to update an activity with canceled status"),

@@ -4,7 +4,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -56,7 +55,7 @@ public class ActivityService {
     public Activity create(UUID eventId, UUID subeventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
-        checkIfEventIsAssociateToSubEvent(eventId, subevent);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
 
         if(activityRepository.existsByTitleIgnoreCaseAndSubeventId(dto.getTitle(), subeventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "title", dto.getTitle());
@@ -66,7 +65,7 @@ public class ActivityService {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
         }
 
-        if(subevent.getStatus().equals(EventStatus.CANCELED)) { // SUBEVENT ESTÁ COM OUTRO STATUS, APAGAR
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_SUBEVENT_CANCELED_STATUS);
         }
 
@@ -98,6 +97,43 @@ public class ActivityService {
         }
 
         if(activityRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_CANCELED_STATUS);
+        }
+
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        activity.setTitle(dto.getTitle());
+        activity.setSlug(dto.getSlug());
+        activity.setDescription(dto.getDescription());
+        activity.setType(dto.getActivityType());
+        activity.setOnline(dto.isOnline());
+        activity.setNeedRegistration(dto.isNeedRegistration());
+
+        return activityRepository.save(activity);
+    }
+
+    public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto) {
+        Event event = getEvent(eventId);
+        Subevent subevent = getSubEvent(subeventId);
+        Activity activity = getActivity(activityId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+
+        if(activityRepository.existsByTitleIgnoreCaseAndSubeventIdAndIdNot(dto.getTitle(), subeventId, activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY,"title", dto.getTitle());
+        }
+
+        if(activityRepository.existsBySlugAndSubeventIdAndIdNot(dto.getSlug(), subeventId, activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
         }
 
@@ -205,7 +241,7 @@ public class ActivityService {
         return activity;
     }
 
-    public void delete(UUID eventId, UUID activityId) {
+    public void delete(UUID eventId, UUID activityId) { // TODO VERIFICAR MELHOR AS VALIDAÇÕES
         Event event = getEvent(eventId);
         checksEventExists(eventId);
         Activity activity = getActivity(activityId);
@@ -244,7 +280,7 @@ public class ActivityService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
     }
 
-    private void checkIfEventIsAssociateToSubEvent(UUID eventId, Subevent subevent) {
+    private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {
         if (!subevent.getEvent().getId().equals(eventId)) {
             throw new ResourceReferentialIntegrityException(ResourceName.SUBEVENT, ResourceName.EVENT);
         }
@@ -257,6 +293,12 @@ public class ActivityService {
 
     private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
         if (!activity.getEvent().getId().equals(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_EVENT);
+        }
+    }
+
+    private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
+        if (!activity.getSubevent().getId().equals(subeventId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_EVENT);
         }
     }

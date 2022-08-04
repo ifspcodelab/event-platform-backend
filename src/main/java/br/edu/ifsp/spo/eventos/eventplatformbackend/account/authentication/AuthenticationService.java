@@ -2,6 +2,9 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
@@ -20,10 +23,16 @@ public class AuthenticationService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final RecaptchaService recaptchaService;
 
     @Transactional
     public TokensDto login(LoginCreateDto loginCreateDto){
+        if (!recaptchaService.isValid(loginCreateDto.getRecaptcha())) {
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, loginCreateDto.getEmail());
+        }
+
         Account account = getAccount(loginCreateDto.getEmail());
+
 
         if (!account.getVerified()) {
             throw new AuthenticationException(AuthenticationExceptionType.UNVERIFIED_ACCOUNT, account.getEmail());

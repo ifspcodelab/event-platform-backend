@@ -65,6 +65,10 @@ public class ActivityService {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
         }
 
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
         if(subevent.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_SUBEVENT_CANCELED_STATUS);
         }
@@ -139,6 +143,10 @@ public class ActivityService {
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_SUBEVENT_CANCELED_STATUS);
         }
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {

@@ -96,6 +96,11 @@ public class EventService {
     public Event update(UUID eventId, EventCreateDto dto) {
         Event event = getEvent(eventId);
 
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+            event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
+
         if(eventRepository.existsByTitleAndIdNot(dto.getTitle(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.EVENT, "title", dto.getTitle());
         }
@@ -139,10 +144,6 @@ public class EventService {
                 if(!dto.getExecutionPeriod().getStartDate().isEqual(event.getExecutionPeriod().getStartDate())) {
                     throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
                 }
-            }
-
-            if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
             }
         }
 

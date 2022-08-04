@@ -34,6 +34,8 @@ public enum BusinessRuleType {
     SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar um subevento publicado que o seu período de inscrições já tenha iniciado"),
     SUBEVENT_DELETE_WITH_STATUS_CANCELED("Não é possível deletar um subevento cancelado"),
     SUBEVENT_UPDATE_WITH_CANCELED_STATUS("Não é possível editar um subevento cancelado"),
+    SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START("Não é possível editar O slug de um subevento publicado que o seu período de inscrições já tenha iniciado"),
+    SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START("Não é possível editar o início do período de execução de um subevento publicado que o seu período de inscrições já tenha iniciado"),
     SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("Não é possível editar um subevento publicado que tenha sido finalizado"),
     SUBEVENT_CANCEL_WITH_DRAFT_STATUS("Não é possível cancelar um subevento em rascunho"),
     SUBEVENT_CANCEL_WITH_CANCELED_STATUS("Não é possível cancelar um subevento que já está cancelado"),

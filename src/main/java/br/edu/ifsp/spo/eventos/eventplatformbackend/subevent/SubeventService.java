@@ -104,6 +104,12 @@ public class SubeventService {
         Event event = getEvent(eventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+            subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
+
         if(subeventRepository.existsByTitleAndEventIdAndIdNot(dto.getTitle(), eventId, subeventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
         }
@@ -130,13 +136,19 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
-                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
-        }
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if(!dto.getSlug().equals(subevent.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
 
-        //TODO: ADICIONAR A MESMA VALIDAÇÃO DE EVENTOS
+                if(!dto.getExecutionPeriod().getStartDate().isEqual(subevent.getExecutionPeriod().getStartDate())) {
+                    throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
+        }
 
         subevent.setTitle(dto.getTitle());
         subevent.setSlug(dto.getSlug());

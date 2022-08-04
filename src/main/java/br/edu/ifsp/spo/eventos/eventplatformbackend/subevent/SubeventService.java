@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ public class SubeventService {
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_CREATE_WITH_EVENT_WITH_CANCELED_STATUS);
+        }
 
         if(subeventRepository.existsByTitleAndEventId(dto.getTitle(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
@@ -82,17 +87,12 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
-                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
-        }
-
-        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
-                event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
                 event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_WITH_PUBLISHED_STATUS_DELETE_IN_REGISTRATION_PERIOD);
+            ) {
+                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
         }
 
         subeventRepository.deleteById(subeventId);
@@ -103,6 +103,12 @@ public class SubeventService {
         Subevent subevent = getSubevent(subeventId);
         Event event = getEvent(eventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
+
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+            subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
 
         if(subeventRepository.existsByTitleAndEventIdAndIdNot(dto.getTitle(), eventId, subeventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
@@ -130,10 +136,18 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
-                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if(!dto.getSlug().equals(subevent.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
+
+                if(!dto.getExecutionPeriod().getStartDate().isEqual(subevent.getExecutionPeriod().getStartDate())) {
+                    throw new BusinessRuleException(BusinessRuleType.SUBEVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
         }
 
         subevent.setTitle(dto.getTitle());
@@ -181,11 +195,17 @@ public class SubeventService {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
+        if(subevent.getEvent().getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_EVENT_WITH_DRAFT_STATUS);
+        }
+
+        if(subevent.getEvent().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_EVENT_WITH_CANCELED_STATUS);
+        }
+
         if(subevent.getStatus().equals(EventStatus.DRAFT)) {
-            if(subevent.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-                    subevent.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-            ) {
-                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START);
+            if(subevent.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_END);
             }
         }
 

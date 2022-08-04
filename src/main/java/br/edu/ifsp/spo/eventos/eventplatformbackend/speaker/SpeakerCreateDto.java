@@ -9,7 +9,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.UUID;
 
 @Value
 public class SpeakerCreateDto {
@@ -37,5 +36,4 @@ public class SpeakerCreateDto {
     @NotBlank
     @Size(min = 8)
     String phoneNumber;
-    UUID accountId;
 }

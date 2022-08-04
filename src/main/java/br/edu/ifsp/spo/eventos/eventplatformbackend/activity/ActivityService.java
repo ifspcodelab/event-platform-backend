@@ -24,6 +24,10 @@ public class ActivityService {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "title", dto.getTitle());
         }
 
+        if(activityRepository.existsBySlugAndEventId(dto.getSlug(), eventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
+        }
+
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
         }
@@ -52,6 +56,10 @@ public class ActivityService {
 
         if(activityRepository.existsByTitleIgnoreCaseAndEventIdAndIdNot(dto.getTitle(), eventId, activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY,"title", dto.getTitle());
+        }
+
+        if(activityRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {

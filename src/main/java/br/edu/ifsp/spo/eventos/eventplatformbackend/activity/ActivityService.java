@@ -90,7 +90,7 @@ public class ActivityService {
         }
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_CANCELED_STATUS);
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
@@ -115,8 +115,8 @@ public class ActivityService {
         }
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
-        } // TODO mudar o nome dessa validação
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_CANCELED_STATUS);
+        }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS);

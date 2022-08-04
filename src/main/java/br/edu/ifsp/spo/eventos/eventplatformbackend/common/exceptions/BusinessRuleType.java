@@ -52,6 +52,7 @@ public enum BusinessRuleType {
     ACTIVITY_IS_NOT_ASSOCIATED_EVENT("Activity is not associated to event"),
     ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS("It is not possible to publish an activity with published status"),
     ACTIVITY_PUBLISH_WITH_CANCELED_STATUS("It is not possible to publish an activity with canceled status"),
+    ACTIVITY_UNPUBLISH_WITH_CANCELED_STATUS("It is not possible to UNpublish an activity with canceled status"),
     ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("It is not possible to unpublish an activity with draft status"),
     ACTIVITY_DELETE_WITH_STATUS_CANCELED("It is not possible to delete an activity with canceled status");
     String message;

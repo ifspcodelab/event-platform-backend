@@ -127,7 +127,14 @@ public class ActivityService {
     }
 
     public void delete(UUID eventId, UUID activityId) {
+        checksEventExists(eventId);
         Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
+        }
+
         activityRepository.delete(activity);
     }
 

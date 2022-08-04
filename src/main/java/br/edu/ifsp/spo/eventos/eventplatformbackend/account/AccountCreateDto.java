@@ -31,4 +31,12 @@ public class AccountCreateDto {
     Boolean agreed;
     @NotNull
     String userRecaptcha;
+
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getCpf() {
+        return cpf.replace(".","").replace("-","");
+    }
 }

@@ -35,14 +35,14 @@ public class RegistrationService {
         }
 
         if(accountRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "e-mail", dto.getEmail());
+            throw new ResourceAlreadyExistsException(ResourceName.EMAIL, "e-mail", dto.getEmail());
         }
         if(accountRepository.existsByCpf(dto.getCpf())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "cpf", dto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.CPF, "cpf", dto.getCpf());
         }
 
         Account account = new Account(
-                dto.getName().strip(),
+                dto.getName(),
                 dto.getEmail(),
                 dto.getCpf(),
                 passwordEncoder.encode(dto.getPassword()),

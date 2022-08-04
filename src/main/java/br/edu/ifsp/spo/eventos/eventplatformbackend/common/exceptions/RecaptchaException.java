@@ -12,4 +12,9 @@ public class RecaptchaException extends RuntimeException{
         this.recaptchaExceptionType = recaptchaExceptionType;
         this.email = email;
     }
+
+    public RecaptchaException(RecaptchaExceptionType recaptchaExceptionType){
+        this.recaptchaExceptionType = recaptchaExceptionType;
+        this.email = "";
+    }
 }

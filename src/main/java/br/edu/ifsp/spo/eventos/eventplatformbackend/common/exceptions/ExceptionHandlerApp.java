@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND;
+
 @ControllerAdvice
 @Slf4j
 public class ExceptionHandlerApp {
@@ -126,9 +128,13 @@ public class ExceptionHandlerApp {
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
+        if(ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
+            ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
+            return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+        }
         return ResponseEntity.accepted().build();
     }
-
+    
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<ProblemDetail> handlerRegistrationException(RegistrationException ex) {
         String message = String.format(ex.getRegistrationRuleType().getMessage(), ex.getEmail());
@@ -176,12 +182,13 @@ public class ExceptionHandlerApp {
         log.warn("Token Expired Exception");
         return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
+    
 
     @ExceptionHandler(RecaptchaException.class)
-    public ResponseEntity<Void> handlerInvalidRecaptcha(RecaptchaException ex){
+    public ResponseEntity<ProblemDetail> handlerInvalidRecaptcha(RecaptchaException ex){
         log.warn(String.format(ex.getRecaptchaExceptionType().getMessage(), ex.getEmail()));
         ProblemDetail problemDetail = new ProblemDetail("Invalid recaptcha", List.of());
-        log.warn("Invalid recaptcha exception");
+
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

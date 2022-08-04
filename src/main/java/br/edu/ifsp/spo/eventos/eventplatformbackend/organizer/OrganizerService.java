@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -22,6 +23,10 @@ public class OrganizerService {
     public Organizer create(UUID eventId, OrganizerCreateDto organizerDto) {
         Account account = getAccount(organizerDto.getAccountId());
         Event event = getEvent(eventId);
+
+        if(organizerRepository.existsByAccountAndEventId(account, eventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "account", account.getName());
+        }
 
         Organizer organizer = new Organizer(organizerDto.getType(), account, event);
         return organizerRepository.save(organizer);

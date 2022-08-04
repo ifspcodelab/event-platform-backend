@@ -1,7 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

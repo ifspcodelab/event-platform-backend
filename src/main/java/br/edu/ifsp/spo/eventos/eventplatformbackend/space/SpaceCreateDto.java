@@ -9,7 +9,7 @@ import javax.validation.constraints.*;
 public class SpaceCreateDto {
     @NotNull
     @NotBlank
-    @Size (min=4, max=100)
+    @Size (min=1, max=100)
     String name;
     @NotNull
     @Min(value = 2)

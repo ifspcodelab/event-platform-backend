@@ -1,0 +1,1 @@
+INSERT INTO areas VALUES ('29eb3ccf-711d-40f2-954c-3f2616a6cf36', 'Bloco A', 'Perto da entrada', '5607ddd3-31ed-4435-bd61-23133d2f3381');

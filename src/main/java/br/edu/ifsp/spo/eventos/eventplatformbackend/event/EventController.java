@@ -54,8 +54,8 @@ public class EventController {
     }
 
     @PatchMapping("{eventId}/cancel")
-    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId) {
-        Event event = eventService.cancel(eventId);
+    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessage) {
+        Event event = eventService.cancel(eventId, cancellationMessage);
 
         return ResponseEntity.ok(eventMapper.to(event));
     }

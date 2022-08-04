@@ -36,8 +36,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.assertj:assertj-core:3.23.1'
+	testImplementation 'io.rest-assured:rest-assured:4.5.1'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	systemProperty 'file.encoding', 'UTF-8'
 }

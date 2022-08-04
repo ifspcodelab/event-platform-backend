@@ -23,11 +23,11 @@ public class SubeventService {
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
 
-        if(subeventRepository.existsByTitleAndEvent(dto.getTitle(), event)) {
+        if(subeventRepository.existsByTitleAndEventId(dto.getTitle(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
         }
 
-        if(subeventRepository.existsBySlugAndEvent(dto.getSlug(), event)) {
+        if(subeventRepository.existsBySlugAndEventId(dto.getSlug(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT, "slug", dto.getSlug());
         }
 
@@ -104,11 +104,11 @@ public class SubeventService {
         Event event = getEvent(eventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
-        if(subeventRepository.existsByTitleAndEvent(dto.getTitle(), event)) {
+        if(subeventRepository.existsByTitleAndEventIdAndIdNot(dto.getTitle(), eventId, subeventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT,"title", dto.getTitle());
         }
 
-        if(subeventRepository.existsBySlugAndEvent(dto.getSlug(), event)) {
+        if(subeventRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, subeventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SUBEVENT, "slug", dto.getSlug());
         }
 
@@ -147,7 +147,7 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
-    public Subevent cancel(UUID eventId, UUID subeventId) {
+    public Subevent cancel(UUID eventId, UUID subeventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -171,6 +171,7 @@ public class SubeventService {
         }
 
         subevent.setStatus(EventStatus.CANCELED);
+        subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
 
         return subeventRepository.save(subevent);

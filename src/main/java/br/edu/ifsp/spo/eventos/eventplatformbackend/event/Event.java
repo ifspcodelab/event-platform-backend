@@ -37,6 +37,7 @@ public class Event {
     private String biggerImage;
     @Enumerated(EnumType.STRING)
     private EventStatus status;
+    private String cancellationMessage;
 
     public Event(
         String title,
@@ -58,5 +59,6 @@ public class Event {
         this.smallerImage = smallerImage;
         this.biggerImage = biggerImage;
         this.status = EventStatus.DRAFT;
+        this.cancellationMessage = null;
     }
 }

@@ -14,7 +14,6 @@ public class EventCreateDto {
     String title;
     @NotNull
     @NotBlank
-    @Size(min = 1)
     String slug;
     @NotNull
     @NotBlank

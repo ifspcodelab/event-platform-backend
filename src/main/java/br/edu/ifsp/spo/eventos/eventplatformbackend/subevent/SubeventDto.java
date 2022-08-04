@@ -15,4 +15,5 @@ public class SubeventDto {
     String smallerImage;
     String biggerImage;
     EventStatus status;
+    String cancellationMessage;
 }

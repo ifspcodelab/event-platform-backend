@@ -200,10 +200,8 @@ public class EventService {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
-            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(
-                    BusinessRuleType.EVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START
-                );
+            if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.EVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_END);
             }
         }
 

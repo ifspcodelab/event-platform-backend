@@ -194,13 +194,17 @@ public class SubeventService {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
-        //TODO: PODE PUBLICAR UM SUBEVENTO CUJO EVENTO ESTEJA EM RASCUNHO?
+        if(subevent.getEvent().getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_EVENT_WITH_DRAFT_STATUS);
+        }
+
+        if(subevent.getEvent().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_EVENT_WITH_CANCELED_STATUS);
+        }
 
         if(subevent.getStatus().equals(EventStatus.DRAFT)) {
-            if(subevent.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-                    subevent.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-            ) {
-                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START);
+            if(subevent.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_END);
             }
         }
 

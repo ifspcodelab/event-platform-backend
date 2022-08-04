@@ -87,13 +87,12 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_STATUS_CANCELED);
         }
 
-        //TODO: COLOCAR EM UM MESMO IF
-
-        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
-                event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
                 event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_WITH_PUBLISHED_STATUS_DELETE_AFTER_REGISTRATION_PERIOD_START);
+            ) {
+                throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
         }
 
         subeventRepository.deleteById(subeventId);

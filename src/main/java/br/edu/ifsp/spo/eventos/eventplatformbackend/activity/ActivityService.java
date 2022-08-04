@@ -131,6 +131,7 @@ public class ActivityService {
     }
 
     public Activity cancel(UUID eventId, UUID activityId) {
+        Event event = getEvent(eventId);
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
 
@@ -138,11 +139,20 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_DRAFT_STATUS);
         }
 
-        // TODO validações
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_CANCEL_STATUS);
+        }
+
+        if(!event.getRegistrationPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
 
         activity.setStatus(EventStatus.CANCELED);
         return activityRepository.save(activity);
-
     }
 
     public List<Activity> findALl(UUID eventId) {

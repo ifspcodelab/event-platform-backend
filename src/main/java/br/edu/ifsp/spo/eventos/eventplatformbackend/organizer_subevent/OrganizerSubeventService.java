@@ -53,6 +53,15 @@ public class OrganizerSubeventService {
         OrganizerSubevent organizerSubevent = getOrganizerSubevent(organizerSubeventId);
         checkEventExists(eventId);
         checkSubeventExists(subeventId);
+
+        if(organizerSubevent.getEvent().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_DELETE_WITH_CANCELED_STATUS);
+        }
+
+        if(organizerSubevent.getSubevent().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_DELETE_WITH_CANCELED_STATUS);
+        }
+
         organizerSubeventRepository.delete(organizerSubevent);
     }
 

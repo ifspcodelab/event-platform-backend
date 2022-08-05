@@ -12,7 +12,8 @@ public enum ResourceName {
     EVENT("Event"),
     SUBEVENT("Subevent"),
     ACCOUNT("Account"),
-    SPEAKER("Speaker");
+    SPEAKER("Speaker"),
+    ORGANIZERSUBEVENT("Organizer Subevent");
 
     private String name;
 }

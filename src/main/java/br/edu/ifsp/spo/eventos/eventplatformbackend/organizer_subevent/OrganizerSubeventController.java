@@ -29,4 +29,10 @@ public class OrganizerSubeventController {
         return ResponseEntity.ok(organizerSubeventMapper.to(organizerSubevents));
 
     }
+
+    @DeleteMapping("{organizerSubeventId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID organizerSubeventId) {
+        organizerSubeventService.delete(eventId, subeventId, organizerSubeventId);
+        return ResponseEntity.noContent().build();
+    }
 }

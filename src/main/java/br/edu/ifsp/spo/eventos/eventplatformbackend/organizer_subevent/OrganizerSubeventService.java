@@ -49,6 +49,18 @@ public class OrganizerSubeventService {
         return organizerSubeventRepository.findAllBySubeventId(subeventId);
     }
 
+    public void delete(UUID eventId, UUID subeventId, UUID organizerSubeventId) {
+        OrganizerSubevent organizerSubevent = getOrganizerSubevent(organizerSubeventId);
+        checkEventExists(eventId);
+        checkSubeventExists(subeventId);
+        organizerSubeventRepository.delete(organizerSubevent);
+    }
+
+    private OrganizerSubevent getOrganizerSubevent(UUID organizerSubeventId) {
+        return organizerSubeventRepository.findById(organizerSubeventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ORGANIZERSUBEVENT, organizerSubeventId));
+    }
+
     private Account getAccount(UUID accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, accountId));

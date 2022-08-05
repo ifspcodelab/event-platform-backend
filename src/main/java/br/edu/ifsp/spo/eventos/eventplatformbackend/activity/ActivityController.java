@@ -86,6 +86,12 @@ public class ActivityController {
         return ResponseEntity.ok(activityMapper.to(activities));
     }
 
+    @GetMapping("sub-events/{subeventId}/activities")
+    public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        List<Activity> activities = activityService.findALl(eventId, subeventId);
+        return ResponseEntity.ok(activityMapper.to(activities));
+    }
+
     @GetMapping("activities/{activityId}")
     public ResponseEntity<ActivityDto> show(@PathVariable UUID eventId, @PathVariable UUID activityId) {
         Activity activity = activityService.findById(eventId, activityId);

@@ -331,6 +331,13 @@ public class ActivityService {
         return activityRepository.findAllByEventId(eventId);
     }
 
+    public List<Activity> findALl(UUID eventId, UUID subeventId) {
+        checksEventExists(eventId);
+        checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
+        return activityRepository.findAllByEventId(eventId);
+    }
+
+
     public Activity findById(UUID eventId, UUID activityId) {
         Activity activity = getActivity(activityId);
         checksEventExists(eventId);
@@ -401,8 +408,14 @@ public class ActivityService {
     }
 
     private void checksEventExists(UUID eventId) {
-        if(!eventRepository.existsById(eventId)) {
+        if (!eventRepository.existsById(eventId)) {
             throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
+        }
+    }
+
+    private void checksSubeventExists(UUID subeventId) {
+        if(!subeventRepository.existsById(subeventId)) {
+            throw new ResourceNotFoundException(ResourceName.EVENT, subeventId);
         }
     }
 }

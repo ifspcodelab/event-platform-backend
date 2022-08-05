@@ -71,6 +71,12 @@ public class SubeventService {
         return subevent;
     }
 
+    public Subevent findBySlug(UUID eventId, String slug) {
+        getEvent(eventId);
+
+        return subeventRepository.findSubeventBySlugAndEventId(slug, eventId);
+    }
+
     public List<Subevent> findAll(UUID eventId) {
         checksEventExists(eventId);
 

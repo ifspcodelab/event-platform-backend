@@ -35,7 +35,12 @@ public class SubeventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SubeventDto>> index(@PathVariable UUID eventId) {
+    public ResponseEntity<List<SubeventDto>> index(@PathVariable UUID eventId, @RequestParam(required = false) String slug) {
+        if(slug != null) {
+            List<Subevent> subevents =  List.of(subeventService.findBySlug(eventId, slug));
+            return ResponseEntity.ok(subeventMapper.to(subevents));
+        }
+
         List<Subevent> subevents = subeventService.findAll(eventId);
 
         return ResponseEntity.ok(subeventMapper.to(subevents));

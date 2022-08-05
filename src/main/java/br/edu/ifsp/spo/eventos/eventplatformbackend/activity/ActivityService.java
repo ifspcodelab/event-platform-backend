@@ -386,14 +386,14 @@ public class ActivityService {
 
     public List<Activity> findALl(UUID eventId) {
         checksEventExists(eventId);
-        return activityRepository.findAllByEventId(eventId);
+        return activityRepository.findAllByEventIdAndSubeventNull(eventId);
     }
 
-    public List<Activity> findALl(UUID eventId, UUID subeventId) {
+    public List<Activity> findAll(UUID eventId, UUID subeventId) {
         checksEventExists(eventId);
         checksSubeventExists(subeventId);
         checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
-        return activityRepository.findAllByEventId(eventId);
+        return activityRepository.findAllBySubeventId(subeventId);
     }
 
     public Activity findById(UUID eventId, UUID activityId) {

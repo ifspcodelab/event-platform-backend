@@ -27,17 +27,17 @@ public class OrganizerSubeventService {
         Event event = getEvent(eventId);
         Subevent subevent = getSubevent(subeventId);
 
-        if(organizerSubeventRepository.existsByAccountAndEventId(account, eventId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "account", account.getName());
+        if(organizerSubeventRepository.existsByAccountAndSubeventId(account, subeventId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ORGANIZERSUBEVENT, "account", account.getName());
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_CREATE_WITH_CANCELED_STATUS);
         }
 
-//        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
-//            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_WITH_CANCELED_STATUS);
-//        }
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_WITH_CANCELED_STATUS);
+        }
 
         OrganizerSubevent organizerSubevent = new OrganizerSubevent(dto.getOrganizerSubeventType(), account, event, subevent);
         return organizerSubeventRepository.save(organizerSubevent);

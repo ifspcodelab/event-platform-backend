@@ -16,4 +16,6 @@ public class LoginCreateDto {
     @NotBlank
     @Size(min = 8, max = 64)
     String password;
+    @NotNull
+    String recaptcha;
 }

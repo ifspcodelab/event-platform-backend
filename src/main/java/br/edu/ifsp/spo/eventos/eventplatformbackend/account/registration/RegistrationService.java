@@ -4,8 +4,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,14 +27,19 @@ public class RegistrationService {
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RecaptchaService recaptchaService;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
+        if (!recaptchaService.isValid(dto.getUserRecaptcha())) {
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
+        }
+
         if(accountRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "e-mail", dto.getEmail());
+            throw new ResourceAlreadyExistsException(ResourceName.EMAIL, "e-mail", dto.getEmail());
         }
         if(accountRepository.existsByCpf(dto.getCpf())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "cpf", dto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.CPF, "cpf", dto.getCpf());
         }
 
         Account account = new Account(

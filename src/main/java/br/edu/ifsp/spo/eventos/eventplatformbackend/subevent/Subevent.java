@@ -24,6 +24,7 @@ public class Subevent {
     private String slug;
     private String summary;
     private String presentation;
+    private String cancellationMessage;
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "startDate", column = @Column(name = "start_date")),
@@ -56,5 +57,6 @@ public class Subevent {
         this.biggerImage = biggerImage;
         this.status = EventStatus.DRAFT;
         this.event = event;
+        this.cancellationMessage = null;
     }
 }

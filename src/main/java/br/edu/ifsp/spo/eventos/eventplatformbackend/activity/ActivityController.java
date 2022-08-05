@@ -112,5 +112,9 @@ public class ActivityController {
         return ResponseEntity.noContent().build();
     }
 
-    //TODO DELETEMAPPING WITH SUBEVENT
+    @DeleteMapping("sub-events/{subeventId}/activities/{activityId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        activityService.delete(eventId, subeventId, activityId);
+        return ResponseEntity.noContent().build();
+    }
 }

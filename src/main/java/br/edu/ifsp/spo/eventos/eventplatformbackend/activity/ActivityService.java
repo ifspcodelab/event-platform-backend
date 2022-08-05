@@ -434,6 +434,42 @@ public class ActivityService {
         activityRepository.delete(activity);
     }
 
+    public void delete(UUID eventId, UUID subeventId, UUID activityId) {
+        Event event = getEvent(eventId);
+        Subevent subevent = getSubEvent(subeventId);
+        Activity activity = getActivity(activityId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SUBEVENT_CANCELED_STATUS);
+        }
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
+        }
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED) && subevent.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
+        }
+
+        if(subevent.getStatus().equals(EventStatus.PUBLISHED) &&
+                subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD__SUBEVENT);
+        }
+
+        activityRepository.delete(activity);
+    }
+
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));

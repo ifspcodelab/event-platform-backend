@@ -35,6 +35,7 @@ public class Subevent {
     private String biggerImage;
     @ManyToOne
     private Event event;
+    @Enumerated(EnumType.STRING)
     private EventStatus status;
 
     public Subevent(

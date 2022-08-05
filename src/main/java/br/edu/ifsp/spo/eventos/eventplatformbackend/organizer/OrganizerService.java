@@ -43,6 +43,11 @@ public class OrganizerService {
     public void delete(UUID eventId, UUID organizerId) {
         Organizer organizer = getOrganizer(organizerId);
         checkEventExists(eventId);
+
+        if(organizer.getEvent().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_DELETE_WITH_CANCELED_STATUS);
+        }
+
         organizerRepository.delete(organizer);
     }
 

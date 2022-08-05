@@ -43,7 +43,8 @@ public enum BusinessRuleType {
     SUBEVENT_UNPUBLISH_WITH_DRAFT_STATUS("It is not possible to unpublish an subevent with draft status"),
     SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("It is not possible to unpublish an subevent with canceled status"),
     SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("It is not possible to unpublish an subevent with published status and the registration period start"),
-    ORGANIZER_CREATE_WITH_CANCELED_STATUS("It is not possible to add an organizer wit canceled event status");
+    ORGANIZER_CREATE_WITH_CANCELED_STATUS("Não é possível adicionar um organizador com o evento cancelado"),
+    ORGANIZER_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o evento cancelado");
 
     String message;
 

@@ -38,8 +38,8 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-        } // MUDAR ESSA VALIDAÇÃO?
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
 
         Activity activity = new Activity(
                 dto.getTitle(),
@@ -76,8 +76,8 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-        } // MUDAR ESSA VALIDAÇÃO?
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
 
         Activity activity = new Activity(
                 dto.getTitle(),
@@ -115,7 +115,7 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         activity.setTitle(dto.getTitle());
@@ -156,7 +156,7 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         activity.setTitle(dto.getTitle());
@@ -191,7 +191,7 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         activity.setStatus(EventStatus.PUBLISHED);
@@ -231,7 +231,7 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         activity.setStatus(EventStatus.PUBLISHED);
@@ -265,7 +265,7 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         activity.setStatus(EventStatus.DRAFT);
@@ -294,7 +294,7 @@ public class ActivityService {
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS);
-        } // SE AO CANCELAR O EVENTO, TODAS OS SUBEVENTOS E ATIVIDADES SÃO CANCELADAS, ENTÃO NÃO PRECISO DESSA VALIDAÇÃO, pois vai cair na atividade cancelada
+        }
 
         if(event.getStatus().equals(EventStatus.PUBLISHED)) {
             if (event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
@@ -305,7 +305,7 @@ public class ActivityService {
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         activity.setStatus(EventStatus.DRAFT);

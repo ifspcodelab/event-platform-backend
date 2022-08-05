@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,10 +32,9 @@ public class Subevent {
     private Period executionPeriod;
     private String smallerImage;
     private String biggerImage;
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
     @ManyToOne
     private Event event;
+    private EventStatus status;
 
     public Subevent(
         String title,

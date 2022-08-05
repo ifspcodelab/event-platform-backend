@@ -7,6 +7,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final EventRepository eventRepository;
@@ -193,6 +195,7 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.PUBLISHED);
+        log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
 
@@ -232,6 +235,7 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.PUBLISHED);
+        log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
 
@@ -265,6 +269,7 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.DRAFT);
+        log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
 
@@ -304,6 +309,7 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.DRAFT);
+        log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
 
@@ -334,6 +340,7 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
 
@@ -373,6 +380,7 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
 
@@ -432,6 +440,7 @@ public class ActivityService {
         }
 
         activityRepository.delete(activity);
+        log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId) {
@@ -468,6 +477,7 @@ public class ActivityService {
         }
 
         activityRepository.delete(activity);
+        log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
     }
 
     private Event getEvent(UUID eventId) {

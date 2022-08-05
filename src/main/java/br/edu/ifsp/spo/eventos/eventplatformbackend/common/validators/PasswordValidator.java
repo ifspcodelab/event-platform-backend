@@ -1,13 +1,13 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.validators;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Name;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Password;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class NameValidator implements ConstraintValidator<Name, String> {
+public class PasswordValidator implements ConstraintValidator<Password, String> {
     @Override
-    public void initialize(Name constraintAnnotation) {
+    public void initialize(Password constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
@@ -16,6 +16,6 @@ public class NameValidator implements ConstraintValidator<Name, String> {
         if(value.isBlank()) {
             return false;
         }
-        return value.matches("^[a-zA-ZáàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ'\\-`\\s]+ [a-zA-ZáàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ'\\-`\\s]+$");
+        return value.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{8,64}$");
     }
 }

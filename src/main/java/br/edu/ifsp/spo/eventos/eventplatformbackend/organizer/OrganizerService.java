@@ -24,7 +24,7 @@ public class OrganizerService {
         Event event = getEvent(eventId);
 
         if(organizerRepository.existsByAccountAndEventId(account, eventId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "account", account.getName());
+            throw new ResourceAlreadyExistsException(ResourceName.ORGANIZER, "account", account.getName());
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {

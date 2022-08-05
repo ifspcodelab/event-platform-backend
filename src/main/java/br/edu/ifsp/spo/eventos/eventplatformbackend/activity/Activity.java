@@ -29,6 +29,7 @@ public class Activity {
     private EventStatus status;
     private boolean online;
     private boolean needRegistration;
+    private String cancellationMessage;
     @ManyToOne
     private Event event;
     @ManyToOne
@@ -43,6 +44,7 @@ public class Activity {
         this.status = EventStatus.DRAFT;
         this.online = online;
         this.needRegistration = needRegistration;
+        this.cancellationMessage = null;
         this.event = event;
     }
 
@@ -55,7 +57,9 @@ public class Activity {
         this.status = EventStatus.DRAFT;
         this.online = online;
         this.needRegistration = needRegistration;
+        this.cancellationMessage = null;
         this.event = event;
         this.subevent = subevent;
+
     }
 }

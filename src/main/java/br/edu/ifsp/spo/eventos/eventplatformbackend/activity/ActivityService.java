@@ -280,7 +280,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public Activity cancel(UUID eventId, UUID activityId) {
+    public Activity cancel(UUID eventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Event event = getEvent(eventId);
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
@@ -297,10 +297,11 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.CANCELED);
+        activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         return activityRepository.save(activity);
     }
 
-    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId) {
+    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -323,6 +324,7 @@ public class ActivityService {
         }
 
         activity.setStatus(EventStatus.CANCELED);
+        activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         return activityRepository.save(activity);
     }
 

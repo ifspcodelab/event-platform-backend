@@ -7,6 +7,7 @@ CREATE TABLE activities(
    status VARCHAR NOT NULL,
    online BOOLEAN NOT NULL,
    need_registration BOOLEAN NOT NULL,
+   cancellation_message TEXT,
    event_id UUID NOT NULL,
    subevent_id UUID,
    CONSTRAINT activities_pk PRIMARY KEY (id),

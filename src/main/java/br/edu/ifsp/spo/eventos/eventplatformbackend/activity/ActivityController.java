@@ -69,14 +69,14 @@ public class ActivityController {
     }
 
     @PatchMapping("activities/{activityId}/cancel")
-    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID activityId) {
-        Activity activity = activityService.cancel(eventId, activityId);
+    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Activity activity = activityService.cancel(eventId, activityId, cancellationMessageCreateDto);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
     @PatchMapping("sub-events/{subeventId}/activities/{activityId}/cancel")
-    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
-        Activity activity = activityService.cancel(eventId, subeventId, activityId);
+    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Activity activity = activityService.cancel(eventId, subeventId, activityId, cancellationMessageCreateDto);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 

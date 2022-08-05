@@ -11,4 +11,5 @@ public class AccountDto {
     private String email;
     private String cpf;
     private Boolean agreed;
+    private Boolean verified;
 }

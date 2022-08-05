@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -41,5 +42,11 @@ public class RegistrationController {
         Account account = registrationService.verify(token);
 
         return ResponseEntity.ok(accountMapper.to(account));
+    }
+
+    @GetMapping("searchName/{name}")
+    public ResponseEntity<List<AccountDto>> findByName(@PathVariable String name) {
+        List<Account> results = registrationService.search(name, true);
+        return ResponseEntity.ok(accountMapper.to(results));
     }
 }

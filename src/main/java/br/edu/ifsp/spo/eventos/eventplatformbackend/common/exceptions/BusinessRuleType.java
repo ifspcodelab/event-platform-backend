@@ -48,7 +48,10 @@ public enum BusinessRuleType {
     SUBEVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_END("Não é possível publicar um subevento em rascunho que o seu período de inscrições já tenha finalizado"),
     SUBEVENT_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar um subevento em rascunho"),
     SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar um subevento cancelado "),
-    SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("Não é possível despublicar um subevento publicado que o seu período de inscrições ja tenha iniciado");
+    SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("Não é possível despublicar um subevento publicado que o seu período de inscrições ja tenha iniciado"),
+    ORGANIZER_CREATE_WITH_CANCELED_STATUS("Não é possível adicionar um organizador com o evento cancelado"),
+    ORGANIZER_CREATE_WITH_ACCOUNT_UNVERIFIED("Não é possível adicionar um organizador associado a uma conta não verificada"),
+    ORGANIZER_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o evento cancelado");
 
     String message;
 

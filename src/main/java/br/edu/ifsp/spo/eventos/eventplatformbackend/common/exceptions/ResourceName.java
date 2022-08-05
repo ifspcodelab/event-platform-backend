@@ -12,6 +12,7 @@ public enum ResourceName {
     EVENT("Event"),
     SUBEVENT("Subevent"),
     ACCOUNT("Account"),
+    ORGANIZER("Organizer"),
     EMAIL("E-mail"),
     CPF("Cpf"),
     SPEAKER("Speaker");

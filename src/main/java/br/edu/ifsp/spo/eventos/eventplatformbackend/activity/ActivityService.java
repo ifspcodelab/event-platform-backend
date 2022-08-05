@@ -266,7 +266,7 @@ public class ActivityService {
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS);
-        }
+        } // SE AO CANCELAR O EVENTO, TODAS OS SUBEVENTOS E ATIVIDADES SÃO CANCELADAS, ENTÃO NÃO PRECISO DESSA VALIDAÇÃO
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
@@ -286,10 +286,36 @@ public class ActivityService {
         checksIfEventIsAssociateToActivity(eventId, activity);
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_CANCEL_STATUS);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_CANCELED_STATUS);
         }
         if(activity.getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_DRAFT_STATUS);
+        }
+
+        if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
+        activity.setStatus(EventStatus.CANCELED);
+        return activityRepository.save(activity);
+    }
+
+    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId) {
+        Event event = getEvent(eventId);
+        Subevent subevent = getSubEvent(subeventId);
+        Activity activity = getActivity(activityId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_CANCELED_STATUS);
+        }
+        if(activity.getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_DRAFT_STATUS);
+        }
+
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_SUBEVENT_CANCELED_STATUS);
         }
 
         if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {

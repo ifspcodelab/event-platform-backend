@@ -74,6 +74,12 @@ public class ActivityController {
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
+    @PatchMapping("sub-events/{subeventId}/activities/{activityId}/cancel")
+    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.cancel(eventId, subeventId, activityId);
+        return ResponseEntity.ok(activityMapper.to(activity));
+    }
+
     @GetMapping("activities")
     public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId) {
         List<Activity> activities = activityService.findALl(eventId);

@@ -99,6 +99,13 @@ public class ActivityController {
         return ResponseEntity.ok(activityDto);
     }
 
+    @GetMapping("sub-events/{subeventId}/activities/{activityId}")
+    public ResponseEntity<ActivityDto> show(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.findById(eventId, subeventId, activityId);
+        ActivityDto activityDto = activityMapper.to(activity);
+        return ResponseEntity.ok(activityDto);
+    }
+
     @DeleteMapping("activities/{activityId}")
     public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID activityId) {
         activityService.delete(eventId, activityId);

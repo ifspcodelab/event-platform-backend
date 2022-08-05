@@ -333,14 +333,23 @@ public class ActivityService {
 
     public List<Activity> findALl(UUID eventId, UUID subeventId) {
         checksEventExists(eventId);
+        checksSubeventExists(subeventId);
         checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
         return activityRepository.findAllByEventId(eventId);
     }
 
-
     public Activity findById(UUID eventId, UUID activityId) {
         Activity activity = getActivity(activityId);
         checksEventExists(eventId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        return activity;
+    }
+
+    public Activity findById(UUID eventId, UUID subeventId, UUID activityId) {
+        Activity activity = getActivity(activityId);
+        checksEventExists(eventId);
+        checksSubeventExists(subeventId);
+        checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
         checksIfEventIsAssociateToActivity(eventId, activity);
         return activity;
     }

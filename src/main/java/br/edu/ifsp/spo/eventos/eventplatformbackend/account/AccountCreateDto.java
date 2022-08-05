@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Name;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Password;
 import lombok.Value;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -23,9 +24,19 @@ public class AccountCreateDto {
     @NotNull
     @NotBlank
     @Size(min = 8, max = 64)
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$", flags = Pattern.Flag.UNICODE_CASE, message = "A senha deve ter uma maiúscula, uma minúscula, um número e um caractere especial")
+    @Password
     String password;
     @NotNull
     @AssertTrue(message = "Os termos devem estar aceitos")
     Boolean agreed;
+    @NotNull
+    String userRecaptcha;
+
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getCpf() {
+        return cpf.replace(".","").replace("-","");
+    }
 }

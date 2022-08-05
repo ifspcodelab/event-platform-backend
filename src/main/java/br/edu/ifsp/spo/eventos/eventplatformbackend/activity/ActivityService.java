@@ -204,6 +204,10 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS);
         }
 
+        if(subevent.getEvent().getStatus().equals(EventStatus.DRAFT)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_SUBEVENT_CANCELED_STATUS);
+        }
+
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_CANCELED_STATUS);
         }
@@ -213,7 +217,7 @@ public class ActivityService {
         }
 
         if(subevent.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_SUBEVENT_CANCELED_STATUS);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_SUBEVENT_CANCELED_STATUS);
         }
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {

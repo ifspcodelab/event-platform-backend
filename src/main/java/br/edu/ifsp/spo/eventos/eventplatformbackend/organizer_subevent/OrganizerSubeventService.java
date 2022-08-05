@@ -31,6 +31,10 @@ public class OrganizerSubeventService {
             throw new ResourceAlreadyExistsException(ResourceName.ORGANIZERSUBEVENT, "account", account.getName());
         }
 
+        if(!account.getVerified()) {
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_WITH_ACCOUNT_UNVERIFIED);
+        }
+
         if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_CREATE_WITH_CANCELED_STATUS);
         }

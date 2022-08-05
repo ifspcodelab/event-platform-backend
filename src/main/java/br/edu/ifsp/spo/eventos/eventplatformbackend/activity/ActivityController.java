@@ -3,7 +3,6 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -60,6 +59,12 @@ public class ActivityController {
     @PatchMapping("activities/{activityId}/unpublish")
     public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID activityId) {
         Activity activity = activityService.unpublish(eventId, activityId);
+        return ResponseEntity.ok(activityMapper.to(activity));
+    }
+
+    @PatchMapping("sub-events/{subeventId}/activities/{activityId}/unpublish")
+    public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.unpublish(eventId, subeventId, activityId);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 

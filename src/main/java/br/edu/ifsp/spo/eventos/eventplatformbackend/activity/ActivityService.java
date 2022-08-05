@@ -412,7 +412,7 @@ public class ActivityService {
 
     private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
         if (!activity.getSubevent().getId().equals(subeventId)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_EVENT);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_SUBEVENT);
         }
     }
 

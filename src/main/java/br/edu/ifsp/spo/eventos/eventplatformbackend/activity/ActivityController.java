@@ -111,4 +111,6 @@ public class ActivityController {
         activityService.delete(eventId, activityId);
         return ResponseEntity.noContent().build();
     }
+
+    //TODO DELETEMAPPING WITH SUBEVENT
 }

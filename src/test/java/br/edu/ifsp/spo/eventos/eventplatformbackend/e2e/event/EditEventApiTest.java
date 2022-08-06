@@ -57,14 +57,33 @@ public class EditEventApiTest {
     }
 
     @Test
-    @DisplayName("PUT /events/{eventId} - already exists")
+    @DisplayName("PUT /events/{eventId} - draft - title already exists")
     @Sql("/sql/delete_all_tables.sql")
     @Sql("/sql/events/insert_many.sql")
     public void putEventsAlreadyExists() {
         given()
             .contentType(ContentType.JSON)
             .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
-            .body(eventBody.getEditedEventWithRepetedTitle())
+            .body(eventBody.getEditedDraftEventWithRepetedTitle())
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+                .statusCode(409)
+                .body("title", equalTo("Resource already exists exception"))
+                .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - published - title already exists")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_many.sql")
+    public void putEventsPublishedAlreadyExists() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "8ae2bd06-7358-4700-a20e-af4da8ae6c36")
+            .body(eventBody.getEditedPublishedEventWithRepetedTitle())
         .when()
             .put(eventURI)
         .then()
@@ -213,5 +232,125 @@ public class EditEventApiTest {
                 .statusCode(409)
                 .body("title", equalTo("Business rule exception"))
                 .body("violations", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - edit summary and presentation")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_many_published.sql")
+    public void putEventsEditSummaryAndPresentation() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "b11fd168-eeaa-410e-b182-ab3625e13368")
+            .body(eventBody.getValidSummayAndPresentationEditedEvent("SEDCITEC", "sedcitec","2022-09-01", "2022-09-28", "2022-11-05", "2022-11-09"))
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+            .statusCode(200)
+                .body("id", notNullValue())
+                .body("title", equalTo("SEDCITEC"))
+                .body("slug", equalTo("sedcitec"))
+                .body("summary", notNullValue())
+                .body("summary", isA(String.class))
+                .body("presentation", notNullValue())
+                .body("presentation", isA(String.class))
+                .body("registrationPeriod.startDate", equalTo("2022-09-01"))
+                .body("registrationPeriod.endDate", equalTo("2022-09-28"))
+                .body("executionPeriod.startDate", equalTo("2022-11-05"))
+                .body("executionPeriod.endDate", equalTo("2022-11-09"))
+                .body("status", equalTo("PUBLISHED"));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - edit summary and presentation - open registration")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_many_published.sql")
+    public void putEventsEditSummaryAndPresentationOpenRegistration() {
+        given()
+        .contentType(ContentType.JSON)
+        .pathParam("eventId", "13c95893-1c49-46e5-bfba-29923e035d67")
+        .body(eventBody.getValidSummayAndPresentationEditedEvent("SEDCITEC 2", "sedcitec-2", "2022-08-01", "2022-09-28", "2022-11-05", "2022-11-09"))
+        .log().all()
+        .when()
+        .put(eventURI)
+        .then()
+        .log().all()
+        .assertThat()
+        .statusCode(200)
+        .body("id", notNullValue())
+        .body("title", equalTo("SEDCITEC 2"))
+        .body("slug", equalTo("sedcitec-2"))
+        .body("summary", notNullValue())
+        .body("summary", isA(String.class))
+        .body("presentation", notNullValue())
+        .body("presentation", isA(String.class))
+        .body("registrationPeriod.startDate", equalTo("2022-08-01"))
+        .body("registrationPeriod.endDate", equalTo("2022-09-28"))
+        .body("executionPeriod.startDate", equalTo("2022-11-05"))
+        .body("executionPeriod.endDate", equalTo("2022-11-09"))
+        .body("status", equalTo("PUBLISHED"));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - edit summary and presentation - closed registration")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_many_published.sql")
+    public void putEventsEditSummaryAndPresentationClosedRegistration() {
+        given()
+                .contentType(ContentType.JSON)
+                .pathParam("eventId", "0d4dcb8d-6384-4ec4-9e45-15069b20772a")
+                .body(eventBody.getValidSummayAndPresentationEditedEvent("SEDCITEC 3", "sedcitec-3","2022-07-01", "2022-07-28", "2022-11-05", "2022-11-09"))
+                .log().all()
+                .when()
+                .put(eventURI)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(200)
+                .body("id", notNullValue())
+                .body("title", equalTo("SEDCITEC 3"))
+                .body("slug", equalTo("sedcitec-3"))
+                .body("summary", notNullValue())
+                .body("summary", isA(String.class))
+                .body("presentation", notNullValue())
+                .body("presentation", isA(String.class))
+                .body("registrationPeriod.startDate", equalTo("2022-07-01"))
+                .body("registrationPeriod.endDate", equalTo("2022-07-28"))
+                .body("executionPeriod.startDate", equalTo("2022-11-05"))
+                .body("executionPeriod.endDate", equalTo("2022-11-09"))
+                .body("status", equalTo("PUBLISHED"));
+    }
+
+    @Test
+    @DisplayName("PUT /events/{eventId} - edit summary and presentation - open execution")
+    @Sql("/sql/delete_all_tables.sql")
+    @Sql("/sql/events/insert_many_published.sql")
+    public void putEventsEditSummaryAndPresentationOnExecution() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("eventId", "f3c829db-0334-4fb3-aa65-ea8b09345f98")
+            .body(eventBody.getValidSummayAndPresentationEditedEvent("SEDCITEC 4", "sedcitec-4", "2022-07-01", "2022-07-28", "2022-07-30", "2022-11-09"))
+            .log().all()
+        .when()
+            .put(eventURI)
+        .then()
+            .log().all()
+            .assertThat()
+            .statusCode(200)
+                .body("id", notNullValue())
+                .body("title", equalTo("SEDCITEC 4"))
+                .body("slug", equalTo("sedcitec-4"))
+                .body("summary", notNullValue())
+                .body("summary", isA(String.class))
+                .body("presentation", notNullValue())
+                .body("presentation", isA(String.class))
+                .body("registrationPeriod.startDate", equalTo("2022-07-01"))
+                .body("registrationPeriod.endDate", equalTo("2022-07-28"))
+                .body("executionPeriod.startDate", equalTo("2022-07-30"))
+                .body("executionPeriod.endDate", equalTo("2022-11-09"))
+                .body("status", equalTo("PUBLISHED"));
     }
 }

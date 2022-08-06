@@ -114,22 +114,35 @@ public class TestEventBodies {
         );
     }
 
-    public String getValidSummayAndPresentationEditedEvent(){
+    public String getValidSummayAndPresentationEditedEvent(String title, String slug, String regStartDate, String regEndDate, String execStartDAte, String execEndDate){
         return getEventBodyToEdit(
-                "SEDCITEC",
-                "sedcitec",
+                title,
+                slug,
                 getValidSummary(),
                 getValidPresentation(),
-                "2022-07-28",
-                "2022-08-28",
-                "2022-09-05",
-                "2022-09-09"
+                regStartDate,
+                regEndDate,
+                execStartDAte,
+                execEndDate
         );
     }
 
-    public String getEditedEventWithRepetedTitle(){
+    public String getEditedDraftEventWithRepetedTitle(){
         return getEventBodyToEdit(
                 "FEIRA DE PROFISSÕES",
+                "sedcitec",
+                getValidSummary(),
+                getValidPresentation(),
+                getValidRegistrationStartDate(),
+                getValidRegistrationEndDate(),
+                getValidEventStartDate(),
+                getValidEventEndDate()
+        );
+    }
+
+    public String getEditedPublishedEventWithRepetedTitle(){
+        return getEventBodyToEdit(
+                "SEDCITEC",
                 "feira-de-profissoes",
                 getValidSummary(),
                 getValidPresentation(),

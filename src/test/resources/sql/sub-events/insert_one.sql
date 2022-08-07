@@ -1,0 +1,1 @@
+INSERT INTO subevents VALUES ('a7118369-b18b-48e9-b172-ba23be91d9d5','Semana da Química','semana-da-quimica','Semana de eventos e paletras de Química','Semana de eventos e paletras de Química','2022-09-05','2022-09-09',null,null,'DRAFT','b11fd168-eeaa-410e-b182-ab3625e13368');

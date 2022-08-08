@@ -214,20 +214,12 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS);
         }
 
-        if(subevent.getEvent().getStatus().equals(EventStatus.DRAFT)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_SUBEVENT_CANCELED_STATUS);
-        }
-
-        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+        if(subevent.getEvent().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_SUBEVENT_CANCELED_STATUS);
         }
 
         if(subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY);
-        }
-
-        if (event.getStatus().equals(EventStatus.DRAFT)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_DRAFT_STATUS);
         }
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {

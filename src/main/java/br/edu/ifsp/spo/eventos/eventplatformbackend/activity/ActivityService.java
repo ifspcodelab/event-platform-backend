@@ -459,7 +459,7 @@ public class ActivityService {
 
         if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
             if (subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD__SUBEVENT);
+                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
         }
 
@@ -490,13 +490,13 @@ public class ActivityService {
 
     private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
         if (!activity.getEvent().getId().equals(eventId)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_EVENT);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_EVENT);
         }
     }
 
     private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
         if (!activity.getSubevent().getId().equals(subeventId)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_SUBEVENT);
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_SUBEVENT);
         }
     }
 

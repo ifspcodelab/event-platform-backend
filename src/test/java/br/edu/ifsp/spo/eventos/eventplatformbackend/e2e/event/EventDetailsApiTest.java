@@ -73,7 +73,7 @@ public class EventDetailsApiTest {
     }
 
     @Test
-    @DisplayName("GET /events/{evenId}/sub-events - empty list")
+    @DisplayName("GET /events/{eventId}/sub-events - empty list")
     @Sql("/sql/delete_all_tables.sql")
     @Sql("/sql/events/insert_many.sql")
     public void getAllSubeventsEmptyList() {
@@ -91,7 +91,7 @@ public class EventDetailsApiTest {
     }
 
     @Test
-    @DisplayName("GET /events/{evenId}/sub-events - one sub-event")
+    @DisplayName("GET /events/{eventId}/sub-events - one sub-event")
     @Sql("/sql/delete_all_tables.sql")
     @Sql("/sql/events/insert_one.sql")
     @Sql("/sql/sub-events/insert_one.sql")
@@ -110,7 +110,7 @@ public class EventDetailsApiTest {
     }
 
     @Test
-    @DisplayName("GET /events/{evenId}/sub-events - many sub-events")
+    @DisplayName("GET /events/{eventId}/sub-events - many sub-events")
     @Sql("/sql/delete_all_tables.sql")
     @Sql("/sql/events/insert_many_published.sql")
     @Sql("/sql/sub-events/insert_many.sql")

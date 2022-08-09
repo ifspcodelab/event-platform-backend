@@ -18,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/accounts")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
 public class RegistrationController {
     private final RegistrationService registrationService;
     private final AccountMapper accountMapper;

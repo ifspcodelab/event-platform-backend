@@ -56,7 +56,6 @@ public class PasswordResetService {
     @Transactional
     public void resetPassword(PasswordResetDto dto) {
 
-        //implementar caminho de volta com essa exceção levando o erro para o front end
         if(!recaptchaService.isValid(dto.getUserRecaptcha())){
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA);
         }

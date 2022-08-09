@@ -9,6 +9,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,6 +31,7 @@ public class RegistrationService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final SpeakerRepository speakerRepository;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -60,6 +64,17 @@ public class RegistrationService {
         verificationTokenRepository.save(verificationToken);
 
         log.debug("Verification token {} for email {} was created", verificationToken.getToken(), account.getEmail());
+
+        Optional<Speaker> optionalSpeaker = speakerRepository.findByCpf(account.getCpf());
+        if(optionalSpeaker.isPresent()) {
+            Speaker speaker = optionalSpeaker.get();
+            speaker.setAccount(account);
+
+            log.info(
+                    "Speaker with name={} and email={} was associated with account with id {}",
+                    speaker.getName(), speaker.getEmail(), account.getId()
+            );
+        }
 
         return account;
     }

@@ -50,6 +50,21 @@ public class ExceptionHandlerApp {
         return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handlerUserNotFoundException(
+            UserNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        String message = "Usuário não encontrado relacionado à" + ex.getQuery();
+        ProblemDetail problemDetail = new ProblemDetail(
+                "User not found exception",
+                List.of(new Violation(ex.getResourceName().getName(), message))
+        );
+
+        log.warn("Resource not found at {} {}", request.getMethod(), request.getRequestURI());
+        return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ProblemDetail> handlerResourceAlreadyExistsException(
         ResourceAlreadyExistsException ex,

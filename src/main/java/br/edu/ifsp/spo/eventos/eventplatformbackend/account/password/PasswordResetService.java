@@ -50,7 +50,6 @@ public class PasswordResetService {
         tokenRepo.save(passwordResetToken);
         log.debug("Password Reset: token generated: {}", passwordResetToken.getToken());
         log.info("Password Reset: token generated for account {}", dto.getEmail());
-
     }
 
     @Transactional

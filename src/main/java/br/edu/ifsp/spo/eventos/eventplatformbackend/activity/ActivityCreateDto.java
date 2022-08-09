@@ -22,7 +22,7 @@ public class ActivityCreateDto {
     String description;
     @Valid
     @NotNull
-    ActivityType activityType;
+    ActivityType type;
     @NotNull
     boolean online;
     @NotNull

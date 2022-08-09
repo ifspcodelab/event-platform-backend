@@ -46,7 +46,7 @@ public class ActivityService {
                 dto.getTitle(),
                 dto.getSlug(),
                 dto.getDescription(),
-                dto.getActivityType(),
+                dto.getType(),
                 dto.isOnline(),
                 dto.isNeedRegistration(),
                 event
@@ -84,7 +84,7 @@ public class ActivityService {
                 dto.getTitle(),
                 dto.getSlug(),
                 dto.getDescription(),
-                dto.getActivityType(),
+                dto.getType(),
                 dto.isOnline(),
                 dto.isNeedRegistration(),
                 event,
@@ -122,7 +122,7 @@ public class ActivityService {
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
-        activity.setType(dto.getActivityType());
+        activity.setType(dto.getType());
         activity.setOnline(dto.isOnline());
         activity.setNeedRegistration(dto.isNeedRegistration());
 
@@ -167,7 +167,7 @@ public class ActivityService {
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
-        activity.setType(dto.getActivityType());
+        activity.setType(dto.getType());
         activity.setOnline(dto.isOnline());
         activity.setNeedRegistration(dto.isNeedRegistration());
 

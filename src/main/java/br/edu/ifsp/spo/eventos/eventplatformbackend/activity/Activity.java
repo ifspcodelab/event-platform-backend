@@ -27,39 +27,42 @@ public class Activity {
     private ActivityType type;
     @Enumerated(EnumType.STRING)
     private EventStatus status;
-    private boolean online;
+    @Enumerated(EnumType.STRING)
+    private ActivityModality modality;
     private boolean needRegistration;
+    private Integer duration;
     private String cancellationMessage;
     @ManyToOne
     private Event event;
     @ManyToOne
     private Subevent subevent;
 
-    public Activity(String title, String slug, String description, ActivityType type, boolean online, boolean needRegistration, Event event) {
+    public Activity(String title, String slug, String description, ActivityType type, ActivityModality modality, boolean needRegistration, Integer duration, Event event) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.slug = slug;
         this.description = description;
         this.type = type;
         this.status = EventStatus.DRAFT;
-        this.online = online;
+        this.modality = modality;
         this.needRegistration = needRegistration;
+        this.duration = duration;
         this.cancellationMessage = null;
         this.event = event;
     }
 
-    public Activity(String title, String slug, String description, ActivityType type, boolean online, boolean needRegistration, Event event, Subevent subevent) {
+    public Activity(String title, String slug, String description, ActivityType type, ActivityModality modality, boolean needRegistration, Integer duration, Event event, Subevent subevent) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.slug = slug;
         this.description = description;
         this.type = type;
         this.status = EventStatus.DRAFT;
-        this.online = online;
+        this.modality = modality;
         this.needRegistration = needRegistration;
+        this.duration = duration;
         this.cancellationMessage = null;
         this.event = event;
         this.subevent = subevent;
-
     }
 }

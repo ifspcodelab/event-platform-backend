@@ -47,8 +47,9 @@ public class ActivityService {
                 dto.getSlug(),
                 dto.getDescription(),
                 dto.getType(),
-                dto.isOnline(),
+                dto.getModality(),
                 dto.isNeedRegistration(),
+                dto.getDuration(),
                 event
         );
 
@@ -85,8 +86,9 @@ public class ActivityService {
                 dto.getSlug(),
                 dto.getDescription(),
                 dto.getType(),
-                dto.isOnline(),
+                dto.getModality(),
                 dto.isNeedRegistration(),
+                dto.getDuration(),
                 event,
                 subevent
         );
@@ -123,8 +125,9 @@ public class ActivityService {
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
         activity.setType(dto.getType());
-        activity.setOnline(dto.isOnline());
+        activity.setModality(dto.getModality());
         activity.setNeedRegistration(dto.isNeedRegistration());
+        activity.setDuration(dto.getDuration());
 
         return activityRepository.save(activity);
     }
@@ -168,8 +171,9 @@ public class ActivityService {
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
         activity.setType(dto.getType());
-        activity.setOnline(dto.isOnline());
+        activity.setModality(dto.getModality());
         activity.setNeedRegistration(dto.isNeedRegistration());
+        activity.setDuration(dto.getDuration());
 
         return activityRepository.save(activity);
     }

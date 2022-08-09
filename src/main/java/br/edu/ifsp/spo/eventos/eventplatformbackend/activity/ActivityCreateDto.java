@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 import lombok.Value;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -24,7 +25,10 @@ public class ActivityCreateDto {
     @NotNull
     ActivityType type;
     @NotNull
-    boolean online;
+    ActivityModality modality;
     @NotNull
     boolean needRegistration;
+    @NotNull
+    @Min(value = 10)
+    Integer duration;
 }

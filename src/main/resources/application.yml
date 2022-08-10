@@ -32,7 +32,7 @@ spring:
             enabled: true
 
 support:
-  mail: nao.responda424@gmail.com
+  mail: ${SUPPORT_EMAIL}
 
 frontend:
   url: ${FRONTEND_URL:http://localhost:4200}

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -80,5 +81,10 @@ public class RegistrationService {
         verificationTokenRepository.delete(verificationToken);
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;
+    }
+
+    public List<Account> search(String name, Boolean verified) {
+        List<Account> accounts = accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
+        return accounts;
     }
 }

@@ -33,10 +33,10 @@ public class Subevent {
     private Period executionPeriod;
     private String smallerImage;
     private String biggerImage;
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
     @ManyToOne
     private Event event;
+    @Enumerated(EnumType.STRING)
+    private EventStatus status;
 
     public Subevent(
         String title,

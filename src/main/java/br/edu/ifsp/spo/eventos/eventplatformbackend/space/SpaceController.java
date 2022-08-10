@@ -12,6 +12,7 @@ import java.util.UUID;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "api/v1/locations/{locationId}/areas/{areaId}/spaces")
+@CrossOrigin(origins = "*")
 public class SpaceController {
     private final SpaceService spaceService;
     private final SpaceMapper spaceMapper;

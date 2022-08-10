@@ -15,6 +15,25 @@ spring:
     open-in-view: false
     generate-ddl: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    test-connection: false
+    username: nao.responda424@gmail.com
+    password: nyjjfxnznezmhtkm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enabled: true
+
+support:
+  mail: nao.responda424@gmail.com
+
 frontend:
   url: ${FRONTEND_URL:http://localhost:4200}
 
@@ -40,3 +59,5 @@ jwt:
 recaptcha:
   secret: ${RECAPTCHA_SECRET}
   site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
+
+

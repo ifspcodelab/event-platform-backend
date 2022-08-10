@@ -12,18 +12,22 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaSe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class RegistrationService {
     private final AccountRepository accountRepository;
@@ -32,6 +36,10 @@ public class RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
     private final SpeakerRepository speakerRepository;
+    private final EmailService emailService;
+
+    @Value("${frontend.url}/")
+    private String url;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -60,6 +68,16 @@ public class RegistrationService {
 
         VerificationToken verificationToken =
                 new VerificationToken(account,accountConfig.getVerificationTokenExpiresIn());
+
+        String verification_url = url + "cadastro/verificacao/" + verificationToken.getToken().toString() ;
+
+        String content = emailService.getContentMailVerification(account.getName().split(" ")[0], verification_url);
+
+        try {
+            emailService.sendEmailToClient("Verificação de e-mail sistema de registro IFSP SPO", account.getEmail(), content);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
 
         verificationTokenRepository.save(verificationToken);
 

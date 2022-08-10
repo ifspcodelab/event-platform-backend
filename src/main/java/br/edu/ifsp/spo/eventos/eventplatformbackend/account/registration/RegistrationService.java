@@ -74,7 +74,7 @@ public class RegistrationService {
         String content = emailService.getContentMailVerification(account.getName().split(" ")[0], verification_url);
 
         try {
-            emailService.sendEmailToClient("Verificação de e-mail sistema de registro IFSP SPO", account.getEmail(), content);
+            emailService.sendEmailToClient("Verificação de e-mail do sistema de registro IFSP SPO", account.getEmail(), content);
         } catch (MessagingException e) {
             e.printStackTrace();
         }

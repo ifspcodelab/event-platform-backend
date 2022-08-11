@@ -42,7 +42,7 @@ public class ExceptionHandlerApp {
         ResourceNotFoundException ex,
         HttpServletRequest request
     ) {
-        String message = "Recurso não encontrado com id " + ex.getResourceId();
+        String message = "Recurso não encontrado com valor " + ex.getResourceId();
         ProblemDetail problemDetail = new ProblemDetail(
             "Resource not found exception",
             List.of(new Violation(ex.getResourceName().getName(), message))

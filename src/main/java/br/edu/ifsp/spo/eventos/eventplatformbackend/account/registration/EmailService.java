@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,6 +39,24 @@ public class EmailService {
                 "<p>Organiza&ccedil;&atilde;o</p></div></div>";
 
         sendEmailToClient("Verificação de E-mail da Plataforma de Eventos IFSP SPO", account.getEmail(), content);
+    }
+
+    public void sendPasswordResetEmail(Account account, PasswordResetToken token) throws MessagingException {
+        var passwordResetUrl = url + "redefinir-minha-senha/" + token.getToken().toString();
+        var name = account.getName().split(" ")[0];
+
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Verifique seu e-mail</h1>\n" +
+                "<p>Ol&aacute;, "+ name + ".</p>\n" +
+                "<p>Utilize o link abaixo para alterar sua senha.</p>\n" +
+                "<a href=\"" + passwordResetUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">" +
+                "  Alterar senha" +
+                "</a>" +
+                "<p>Caso n&atilde;o consiga usar o bot&atilde;o, copie e cole o seguinte link no seu navegador:</p>\n" +
+                "<p>"+ passwordResetUrl + "</p>\n" +
+                "<p>Atenciosamente,</p>\n" +
+                "<p>Organiza&ccedil;&atilde;o</p></div></div>";
+
+        sendEmailToClient("Alteração de Senha de Conta da Plataforma de Eventos IFSP SPO", account.getEmail(), content);
     }
 
     public void sendEmailToClient(String subject, String email, String content) throws MessagingException {

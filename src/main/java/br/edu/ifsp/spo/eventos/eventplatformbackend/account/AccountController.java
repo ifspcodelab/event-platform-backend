@@ -29,6 +29,7 @@ public class AccountController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String cpf,
             @PageableDefault(page = 0, size = 20, sort="registrationTimestamp", direction = Sort.Direction.DESC) Pageable pageable) {
+
         if (name != null){
             Page<Account> users = accountService.findAllByName(pageable, name);
             return ResponseEntity.ok(users.map(accountMapper::toAccountManagementDto));
@@ -48,7 +49,7 @@ public class AccountController {
     }
 
 
-    @GetMapping("{userId}")
+    @GetMapping("{accountId}")
         public ResponseEntity<AccountManagementDto> show(@PathVariable UUID accountId) {
         Account account = accountService.findById(accountId);
         AccountManagementDto accountManagementDto = accountMapper.toAccountManagementDto(account);
@@ -56,9 +57,9 @@ public class AccountController {
     }
 
 
-    @PutMapping("{userId}")
-    public ResponseEntity<AccountManagementDto> update(@PathVariable UUID userId, @RequestBody @Valid AccountManagementDto dto) {
-        Account account = accountService.update(userId, dto);
+    @PutMapping("{accountId}")
+    public ResponseEntity<AccountManagementDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountManagementDto dto) {
+        Account account = accountService.update(accountId, dto);
         AccountManagementDto accountManagementDto = accountMapper.toAccountManagementDto(account);
         return ResponseEntity.ok(accountManagementDto);
     }

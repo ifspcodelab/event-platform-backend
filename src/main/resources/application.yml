@@ -15,6 +15,25 @@ spring:
     open-in-view: false
     generate-ddl: false
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    test-connection: false
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enabled: true
+
+support:
+  mail: ${SUPPORT_EMAIL}
+
 frontend:
   url: ${FRONTEND_URL:http://localhost:4200}
 
@@ -40,3 +59,5 @@ jwt:
 recaptcha:
   secret: ${RECAPTCHA_SECRET}
   site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
+
+

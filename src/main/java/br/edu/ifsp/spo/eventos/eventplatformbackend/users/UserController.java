@@ -44,7 +44,6 @@ public class UserController {
             return ResponseEntity.ok(users.map(userMapper::to));
         }
 
-
         Page<Account> users = userService.findAll(pageable);
         return ResponseEntity.ok(users.map(userMapper::to));
     }

@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto;
 
 import lombok.Data;
 

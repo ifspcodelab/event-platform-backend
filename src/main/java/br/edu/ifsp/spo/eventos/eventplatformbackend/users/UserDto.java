@@ -21,5 +21,4 @@ public class UserDto {
     private String role;
     private Boolean verified;
     private Instant registrationTimestamp;
-
 }

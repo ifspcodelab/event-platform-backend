@@ -89,7 +89,10 @@ public enum BusinessRuleType {
     ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS("Não é possível despublicar uma atividade com um evento cancelado"),
     ACTIVITY_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar uma atividade status com status cancelado"),
     ACTIVITY_UNPUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível despublicar uma atividade em que o período de execução do subevento já tenha iniciado"),
-    ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar uma atividade com status de rascunho");
+    ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar uma atividade com status de rascunho"),
+    SPEAKER_ADD_WITH_EVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um evento cancelado"),
+    SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um subevento cancelado"),
+    SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada");
 
     String message;
 

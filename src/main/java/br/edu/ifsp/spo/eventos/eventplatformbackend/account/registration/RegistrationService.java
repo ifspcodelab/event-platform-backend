@@ -36,8 +36,7 @@ public class RegistrationService {
     private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
 
-    @Value("${frontend.url}/")
-    private String url;
+
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -53,11 +52,11 @@ public class RegistrationService {
         }
 
         Account account = new Account(
-                dto.getName(),
-                dto.getEmail(),
-                dto.getCpf(),
-                passwordEncoder.encode(dto.getPassword()),
-                dto.getAgreed()
+            dto.getName(),
+            dto.getEmail(),
+            dto.getCpf(),
+            passwordEncoder.encode(dto.getPassword()),
+            dto.getAgreed()
         );
 
         account = accountRepository.save(account);
@@ -66,10 +65,6 @@ public class RegistrationService {
 
         VerificationToken verificationToken =
                 new VerificationToken(account,accountConfig.getVerificationTokenExpiresIn());
-
-        String verification_url = url + "cadastro/verificacao/" + verificationToken.getToken().toString() ;
-
-        String content = emailService.getContentMailVerification(account.getName().split(" ")[0], verification_url);
 
         verificationTokenRepository.save(verificationToken);
 
@@ -82,14 +77,14 @@ public class RegistrationService {
             speakerRepository.save(speaker);
 
             log.info(
-                    "Speaker with name={} and email={} was associated with account with id {}",
-                    speaker.getName(), speaker.getEmail(), account.getId()
+                "Speaker with name={} and email={} was associated with account with id {}",
+                speaker.getName(), speaker.getEmail(), account.getId()
             );
         }
 
         try {
-            emailService.sendEmailToClient("Verificação de e-mail do sistema de registro IFSP SPO", account.getEmail(), content);
-            log.info("Confirmation e-mail was sent to {}", account.getEmail());
+            emailService.sendVerificationEmail(account, verificationToken);
+            log.info("Verification e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
         }
@@ -103,7 +98,7 @@ public class RegistrationService {
 
         if (verificationToken.getExpiresIn().isBefore(Instant.now())) {
             throw new RegistrationException(
-                    RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
+                RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
             );
         }
 

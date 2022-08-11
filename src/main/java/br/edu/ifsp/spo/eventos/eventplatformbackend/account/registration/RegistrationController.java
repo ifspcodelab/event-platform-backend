@@ -1,8 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import lombok.AllArgsConstructor;

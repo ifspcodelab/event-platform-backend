@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.user;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Name;
 import lombok.AllArgsConstructor;

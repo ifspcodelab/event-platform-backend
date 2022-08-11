@@ -1,9 +1,9 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.user;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class UserService {
+public class AccountService {
     private final JwtService jwtService;
     private final AccountRepository accountRepository;
     

@@ -25,11 +25,11 @@ public class EmailService {
         var verificationUrl = url + "cadastro/verificacao/" + verificationToken.getToken().toString();
         var name = account.getName().split(" ")[0];
 
-        var content = "<div style=\"text-align: center; height: 100%;\"><div style=\"min-width: 300px; padding: 10px; text-align: left\"><h1>Verifique seu e-mail</h1>\n" +
+        var content = "<div style=\"text-align: center; height: 100%;\"><div style=\"max-width: 300px; padding: 10px; text-align: left\"><h1>Verifique seu e-mail</h1>\n" +
                 "<p>Ol&aacute;, "+ name + ".</p>\n" +
                 "<p>Voc&ecirc; fez cadastro no Plataforma de Eventos do IFSP SPO.</p>\n" +
                 "<p>Por favor, verifique seu e-mail.</p>\n" +
-                "<a href=\"" + verificationUrl +"\" target=\"_blank\" rel=\"noreferrer noopener\" style=\"background-color: #4caf50; color: #ffffff; height: 45px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 0 20px;\">" +
+                "<a href=\"" + verificationUrl +"\" target=\"_blank\" rel=\"noreferrer noopener\" style=\"text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">" +
                 "  Verificar" +
                 "</a>" +
                 "<p>Caso n&atilde;o consiga usar o bot&atilde;o, copie e cole o seguinte link no seu navegador:</p>\n" +

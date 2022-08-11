@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("api/v1/accounts")
 @AllArgsConstructor
@@ -23,7 +25,7 @@ public class UserController {
     }
 
     @PatchMapping("my-data")
-    public ResponseEntity<AccountDto> update(@RequestHeader("Authorization") String accessToken, @RequestBody MyDataUpdateDto myDataUpdateDto) {
+    public ResponseEntity<AccountDto> update(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody MyDataUpdateDto myDataUpdateDto) {
         Account account = userService.update(accessToken.replace("Bearer ", ""), myDataUpdateDto);
 
         return ResponseEntity.ok(accountMapper.to(account));

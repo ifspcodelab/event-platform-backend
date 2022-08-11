@@ -75,7 +75,8 @@ public class SubeventService {
     public Subevent findBySlug(UUID eventId, String slug) {
         getEvent(eventId);
 
-        return subeventRepository.findSubeventBySlugAndEventId(slug, eventId);
+        return subeventRepository.findSubeventBySlugAndEventId(slug, eventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, slug));
     }
 
     public List<Subevent> findAll(UUID eventId) {

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -14,5 +15,5 @@ public interface SubeventRepository extends JpaRepository<Subevent, UUID> {
     boolean existsBySlugAndEventIdAndIdNot(String Slug, UUID eventId, UUID subeventId);
     List<Subevent> findAllByEventId(UUID eventId);
     boolean existsByEventId(UUID eventId);
-    Subevent findSubeventBySlugAndEventId(String slug, UUID subeventId);
+    Optional<Subevent> findSubeventBySlugAndEventId(String slug, UUID subeventId);
 }

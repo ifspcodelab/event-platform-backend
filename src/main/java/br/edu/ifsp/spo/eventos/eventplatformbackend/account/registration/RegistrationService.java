@@ -11,11 +11,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,25 +71,27 @@ public class RegistrationService {
 
         String content = emailService.getContentMailVerification(account.getName().split(" ")[0], verification_url);
 
-        try {
-            emailService.sendEmailToClient("Verificação de e-mail do sistema de registro IFSP SPO", account.getEmail(), content);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-
         verificationTokenRepository.save(verificationToken);
 
         log.debug("Verification token {} for email {} was created", verificationToken.getToken(), account.getEmail());
 
         Optional<Speaker> optionalSpeaker = speakerRepository.findByCpf(account.getCpf());
-        if(optionalSpeaker.isPresent()) {
+        if (optionalSpeaker.isPresent()) {
             Speaker speaker = optionalSpeaker.get();
             speaker.setAccount(account);
+            speakerRepository.save(speaker);
 
             log.info(
                     "Speaker with name={} and email={} was associated with account with id {}",
                     speaker.getName(), speaker.getEmail(), account.getId()
             );
+        }
+
+        try {
+            emailService.sendEmailToClient("Verificação de e-mail do sistema de registro IFSP SPO", account.getEmail(), content);
+            log.info("Confirmation e-mail was sent to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
         }
 
         return account;

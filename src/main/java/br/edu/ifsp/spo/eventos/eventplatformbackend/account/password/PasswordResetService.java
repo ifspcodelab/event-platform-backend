@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -24,6 +26,7 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final EmailService emailService;
 
 
     public void createResetPasswordRequest(ForgotPasswordCreateDto dto) {
@@ -51,6 +54,12 @@ public class PasswordResetService {
         tokenRepo.save(passwordResetToken);
         log.info("Password Reset: token generated for account {}", dto.getEmail());
 
+        try {
+            emailService.sendPasswordResetEmail(account, passwordResetToken);
+            log.info("Password reset e-mail was sent to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to send password reset e-mail to {}",account.getEmail(), ex);
+        }
     }
 
     @Transactional

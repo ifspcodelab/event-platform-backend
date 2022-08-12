@@ -25,16 +25,17 @@ public class Session {
     private String cancellationMessage;
     @ManyToOne
     private Activity activity;
-    @OneToMany(cascade=CascadeType.MERGE)
-    private List<SessionSchedule> sessionSchedule;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "session_id", nullable = false)
+    private List<SessionSchedule> sessionsSchedules;
 
-    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionSchedule ) {
+    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedules) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.seats = seats;
         this.cancellationMessage = null;
         this.activity = activity;
-        this.sessionSchedule = sessionSchedule;
+        this.sessionsSchedules = sessionsShedules;
     }
 }
 

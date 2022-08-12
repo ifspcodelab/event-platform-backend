@@ -17,5 +17,5 @@ public class SessionCreateDto {
     Integer seats;
     @NotNull
     @Valid
-    List<SessionSchedule> sessionSchedule;
+    List<SessionScheduleCreateDto> sessionsSchedules;
 }

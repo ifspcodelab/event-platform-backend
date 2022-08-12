@@ -4,7 +4,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-
 import java.util.List;
 import java.util.UUID;
 
@@ -16,5 +15,5 @@ public class SessionDto {
     Integer seats;
     String cancellationMessage;
     Activity activity;
-    List<SessionSchedule> schedules;
+    List<SessionSchedule> sessionsSchedules;
 }

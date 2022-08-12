@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
@@ -9,10 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,26 +21,23 @@ import java.util.UUID;
 public class SessionSchedule {
     @Id
     private UUID id;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime execution_start;
+    private LocalDateTime execution_end;
     private String url;
     @ManyToOne
-    private Location locationId;
+    private Location location;
     @ManyToOne
-    private Area areaId;
+    private Area area;
     @ManyToOne
-    private Space spaceId;
-    @ManyToOne
-    private Activity activity;
+    private Space space;
 
-
-    public SessionSchedule(LocalDateTime start, LocalDateTime end, String url, Location locationId, Area areaId, Space spaceId) {
+    public SessionSchedule(LocalDateTime execution_start, LocalDateTime execution_end, String url, Location location, Area area, Space space) {
         this.id = UUID.randomUUID();
-        this.start = start;
-        this.end = end;
+        this.execution_start = execution_start;
+        this.execution_end = execution_end;
         this.url = url;
-        this.locationId = locationId;
-        this.areaId = areaId;
-        this.spaceId = spaceId;
+        this.location = location;
+        this.area = area;
+        this.space = space;
     }
 }

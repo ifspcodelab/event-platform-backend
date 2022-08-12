@@ -2,7 +2,6 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -19,17 +18,13 @@ public class AccountService {
     private final JwtService jwtService;
     private final AccountRepository accountRepository;
     
-    public MyDataDto getUserByAccessToken(String accessToken) {
+    public Account getUserByAccessToken(String accessToken) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
         UUID accountId = UUID.fromString(decodedToken.getSubject());
 
         Account account = getAccount(accountId);
-        
-        String name = account.getName();
-        String email = account.getEmail();
-        String cpf = account.getCpf();
 
-        return new MyDataDto(name, email, cpf);
+        return account;
     }
 
     public Account update(String accessToken, MyDataUpdateDto myDataUpdateDto) {

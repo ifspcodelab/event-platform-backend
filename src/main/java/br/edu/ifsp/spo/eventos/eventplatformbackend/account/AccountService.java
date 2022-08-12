@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountManagementDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.UserNotFoundException;
@@ -27,7 +27,7 @@ public class AccountService {
     }
 
 
-    public Account update(UUID accountId, AccountManagementDto dto) {
+    public Account update(UUID accountId, AccountDto dto) {
         Account account = getAccount(accountId);
 
         account.setName(dto.getName());

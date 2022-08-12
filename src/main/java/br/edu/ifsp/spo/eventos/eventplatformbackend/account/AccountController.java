@@ -1,7 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountManagementDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +24,7 @@ public class AccountController {
 
 
     @GetMapping()
-    public ResponseEntity<Page<AccountManagementDto>> index(
+    public ResponseEntity<Page<AccountDto>> index(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String cpf,
@@ -32,39 +32,39 @@ public class AccountController {
 
         if (name != null){
             Page<Account> users = accountService.findAllByName(pageable, name);
-            return ResponseEntity.ok(users.map(accountMapper::toAccountManagementDto));
+            return ResponseEntity.ok(users.map(accountMapper::to));
         }
 
         if (email != null){
             Page<Account> users = accountService.findAllByEmail(pageable, email);
-            return ResponseEntity.ok(users.map(accountMapper::toAccountManagementDto));
+            return ResponseEntity.ok(users.map(accountMapper::to));
         }
         if (cpf != null){
             Page<Account> users = accountService.findAllByCpf(pageable, cpf);
-            return ResponseEntity.ok(users.map(accountMapper::toAccountManagementDto));
+            return ResponseEntity.ok(users.map(accountMapper::to));
         }
 
         Page<Account> users = accountService.findAll(pageable);
-        return ResponseEntity.ok(users.map(accountMapper::toAccountManagementDto));
+        return ResponseEntity.ok(users.map(accountMapper::to));
     }
 
 
     @GetMapping("{accountId}")
-        public ResponseEntity<AccountManagementDto> show(@PathVariable UUID accountId) {
+        public ResponseEntity<AccountDto> show(@PathVariable UUID accountId) {
         Account account = accountService.findById(accountId);
-        AccountManagementDto accountManagementDto = accountMapper.toAccountManagementDto(account);
-        return ResponseEntity.ok(accountManagementDto);
+        AccountDto accountDto = accountMapper.to(account);
+        return ResponseEntity.ok(accountDto);
     }
 
 
     @PutMapping("{accountId}")
-    public ResponseEntity<AccountManagementDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountManagementDto dto) {
+    public ResponseEntity<AccountDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountDto dto) {
         Account account = accountService.update(accountId, dto);
-        AccountManagementDto accountManagementDto = accountMapper.toAccountManagementDto(account);
-        return ResponseEntity.ok(accountManagementDto);
+        AccountDto accountDto = accountMapper.to(account);
+        return ResponseEntity.ok(accountDto);
     }
 
-    @DeleteMapping("{userId}")
+    @DeleteMapping("{accountId}")
     public ResponseEntity<Void> delete(@PathVariable UUID accountId) {
         accountService.delete(accountId);
         return ResponseEntity.noContent().build();

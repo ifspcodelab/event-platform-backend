@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,16 +32,16 @@ public class AccountController {
             @PageableDefault(page = 0, size = 20, sort="registrationTimestamp", direction = Sort.Direction.DESC) Pageable pageable) {
 
         if (name != null){
-            Page<Account> users = accountService.findAllByName(pageable, name);
+            Page<Account> users = accountService.findUsersWithPartOfName(pageable, name);
             return ResponseEntity.ok(users.map(accountMapper::to));
         }
 
         if (email != null){
-            Page<Account> users = accountService.findAllByEmail(pageable, email);
+            Page<Account> users = accountService.findUsersWithPartOfEmail(pageable, email);
             return ResponseEntity.ok(users.map(accountMapper::to));
         }
         if (cpf != null){
-            Page<Account> users = accountService.findAllByCpf(pageable, cpf);
+            Page<Account> users = accountService.findUsersWithPartOfCpf(pageable, cpf);
             return ResponseEntity.ok(users.map(accountMapper::to));
         }
 

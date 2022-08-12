@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -52,9 +53,6 @@ public class AccountService {
     }
 
 
-    public Page<Account> findAllByName(Pageable pageable, String name) {
-        return accountRepository.findAllByName(pageable, name);
-    }
 
     public Page<Account> findAllByEmail(Pageable pageable, String email) {
         return accountRepository.findAllByEmail(pageable, email);
@@ -73,6 +71,15 @@ public class AccountService {
                 .orElseThrow(() -> new UserNotFoundException(ResourceName.ACCOUNT, accountName));
     }
 
+    public Page<Account> findUsersWithPartOfName(Pageable pageable, String name) {
+        return accountRepository.findUsersWithPartOfName(pageable, name);
+    }
 
+    public Page<Account> findUsersWithPartOfEmail(Pageable pageable, String email) {
+        return accountRepository.findUsersWithPartOfEmail(pageable, email);
+    }
 
+    public Page<Account> findUsersWithPartOfCpf(Pageable pageable, String cpf) {
+        return accountRepository.findUsersWithPartOfCpf(pageable, cpf);
+    }
 }

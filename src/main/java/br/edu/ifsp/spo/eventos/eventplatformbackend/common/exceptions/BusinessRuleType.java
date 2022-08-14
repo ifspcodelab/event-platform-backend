@@ -80,7 +80,6 @@ public enum BusinessRuleType {
     ACTIVITY_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma atividade com um subevento em rascunho"),
     ACTIVITY_PUBLISH_WITH_EVENT_CANCELED_STATUS("Não é possível publicar uma atividade com um evento cancelado"),
     ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível publicar uma atividade em que o período de inscrição do evento é antes de hoje"),
-    ACTIVITY_PUBLISH_WITH_EVENT_DRAFT_STATUS("Não é possível publicar uma atividade com um evento em rascunho"),
     ACTIVITY_PUBLISH_WITH_SUBEVENT_CANCELED_STATUS("Não é possível publicar uma atividade com um subevento cancelado"),
     ACTIVITY_PUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível publicar uma atividade em que o período de execução é antes de hoje"),
     ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS("Não é possível publicar uma atividade com status publicado"),
@@ -89,7 +88,13 @@ public enum BusinessRuleType {
     ACTIVITY_UNPUBLISH_WITH_EVENT_CANCELED_STATUS("Não é possível despublicar uma atividade com um evento cancelado"),
     ACTIVITY_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar uma atividade status com status cancelado"),
     ACTIVITY_UNPUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível despublicar uma atividade em que o período de execução do subevento já tenha iniciado"),
-    ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar uma atividade com status de rascunho");
+    ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar uma atividade com status de rascunho"),
+    SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
+    SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
+    SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
+    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
+    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma sessão em uma atividade com status publicado e após o período de execução do subevento");
+
 
     String message;
 

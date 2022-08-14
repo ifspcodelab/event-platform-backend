@@ -1,14 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
-
-import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

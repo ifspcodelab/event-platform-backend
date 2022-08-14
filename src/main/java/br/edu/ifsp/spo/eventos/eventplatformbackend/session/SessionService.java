@@ -5,18 +5,20 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
-import org.hibernate.mapping.Collection;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 
-import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +27,8 @@ import java.util.UUID;
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final ActivityRepository activityRepository;
+    private final EventRepository eventRepository;
+    private final SubeventRepository subeventRepository;
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
     private final SpaceRepository spaceRepository;
@@ -106,15 +110,94 @@ public class SessionService {
     }
 
     public void delete(UUID eventId, UUID activityId, UUID sessionId) {
+        Event event = getEvent(eventId);
+        Activity activity = getActivity(activityId);
         Session session = getSession(sessionId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+
+        if(session.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_STATUS_CANCELED);
+        }
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED);
+        }
+
+        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START);
+            }
+        }
+
+        // TODO PRECISA DOS METODOS QUE CANCELA AS ENTIDADES FILHAS
 
         sessionRepository.delete(session);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        Event event = getEvent(eventId);
+        Subevent subevent = getSubEvent(subeventId);
+        Activity activity = getActivity(activityId);
         Session session = getSession(sessionId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
 
+        if(session.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_STATUS_CANCELED);
+        }
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED);
+        }
+
+        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START);
+            }
+        }
+
+        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
+            if (subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
+            }
+        }
+
+        // TODO PRECISA DOS METODOS QUE CANCELA AS ENTIDADES FILHAS, ISSO EXISTE??
         sessionRepository.delete(session);
+    }
+
+    private Event getEvent(UUID eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
+    }
+
+    private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
+        if (!activity.getSubevent().getId().equals(subeventId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_SUBEVENT);
+        }
+    }
+
+    private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {
+        if (!subevent.getEvent().getId().equals(eventId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.SUBEVENT, ResourceName.EVENT);
+        }
+    }
+    private Subevent getSubEvent(UUID subeventId) {
+        return subeventRepository.findById(subeventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
+    }
+    private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
+        if (!activity.getEvent().getId().equals(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_EVENT);
+        }
+    }
+
+    private void checksIfActivityIsAssociateToSession(UUID activityId, Session session) {
+        if (!session.getActivity().getId().equals(activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY);
+        }
     }
 
     private Location getLocation(UUID locationId) {
@@ -143,7 +226,7 @@ public class SessionService {
     }
 
     private List<SessionSchedule> getSessionSchedules(SessionCreateDto dto) {
-        List<SessionSchedule> sessionSchedules = dto.getSessionsSchedules().stream()
+        return dto.getSessionsSchedules().stream()
                 .map(s -> {
                     Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
                     Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
@@ -158,7 +241,5 @@ public class SessionService {
                             space
                     );
                 }).toList();
-
-        return sessionSchedules;
     }
 }

@@ -23,6 +23,7 @@ public class Session {
     private String title;
     private Integer seats;
     private String cancellationMessage;
+    private boolean isCanceled;
     @ManyToOne
     private Activity activity;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

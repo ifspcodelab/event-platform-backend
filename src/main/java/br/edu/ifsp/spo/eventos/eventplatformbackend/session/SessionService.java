@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
@@ -94,6 +95,21 @@ public class SessionService {
         return sessionRepository.findAllByActivityId(activityId);
     }
 
+    public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Session session = getSession(sessionId);
+
+        session.setCanceled(true);
+        session.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        return sessionRepository.save(session);
+    }
+
+    public Session cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Session session = getSession(sessionId);
+
+        session.setCanceled(true);
+        session.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        return sessionRepository.save(session);
+    }
     private Location getLocation(UUID locationId) {
         return locationRepository.findById(locationId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.LOCATION, locationId));
@@ -112,5 +128,10 @@ public class SessionService {
     private Activity getActivity(UUID activityId) {
         return activityRepository.findById(activityId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACTIVITY, activityId));
+    }
+
+    private Session getSession(UUID sessionId) {
+        return sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
     }
 }

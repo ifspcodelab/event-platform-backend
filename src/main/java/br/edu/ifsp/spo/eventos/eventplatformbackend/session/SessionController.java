@@ -2,7 +2,9 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,18 @@ public class SessionController {
         Session session = sessionService.create(eventId, subeventId, activityId, sessionCreateDto);
         SessionDto sessionDto = sessionMapper.to(session);
         return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("activities/{activityId}/sessions/{sessionId}/cancel")
+    public ResponseEntity<SessionDto> cancel(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Session session = sessionService.cancel(eventId, activityId, sessionId, cancellationMessageCreateDto);
+        return ResponseEntity.ok(sessionMapper.to(session));
+    }
+
+    @PatchMapping("sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}/cancel")
+    public ResponseEntity<SessionDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Session session = sessionService.cancel(eventId, subeventId, activityId, sessionId, cancellationMessageCreateDto);
+        return ResponseEntity.ok(sessionMapper.to(session));
     }
 
     @GetMapping("activities/{activityId}/sessions")

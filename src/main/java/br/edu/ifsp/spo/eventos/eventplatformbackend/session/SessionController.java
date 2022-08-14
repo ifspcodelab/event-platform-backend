@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessa
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -45,6 +46,18 @@ public class SessionController {
     public ResponseEntity<SessionDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
         Session session = sessionService.cancel(eventId, subeventId, activityId, sessionId, cancellationMessageCreateDto);
         return ResponseEntity.ok(sessionMapper.to(session));
+    }
+
+    @DeleteMapping("activities/{activityId}/sessions/{sessionId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
+        sessionService.delete(eventId, activityId, sessionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
+        sessionService.delete(eventId, subeventId, activityId, sessionId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("activities/{activityId}/sessions")

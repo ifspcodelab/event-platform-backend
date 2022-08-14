@@ -110,6 +110,18 @@ public class SessionService {
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
         return sessionRepository.save(session);
     }
+
+    public void delete(UUID eventId, UUID activityId, UUID sessionId) {
+        Session session = getSession(sessionId);
+
+        sessionRepository.delete(session);
+    }
+
+    public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        Session session = getSession(sessionId);
+
+        sessionRepository.delete(session);
+    }
     private Location getLocation(UUID locationId) {
         return locationRepository.findById(locationId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.LOCATION, locationId));

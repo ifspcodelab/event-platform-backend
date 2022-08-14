@@ -12,6 +12,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
+import org.hibernate.mapping.Collection;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -54,30 +55,29 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-//    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
-//        Session session = getSession(sessionId);
-//
-//        List<SessionSchedule> sessionSchedulesAux = dto.getSessionsSchedules().stream()
-//                .map(s -> {
-//                    Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
-//                    Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
-//                    Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
-//
-//                    return new SessionSchedule(
-//                            s.getExecution_start(),
-//                            s.getExecution_end(),
-//                            s.getUrl(),
-//                            location,
-//                            area,
-//                            space
-//                    );
-//
-//                }).toList();
-//        List<SessionSchedule> sessionSchedules = session.getSessionsSchedules().stream()
-//                .map(s -> {
-//                    s.setLocation(sessionSchedulesAux);
-//                })
-//    }
+    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+        Session session = getSession(sessionId);
+        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
+
+        session.setTitle(dto.getTitle());
+        session.setSeats(dto.getSeats());
+
+        session.setSessionsSchedules(sessionSchedule);
+
+        return sessionRepository.save(session);
+    }
+
+    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+        Session session = getSession(sessionId);
+        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
+
+        session.setTitle(dto.getTitle());
+        session.setSeats(dto.getSeats());
+
+        session.setSessionsSchedules(sessionSchedule);
+
+        return sessionRepository.save(session);
+    }
 
     // com sessions schedules
     public List<Session> findAll(UUID eventId, UUID activityId) {

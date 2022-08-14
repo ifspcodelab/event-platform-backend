@@ -93,7 +93,15 @@ public enum BusinessRuleType {
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
     SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
-    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma sessão em uma atividade com status publicado e após o período de execução do subevento");
+    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
+    SESSION_CANCEL_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com status cancelado"),
+    SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão em uma atividade com status de rascunho"),
+    SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível cancelar uma sesão em uma atividade com status cancelado"),
+    SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão depois que o período de execução do evento foi finalizado"),
+    SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um evento em rascunho"),
+    SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um subevento em rascunho"),
+    SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
+    SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento");
 
 
     String message;

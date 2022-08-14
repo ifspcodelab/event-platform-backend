@@ -1,12 +1,15 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,5 +33,15 @@ public class SessionController {
         return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
     }
 
+    @GetMapping("activities/{activityId}/sessions")
+    public ResponseEntity<List<SessionDto>> index(@PathVariable UUID eventId, @PathVariable UUID activityId) {
+        List<Session> sessions = sessionService.findAll(eventId, activityId);
+        return ResponseEntity.ok(sessionMapper.to(sessions));
+    }
 
+    @GetMapping("sub-events/{subeventId}/activities/{activityId}/sessions")
+    public ResponseEntity<List<SessionDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        List<Session> sessions = sessionService.findAll(subeventId, eventId, activityId);
+        return ResponseEntity.ok(sessionMapper.to(sessions));
+    }
 }

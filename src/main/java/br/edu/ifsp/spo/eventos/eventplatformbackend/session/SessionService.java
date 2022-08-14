@@ -12,7 +12,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,6 +83,15 @@ public class SessionService {
         );
 
         return sessionRepository.save(session);
+    }
+    // com sessions schedules
+    public List<Session> findAll(UUID eventId, UUID activityId) {
+        return sessionRepository.findAllByActivityId(activityId);
+    }
+
+    // com sessions schedules
+    public List<Session> findAll(UUID eventId, UUID subeventId, UUID activityId) {
+        return sessionRepository.findAllByActivityId(activityId);
     }
 
     private Location getLocation(UUID locationId) {

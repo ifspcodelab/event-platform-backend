@@ -31,27 +31,11 @@ public class SessionService {
     public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
         Activity activity = getActivity(activityId);
 
-        List<SessionSchedule> sessionSchedules = dto.getSessionsSchedules().stream()
-                .map(s -> {
-                    Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
-                    Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
-                    Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
-
-                    return new SessionSchedule(
-                        s.getExecution_start(),
-                        s.getExecution_end(),
-                        s.getUrl(),
-                        location,
-                        area,
-                        space
-                    );
-                }).toList();
-
         Session session = new Session(
                 dto.getTitle(),
                 dto.getSeats(),
                 activity,
-                sessionSchedules
+                getSessionSchedules(dto)
         );
 
         return sessionRepository.save(session);
@@ -60,31 +44,41 @@ public class SessionService {
     public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
         Activity activity = getActivity(activityId);
 
-        List<SessionSchedule> sessionSchedules = dto.getSessionsSchedules().stream()
-                .map(s -> {
-                    Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
-                    Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
-                    Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
-
-                    return new SessionSchedule(
-                            s.getExecution_start(),
-                            s.getExecution_end(),
-                            s.getUrl(),
-                            location,
-                            area,
-                            space
-                    );
-                }).toList();
-
         Session session = new Session(
                 dto.getTitle(),
                 dto.getSeats(),
                 activity,
-                sessionSchedules
+                getSessionSchedules(dto)
         );
 
         return sessionRepository.save(session);
     }
+
+//    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+//        Session session = getSession(sessionId);
+//
+//        List<SessionSchedule> sessionSchedulesAux = dto.getSessionsSchedules().stream()
+//                .map(s -> {
+//                    Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
+//                    Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
+//                    Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
+//
+//                    return new SessionSchedule(
+//                            s.getExecution_start(),
+//                            s.getExecution_end(),
+//                            s.getUrl(),
+//                            location,
+//                            area,
+//                            space
+//                    );
+//
+//                }).toList();
+//        List<SessionSchedule> sessionSchedules = session.getSessionsSchedules().stream()
+//                .map(s -> {
+//                    s.setLocation(sessionSchedulesAux);
+//                })
+//    }
+
     // com sessions schedules
     public List<Session> findAll(UUID eventId, UUID activityId) {
         return sessionRepository.findAllByActivityId(activityId);
@@ -122,6 +116,7 @@ public class SessionService {
 
         sessionRepository.delete(session);
     }
+
     private Location getLocation(UUID locationId) {
         return locationRepository.findById(locationId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.LOCATION, locationId));
@@ -145,5 +140,25 @@ public class SessionService {
     private Session getSession(UUID sessionId) {
         return sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+    }
+
+    private List<SessionSchedule> getSessionSchedules(SessionCreateDto dto) {
+        List<SessionSchedule> sessionSchedules = dto.getSessionsSchedules().stream()
+                .map(s -> {
+                    Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
+                    Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
+                    Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
+
+                    return new SessionSchedule(
+                            s.getExecution_start(),
+                            s.getExecution_end(),
+                            s.getUrl(),
+                            location,
+                            area,
+                            space
+                    );
+                }).toList();
+
+        return sessionSchedules;
     }
 }

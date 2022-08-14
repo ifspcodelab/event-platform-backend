@@ -77,7 +77,7 @@ public class SessionController {
 
     @GetMapping("sub-events/{subeventId}/activities/{activityId}/sessions")
     public ResponseEntity<List<SessionDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
-        List<Session> sessions = sessionService.findAll(subeventId, eventId, activityId);
+        List<Session> sessions = sessionService.findAll(eventId, subeventId , activityId);
         return ResponseEntity.ok(sessionMapper.to(sessions));
     }
 }

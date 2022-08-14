@@ -83,7 +83,7 @@ public class ActivityController {
 
     @GetMapping("activities")
     public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId) {
-        List<Activity> activities = activityService.findALl(eventId);
+        List<Activity> activities = activityService.findAll(eventId);
         return ResponseEntity.ok(activityMapper.to(activities));
     }
 

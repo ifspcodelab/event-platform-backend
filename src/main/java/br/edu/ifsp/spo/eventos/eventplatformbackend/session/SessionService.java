@@ -85,11 +85,17 @@ public class SessionService {
 
     // com sessions schedules
     public List<Session> findAll(UUID eventId, UUID activityId) {
+        checksEventExists(eventId);
+        checksIfEventIsAssociateToActivity(eventId, getActivity(activityId));
         return sessionRepository.findAllByActivityId(activityId);
     }
 
     // com sessions schedules
     public List<Session> findAll(UUID eventId, UUID subeventId, UUID activityId) {
+        checksEventExists(eventId);
+        checksSubeventExists(subeventId);
+        checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
+        checksIfSubeventIsAssociateToActivity(subeventId, getActivity(activityId));
         return sessionRepository.findAllByActivityId(activityId);
     }
 
@@ -234,6 +240,18 @@ public class SessionService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
     }
 
+    private void checksEventExists(UUID eventId) {
+        if (!eventRepository.existsById(eventId)) {
+            throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
+        }
+    }
+
+    private void checksSubeventExists(UUID subeventId) {
+        if(!subeventRepository.existsById(subeventId)) {
+            throw new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId);
+        }
+    }
+
     private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
         if (!activity.getSubevent().getId().equals(subeventId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_SUBEVENT);
@@ -245,6 +263,7 @@ public class SessionService {
             throw new ResourceReferentialIntegrityException(ResourceName.SUBEVENT, ResourceName.EVENT);
         }
     }
+
     private Subevent getSubEvent(UUID subeventId) {
         return subeventRepository.findById(subeventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));

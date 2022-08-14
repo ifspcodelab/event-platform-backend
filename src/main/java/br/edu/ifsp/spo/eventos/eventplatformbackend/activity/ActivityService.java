@@ -374,7 +374,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public List<Activity> findALl(UUID eventId) {
+    public List<Activity> findAll(UUID eventId) {
         checksEventExists(eventId);
         return activityRepository.findAllByEventIdAndSubeventNull(eventId);
     }

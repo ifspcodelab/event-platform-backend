@@ -3,6 +3,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
@@ -28,6 +30,10 @@ public class AccountService {
     }
 
     public Account update(String accessToken, MyDataUpdateDto myDataUpdateDto) {
+        if(accountRepository.existsByCpf(myDataUpdateDto.getCpf())) {
+            throw new ResourceAlreadyExistsException(ResourceName.CPF, "CPF", myDataUpdateDto.getCpf());
+        }
+
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
         UUID accountId = UUID.fromString(decodedToken.getSubject());
 

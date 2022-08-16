@@ -71,6 +71,8 @@ public class AccountService {
         Account account = getAccount(accountId);
 
         account.setPassword(passwordEncoder.encode(myDataUpdatePasswordDto.getNewPassword()));
+        accountRepository.save(account);
+
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
     }
 }

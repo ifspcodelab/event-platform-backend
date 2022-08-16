@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,5 +29,12 @@ public class AccountController {
         Account account = accountService.update(accessToken.replace("Bearer ", ""), myDataUpdateDto);
 
         return ResponseEntity.ok(accountMapper.to(account));
+    }
+
+    @PatchMapping("my-data/password")
+    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
+        accountService.updatePassword(accessToken.replace("Bearer ", ""), myDataUpdatePasswordDto);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH;
 import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND;
 
 @ControllerAdvice
@@ -130,6 +131,10 @@ public class ExceptionHandlerApp {
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
         if(ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
+            return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+        }
+        if(ex.getPasswordResetExceptionType().equals(PASSWORD_CONFIRMATION_DOESNT_MATCH)) {
+            ProblemDetail problemDetail = new ProblemDetail("Password confirmation does not match new password", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
         return ResponseEntity.accepted().build();

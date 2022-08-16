@@ -10,7 +10,8 @@ public enum PasswordResetExceptionType {
     UNVERIFIED_ACCOUNT("Password Reset Exception: the account for the email=%s is not yet verified"),
     OPEN_REQUEST("Password Reset Exception: account already have a open request for the email=%s"),
     RESET_TOKEN_NOT_FOUND("Password Reset Exception: reset token not found"),
-    RESET_TOKEN_EXPIRED("Password Reset Exception: reset token expired for email=%s");
+    RESET_TOKEN_EXPIRED("Password Reset Exception: reset token expired for email=%s"),
+    PASSWORD_CONFIRMATION_DOESNT_MATCH("Password Reset Exception: at account with email=%s password confirmation does not match new password");
 
 
     String message;

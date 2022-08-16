@@ -4,6 +4,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
@@ -62,10 +64,12 @@ public class AccountService {
 
     public void updatePassword(String accessToken, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
         //verificar se a currentpassword é igual a password na base de dados;
-        //verificar se currentpassword e newpassword são diferentes;
-        //settar currentpassword
-
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+
+        if (!myDataUpdatePasswordDto.getNewPassword().equals(myDataUpdatePasswordDto.getNewPasswordConfirmation())) {
+            throw new PasswordResetException(PasswordResetExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH, decodedToken.getClaim("email").toString());
+        }
+
         UUID accountId = UUID.fromString(decodedToken.getSubject());
 
         Account account = getAccount(accountId);

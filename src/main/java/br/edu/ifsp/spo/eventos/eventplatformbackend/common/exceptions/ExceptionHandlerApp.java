@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
@@ -17,8 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH;
-import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND;
+import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.*;
 
 @ControllerAdvice
 @Slf4j
@@ -129,14 +130,11 @@ public class ExceptionHandlerApp {
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
-        if(ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
+        if (ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
-        if(ex.getPasswordResetExceptionType().equals(PASSWORD_CONFIRMATION_DOESNT_MATCH)) {
-            ProblemDetail problemDetail = new ProblemDetail("Password confirmation does not match new password", List.of());
-            return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
-        }
+
         return ResponseEntity.accepted().build();
     }
     
@@ -187,13 +185,32 @@ public class ExceptionHandlerApp {
         log.warn("Token Expired Exception");
         return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
-    
 
     @ExceptionHandler(RecaptchaException.class)
     public ResponseEntity<ProblemDetail> handlerInvalidRecaptcha(RecaptchaException ex){
         log.warn(String.format(ex.getRecaptchaExceptionType().getMessage(), ex.getEmail()));
         ProblemDetail problemDetail = new ProblemDetail("Invalid recaptcha", List.of());
 
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MyDataResetPasswordException.class)
+    public ResponseEntity<Void> handlerMyDataPasswordResetExceptions(MyDataResetPasswordException ex) {
+        ProblemDetail problemDetail = new ProblemDetail("", List.of());
+
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH)) {
+            problemDetail = new ProblemDetail(
+                    "Password confirmation does not match new password",
+                    List.of()
+            );
+        }
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.INCORRECT_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    "Current password is incorrect",
+                    List.of()
+            );
+        }
+        log.warn(String.format(ex.getMyDataResetPasswordExceptionType().getMessage(), ex.getEmail()));
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

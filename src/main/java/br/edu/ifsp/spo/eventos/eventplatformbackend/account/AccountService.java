@@ -63,16 +63,18 @@ public class AccountService {
     }
 
     public void updatePassword(String accessToken, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
-        //verificar se a currentpassword é igual a password na base de dados;
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
 
         if (!myDataUpdatePasswordDto.getNewPassword().equals(myDataUpdatePasswordDto.getNewPasswordConfirmation())) {
-            throw new PasswordResetException(PasswordResetExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH, decodedToken.getClaim("email").toString());
+            throw new MyDataResetPasswordException(MyDataResetPasswordExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH, decodedToken.getClaim("email").toString());
         }
 
         UUID accountId = UUID.fromString(decodedToken.getSubject());
-
         Account account = getAccount(accountId);
+
+        if (!passwordEncoder.matches(myDataUpdatePasswordDto.getCurrentPassword(), account.getPassword())) {
+            throw new MyDataResetPasswordException(MyDataResetPasswordExceptionType.INCORRECT_PASSWORD, account.getEmail());
+        }
 
         account.setPassword(passwordEncoder.encode(myDataUpdatePasswordDto.getNewPassword()));
         accountRepository.save(account);

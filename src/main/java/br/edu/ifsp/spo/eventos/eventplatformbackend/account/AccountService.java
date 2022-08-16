@@ -28,6 +28,31 @@ public class AccountService {
     }
 
 
+    public void delete(UUID accountId) {
+        Account account = getAccount(accountId);
+        accountRepository.deleteById(accountId);
+        log.info("Delete account id={}, name={}, email={}", account.getId(), account.getName(), account.getEmail());
+    }
+
+    public Page<Account> getAccounts(Pageable pageable, String searchType, String query){
+
+        if(searchType.equals("name")){
+            return accountRepository.findUsersWithPartOfName(pageable, query);
+        }
+        if(searchType.equals("email")){
+            return accountRepository.findUsersWithPartOfEmail(pageable, query);
+        }
+        if(searchType.equals("cpf")){
+            return accountRepository.findUsersWithPartOfCpf(pageable, query);
+        }
+        return accountRepository.findAll(pageable);
+    }
+
+    private Account getAccount(UUID userId) {
+        return accountRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, userId));
+    }
+
     public Account update(UUID accountId, AccountDto dto) {
         Account account = getAccount(accountId);
 
@@ -40,46 +65,5 @@ public class AccountService {
         log.info("Account with name={} and email={} was updated", account.getName(), account.getEmail());
 
         return accountRepository.save(account);
-    }
-
-    public Account findByName(String name) {
-        return getAccount(name);
-    }
-
-    public void delete(UUID accountId) {
-        Account account = getAccount(accountId);
-        accountRepository.deleteById(accountId);
-        log.info("Delete account id={}, name={}, email={}", account.getId(), account.getName(), account.getEmail());
-    }
-
-
-
-    public Page<Account> findAllByEmail(Pageable pageable, String email) {
-        return accountRepository.findAllByEmail(pageable, email);
-    }
-
-    public Page<Account> findAllByCpf(Pageable pageable, String cpf) {
-        return accountRepository.findAllByCpf(pageable, cpf);
-    }
-
-    private Account getAccount(UUID userId) {
-        return accountRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, userId));
-    }
-    private Account getAccount(String accountName) {
-        return accountRepository.findByName(accountName)
-                .orElseThrow(() -> new UserNotFoundException(ResourceName.ACCOUNT, accountName));
-    }
-
-    public Page<Account> findUsersWithPartOfName(Pageable pageable, String name) {
-        return accountRepository.findUsersWithPartOfName(pageable, name);
-    }
-
-    public Page<Account> findUsersWithPartOfEmail(Pageable pageable, String email) {
-        return accountRepository.findUsersWithPartOfEmail(pageable, email);
-    }
-
-    public Page<Account> findUsersWithPartOfCpf(Pageable pageable, String cpf) {
-        return accountRepository.findUsersWithPartOfCpf(pageable, cpf);
     }
 }

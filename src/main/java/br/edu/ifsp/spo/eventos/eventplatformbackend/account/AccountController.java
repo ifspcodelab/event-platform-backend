@@ -26,27 +26,12 @@ public class AccountController {
 
     @GetMapping()
     public ResponseEntity<Page<AccountDto>> index(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String cpf,
-            @PageableDefault(page = 0, size = 20, sort="registrationTimestamp", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam String searchType,
+            @RequestParam String query,
+            @PageableDefault(page = 0, size = 20) Pageable pageable) {
 
-        if (name != null){
-            Page<Account> users = accountService.findUsersWithPartOfName(pageable, name);
-            return ResponseEntity.ok(users.map(accountMapper::to));
-        }
-
-        if (email != null){
-            Page<Account> users = accountService.findUsersWithPartOfEmail(pageable, email);
-            return ResponseEntity.ok(users.map(accountMapper::to));
-        }
-        if (cpf != null){
-            Page<Account> users = accountService.findUsersWithPartOfCpf(pageable, cpf);
-            return ResponseEntity.ok(users.map(accountMapper::to));
-        }
-
-        Page<Account> users = accountService.findAll(pageable);
-        return ResponseEntity.ok(users.map(accountMapper::to));
+        Page<Account> accounts = accountService.getAccounts(pageable, searchType, query);
+        return ResponseEntity.ok(accounts.map(accountMapper::to));
     }
 
 

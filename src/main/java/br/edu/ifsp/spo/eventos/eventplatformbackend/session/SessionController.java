@@ -17,12 +17,12 @@ public class SessionController {
     private final SessionService sessionService;
     private final SessionMapper sessionMapper;
 
-//    @PostMapping("activities/{activityId}/sessions")
-//    public ResponseEntity<SessionDto> create (@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {
-//        Session session = sessionService.create(eventId, activityId, sessionCreateDto);
-//        SessionDto sessionDto = sessionMapper.to(session);
-//        return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
-//    }
+    @PostMapping("activities/{activityId}/sessions")
+    public ResponseEntity<SessionDto> create (@PathVariable UUID eventId, @PathVariable UUID activityId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {
+        Session session = sessionService.create(eventId, activityId, sessionCreateDto);
+        SessionDto sessionDto = sessionMapper.to(session);
+        return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
+    }
 //
 //    @PostMapping("sub-events/{subeventId}/activities/{activityId}/sessions")
 //    public ResponseEntity<SessionDto> create (@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {

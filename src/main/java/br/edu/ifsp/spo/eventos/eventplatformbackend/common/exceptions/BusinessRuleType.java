@@ -103,7 +103,10 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
     SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS("Não é possível criar uma sessão com uma atividade cancelada"),
-    SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de inscrição do evento é antes de hoje");
+    SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de inscrição do evento é antes de hoje"),
+    SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução está no passado"),
+    SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT("Data de início do horário da sessão é anterior à data de início do evento"),
+    SESSION_SCHEDULE_EXECUTION_AFTER_EVENT("A data de fim da sessão é posterior à data de fim do evento");
 
 
     String message;

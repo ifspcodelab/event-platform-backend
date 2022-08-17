@@ -14,9 +14,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,34 +28,36 @@ public class SessionService {
     private final AreaRepository areaRepository;
     private final SpaceRepository spaceRepository;
 
-//    public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
-//        Activity activity = getActivity(activityId);
-//        Event event = getEvent(eventId);
-//        checksIfEventIsAssociateToActivity(eventId, activity);
-//
-//        if(sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
-//            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-//        }
-//
-//        if(activity.getStatus().equals(EventStatus.CANCELED)) {
-//            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS);
-//        }
-//
-//        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-//            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-//        }
-//
-//        // TODO - PRECISA VERIFICAR SE OS HORARIOS ESTÃO ENTRE O TEMPO DA EXECUCAÇÃO DO EVENTO/SUBEVENTO
-//
-//        Session session = new Session(
-//                dto.getTitle(),
-//                dto.getSeats(),
-//                activity,
-//                getSessionSchedules(dto)
-//        );
-//
-//        return sessionRepository.save(session);
-//    }
+    public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
+        Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+
+        if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
+
+        if (activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS);
+        }
+
+        if (activity.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        List<SessionSchedule> sessionSchedules = getSessionSchedules(activity, dto);
+
+
+        Session session = new Session(
+                dto.getTitle(),
+                dto.getSeats(),
+                activity,
+                sessionSchedules
+
+        );
+
+        return sessionRepository.save(session);
+    }
+
 //
 //    public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
 //        Activity activity = getActivity(activityId);
@@ -285,37 +286,58 @@ public class SessionService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
     }
 
-    @Transactional
-    public void cancelAllByActivityId(UUID eventId, UUID activityId) {
+//    @Transactional
+//    public void cancelAllByActivityId(UUID eventId, UUID activityId) {
+//
+//        List<Session> sessions = new ArrayList<>();
+//        for (Session session : this.findAll(eventId, activityId)) {
+//
+//            if(!session.isCanceled())
+//             {
+//                session.setCanceled(true);
+//                sessions.add(session);
+//            }
+//        }
+//        sessionRepository.saveAll(sessions);
+//    }
+//
+//    @Transactional
+//    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId) {
+//
+//        List<Session> sessions = new ArrayList<>();
+//        for (Session session : this.findAll(eventId, subeventId, activityId)) {
+//
+//            if(!session.isCanceled())
+//            {
+//                session.setCanceled(true);
+//                sessions.add(session);
+//            }
+//        }
+//        sessionRepository.saveAll(sessions);
+//    }
 
-        List<Session> sessions = new ArrayList<>();
-        for (Session session : this.findAll(eventId, activityId)) {
+//    // TODO MUDAR O NOME DO EXECUTION DE SESSION SCHEDULE
+//    // SEM
+//    private List<SessionSchedule> validationsSessionSchedules(Activity activity, List<SessionSchedule> sessionSchedules) {
+//        sessionSchedules.stream()
+//                .map(s -> {
+//                    if (s.getExecution_start().isBefore(LocalDateTime.now()) ||
+//                            s.getExecution_end().isBefore(LocalDateTime.now())
+//                    ) {
+//                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
+//                    }
+//
+//                    if(s.getExecution_start().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
+//                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT);
+//                    }
+//
+//                    if(s.getExecution_end().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
+//                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT);
+//                    }
+//                }
+//    }
 
-            if(!session.isCanceled())
-             {
-                session.setCanceled(true);
-                sessions.add(session);
-            }
-        }
-        sessionRepository.saveAll(sessions);
-    }
-
-    @Transactional
-    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId) {
-
-        List<Session> sessions = new ArrayList<>();
-        for (Session session : this.findAll(eventId, subeventId, activityId)) {
-
-            if(!session.isCanceled())
-            {
-                session.setCanceled(true);
-                sessions.add(session);
-            }
-        }
-        sessionRepository.saveAll(sessions);
-    }
-
-    private List<SessionSchedule> getSessionSchedules(SessionCreateDto dto) {
+    private List<SessionSchedule> getSessionSchedules(Activity activity, SessionCreateDto dto) {
         return dto.getSessionsSchedules().stream()
                 .map(s -> {
                     Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
@@ -326,6 +348,21 @@ public class SessionService {
                        OU SÓ UMA AREA || SPACE
                        OU SOMENTE UMA AREA E SPACE
                      */
+
+                        if (s.getExecution_start().isBefore(LocalDateTime.now()) ||
+                                s.getExecution_end().isBefore(LocalDateTime.now())
+                        ) {
+                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
+                        }
+
+                        if (s.getExecution_start().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
+                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT);
+                        }
+
+                        if (s.getExecution_end().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
+                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT);
+                        }
+
                     return new SessionSchedule(
                             s.getExecution_start(),
                             s.getExecution_end(),
@@ -335,5 +372,6 @@ public class SessionService {
                             space
                     );
                 }).toList();
+        }
     }
-}
+

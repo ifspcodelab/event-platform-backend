@@ -22,7 +22,7 @@ import java.util.UUID;
 public class SubeventService {
     private final SubeventRepository subeventRepository;
     private final EventRepository eventRepository;
-    private final ActivityService activityService;
+//    private final ActivityService activityService;
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
@@ -187,7 +187,7 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_CANCEL_WITH_CANCELED_STATUS);
         }
 
-        activityService.cancelAllBySubeventId(eventId, subeventId);
+//        activityService.cancelAllBySubeventId(eventId, subeventId);
         subevent.setStatus(EventStatus.CANCELED);
         subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());

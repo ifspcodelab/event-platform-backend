@@ -19,5 +19,5 @@ public class MyDataUpdatePasswordDto {
     @Password
     String newPassword;
     @NotNull
-    String recaptcha;
+    String userRecaptcha;
 }

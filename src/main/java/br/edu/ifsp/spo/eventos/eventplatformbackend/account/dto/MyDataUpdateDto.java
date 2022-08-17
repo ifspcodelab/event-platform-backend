@@ -21,5 +21,5 @@ public class MyDataUpdateDto {
     @CPF
     private String cpf;
     @NotNull
-    String recaptcha;
+    String userRecaptcha;
 }

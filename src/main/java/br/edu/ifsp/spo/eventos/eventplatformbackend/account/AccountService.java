@@ -47,7 +47,7 @@ public class AccountService {
     public Account update(String accessToken, MyDataUpdateDto myDataUpdateDto) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
 
-        if (!recaptchaService.isValid(myDataUpdateDto.getRecaptcha())) {
+        if (!recaptchaService.isValid(myDataUpdateDto.getUserRecaptcha())) {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
         }
 
@@ -74,7 +74,7 @@ public class AccountService {
     public void updatePassword(String accessToken, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
 
-        if (!recaptchaService.isValid(myDataUpdatePasswordDto.getRecaptcha())) {
+        if (!recaptchaService.isValid(myDataUpdatePasswordDto.getUserRecaptcha())) {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
         }
 

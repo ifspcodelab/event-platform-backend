@@ -28,7 +28,7 @@ public class AccountController {
     public ResponseEntity<Page<AccountDto>> index(
             @RequestParam String searchType,
             @RequestParam String query,
-            @PageableDefault(page = 0, size = 20) Pageable pageable) {
+            @PageableDefault(page = 0, size = 20, sort = "name") Pageable pageable) {
 
         Page<Account> accounts = accountService.getAccounts(pageable, searchType, query);
         return ResponseEntity.ok(accounts.map(accountMapper::to));

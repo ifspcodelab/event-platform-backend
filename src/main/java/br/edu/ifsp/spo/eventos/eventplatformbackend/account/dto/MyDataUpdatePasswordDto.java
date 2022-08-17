@@ -18,9 +18,4 @@ public class MyDataUpdatePasswordDto {
     @Size(min = 8, max = 64)
     @Password
     String newPassword;
-    @NotNull
-    @NotBlank
-    @Size(min = 8, max = 64)
-    @Password
-    String newPasswordConfirmation;
 }

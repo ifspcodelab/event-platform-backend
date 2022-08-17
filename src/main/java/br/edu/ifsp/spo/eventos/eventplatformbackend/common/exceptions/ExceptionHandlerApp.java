@@ -198,9 +198,9 @@ public class ExceptionHandlerApp {
     public ResponseEntity<Void> handlerMyDataPasswordResetExceptions(MyDataResetPasswordException ex) {
         ProblemDetail problemDetail = new ProblemDetail("", List.of());
 
-        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.PASSWORD_CONFIRMATION_DOESNT_MATCH)) {
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.SAME_PASSWORD)) {
             problemDetail = new ProblemDetail(
-                    "Password confirmation does not match new password",
+                    "New password is the same as current password",
                     List.of()
             );
         }

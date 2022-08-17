@@ -6,8 +6,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
@@ -24,6 +27,13 @@ public class AccountService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
+    private final RecaptchaService recaptchaService;
+
+    private Account getAccount(UUID id) {
+        return accountRepository.findById(id).orElseThrow(
+                () -> new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_ID, id.toString())
+        );
+    }
     
     public Account getUserByAccessToken(String accessToken) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
@@ -35,11 +45,16 @@ public class AccountService {
     }
 
     public Account update(String accessToken, MyDataUpdateDto myDataUpdateDto) {
+        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+
+        if (!recaptchaService.isValid(myDataUpdateDto.getRecaptcha())) {
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
+        }
+
         if(accountRepository.existsByCpf(myDataUpdateDto.getCpf())) {
             throw new ResourceAlreadyExistsException(ResourceName.CPF, "CPF", myDataUpdateDto.getCpf());
         }
 
-        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
         UUID accountId = UUID.fromString(decodedToken.getSubject());
 
         Account account = getAccount(accountId);
@@ -56,14 +71,12 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    private Account getAccount(UUID id) {
-        return accountRepository.findById(id).orElseThrow(
-                () -> new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_ID, id.toString())
-        );
-    }
-
     public void updatePassword(String accessToken, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+
+        if (!recaptchaService.isValid(myDataUpdatePasswordDto.getRecaptcha())) {
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
+        }
 
         if (myDataUpdatePasswordDto.getCurrentPassword().equals(myDataUpdatePasswordDto.getNewPassword())) {
             throw new MyDataResetPasswordException(MyDataResetPasswordExceptionType.SAME_PASSWORD, decodedToken.getClaim("email").toString());

@@ -20,4 +20,6 @@ public class MyDataUpdateDto {
     @NotNull
     @CPF
     private String cpf;
+    @NotNull
+    String recaptcha;
 }

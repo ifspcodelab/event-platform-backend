@@ -5,6 +5,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,7 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
+    private final SessionService sessionService;
 
     public Activity create(UUID eventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
@@ -327,6 +330,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
+        sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -368,6 +372,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
         }
 
+        sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());

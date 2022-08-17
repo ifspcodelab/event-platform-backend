@@ -14,7 +14,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -281,6 +283,36 @@ public class SessionService {
     private Session getSession(UUID sessionId) {
         return sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+    }
+
+    @Transactional
+    public void cancelAllByActivityId(UUID eventId, UUID activityId) {
+
+        List<Session> sessions = new ArrayList<>();
+        for (Session session : this.findAll(eventId, activityId)) {
+
+            if(!session.isCanceled())
+             {
+                session.setCanceled(true);
+                sessions.add(session);
+            }
+        }
+        sessionRepository.saveAll(sessions);
+    }
+
+    @Transactional
+    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId) {
+
+        List<Session> sessions = new ArrayList<>();
+        for (Session session : this.findAll(eventId, subeventId, activityId)) {
+
+            if(!session.isCanceled())
+            {
+                session.setCanceled(true);
+                sessions.add(session);
+            }
+        }
+        sessionRepository.saveAll(sessions);
     }
 
     private List<SessionSchedule> getSessionSchedules(SessionCreateDto dto) {

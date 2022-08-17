@@ -6,15 +6,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,102 +23,110 @@ import java.util.UUID;
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final ActivityRepository activityRepository;
-    private final EventRepository eventRepository;
-    private final SubeventRepository subeventRepository;
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
     private final SpaceRepository spaceRepository;
 
-    public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
-        Activity activity = getActivity(activityId);
+//    public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
+//        Activity activity = getActivity(activityId);
+//        Event event = getEvent(eventId);
+//        checksIfEventIsAssociateToActivity(eventId, activity);
+//
+//        if(sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
+//            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+//        }
+//
+//        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+//            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS);
+//        }
+//
+//        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+//            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+//        }
+//
+//        // TODO - PRECISA VERIFICAR SE OS HORARIOS ESTÃO ENTRE O TEMPO DA EXECUCAÇÃO DO EVENTO/SUBEVENTO
+//
+//        Session session = new Session(
+//                dto.getTitle(),
+//                dto.getSeats(),
+//                activity,
+//                getSessionSchedules(dto)
+//        );
+//
+//        return sessionRepository.save(session);
+//    }
+//
+//    public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
+//        Activity activity = getActivity(activityId);
+//
+//        Session session = new Session(
+//                dto.getTitle(),
+//                dto.getSeats(),
+//                activity,
+//                getSessionSchedules(dto)
+//        );
+//
+//        return sessionRepository.save(session);
+//    }
+//
+//    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+//        Session session = getSession(sessionId);
+//        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
+//
+//        session.setTitle(dto.getTitle());
+//        session.setSeats(dto.getSeats());
+//
+//        session.setSessionsSchedules(sessionSchedule);
+//
+//        return sessionRepository.save(session);
+//    }
+//
+//    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+//        Session session = getSession(sessionId);
+//        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
+//
+//        session.setTitle(dto.getTitle());
+//        session.setSeats(dto.getSeats());
+//
+//        session.setSessionsSchedules(sessionSchedule);
+//
+//        return sessionRepository.save(session);
+//    }
 
-        Session session = new Session(
-                dto.getTitle(),
-                dto.getSeats(),
-                activity,
-                getSessionSchedules(dto)
-        );
-
-        return sessionRepository.save(session);
-    }
-
-    public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
-        Activity activity = getActivity(activityId);
-
-        Session session = new Session(
-                dto.getTitle(),
-                dto.getSeats(),
-                activity,
-                getSessionSchedules(dto)
-        );
-
-        return sessionRepository.save(session);
-    }
-
-    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
-        Session session = getSession(sessionId);
-        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
-
-        session.setTitle(dto.getTitle());
-        session.setSeats(dto.getSeats());
-
-        session.setSessionsSchedules(sessionSchedule);
-
-        return sessionRepository.save(session);
-    }
-
-    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
-        Session session = getSession(sessionId);
-        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
-
-        session.setTitle(dto.getTitle());
-        session.setSeats(dto.getSeats());
-
-        session.setSessionsSchedules(sessionSchedule);
-
-        return sessionRepository.save(session);
-    }
-
-    // com sessions schedules
     public List<Session> findAll(UUID eventId, UUID activityId) {
-        checksEventExists(eventId);
         checksIfEventIsAssociateToActivity(eventId, getActivity(activityId));
         return sessionRepository.findAllByActivityId(activityId);
     }
 
-    // com sessions schedules
     public List<Session> findAll(UUID eventId, UUID subeventId, UUID activityId) {
-        checksEventExists(eventId);
-        checksSubeventExists(subeventId);
-        checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
-        checksIfSubeventIsAssociateToActivity(subeventId, getActivity(activityId));
+        Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
         return sessionRepository.findAllByActivityId(activityId);
     }
 
     public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Event event = getEvent(eventId);
-        Activity activity = getActivity(activityId);
         Session session = getSession(sessionId);
-        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
 
         if(session.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_CANCELED_STATUS);
         }
 
-        if(event.getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().getEvent().getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS);
         }
 
-        if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
@@ -132,12 +136,9 @@ public class SessionService {
     }
 
     public Session cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Event event = getEvent(eventId);
-        Subevent subevent = getSubEvent(subeventId);
-        Activity activity = getActivity(activityId);
         Session session = getSession(sessionId);
-        checkIfEventIsAssociateToSubevent(eventId, subevent);
-        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfSubeventIsAssociateToSession(subeventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
 
         if(session.isCanceled()) {
@@ -145,28 +146,28 @@ public class SessionService {
         }
 
         // se ao cancelar um evento e os subeventos sao cancelados também, entao não precisa verificar se o evento está cncelado...
-        if(subevent.getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().getSubevent().getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS);
         }
 
-        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().getSubevent().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS);
         }
 
-        if(event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
-            if (subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+            if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
         }
@@ -177,106 +178,83 @@ public class SessionService {
     }
 
     public void delete(UUID eventId, UUID activityId, UUID sessionId) {
-        Event event = getEvent(eventId);
-        Activity activity = getActivity(activityId);
         Session session = getSession(sessionId);
-        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
 
         if(session.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED);
         }
 
-        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
-            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START);
+        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+            if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
             }
         }
-
-        // TODO PRECISA DOS METODOS QUE CANCELA AS ENTIDADES FILHAS
 
         sessionRepository.delete(session);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
-        Event event = getEvent(eventId);
-        Subevent subevent = getSubEvent(subeventId);
-        Activity activity = getActivity(activityId);
         Session session = getSession(sessionId);
-        checkIfEventIsAssociateToSubevent(eventId, subevent);
-        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfSubeventIsAssociateToSession(subeventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
 
         if(session.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED);
         }
 
-        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
-            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START);
+        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+            if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
             }
         }
 
-        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
-            if (subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+            if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
         }
 
-        // TODO PRECISA DOS METODOS QUE CANCELA AS ENTIDADES FILHAS, ISSO EXISTE??
         sessionRepository.delete(session);
     }
 
-    private Event getEvent(UUID eventId) {
-        return eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
-    }
-
-    private void checksEventExists(UUID eventId) {
-        if (!eventRepository.existsById(eventId)) {
-            throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
+    private void checksIfEventIsAssociateToSession(UUID eventId, Session session) {
+        if (!session.getActivity().getEvent().getId().equals(eventId)) {
+            throw new ResourceNotExistsAssociationException(ResourceName.SESSION, ResourceName.EVENT);
         }
     }
 
-    private void checksSubeventExists(UUID subeventId) {
-        if(!subeventRepository.existsById(subeventId)) {
-            throw new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId);
-        }
-    }
-
-    private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
-        if (!activity.getSubevent().getId().equals(subeventId)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_SUBEVENT);
-        }
-    }
-
-    private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {
-        if (!subevent.getEvent().getId().equals(eventId)) {
-            throw new ResourceReferentialIntegrityException(ResourceName.SUBEVENT, ResourceName.EVENT);
-        }
-    }
-
-    private Subevent getSubEvent(UUID subeventId) {
-        return subeventRepository.findById(subeventId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
-    }
-    private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
-        if (!activity.getEvent().getId().equals(eventId)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_EVENT);
+    private void checksIfSubeventIsAssociateToSession(UUID subeventId, Session session) {
+        if (!session.getActivity().getSubevent().getId().equals(subeventId)) {
+            throw new ResourceNotExistsAssociationException(ResourceName.SESSION, ResourceName.SUBEVENT);
         }
     }
 
     private void checksIfActivityIsAssociateToSession(UUID activityId, Session session) {
         if (!session.getActivity().getId().equals(activityId)) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY);
+            throw new ResourceNotExistsAssociationException(ResourceName.SESSION, ResourceName.ACTIVITY);
+        }
+    }
+
+    private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
+        if (!activity.getEvent().getId().equals(eventId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.ACTIVITY, ResourceName.EVENT);
+        }
+    }
+
+    private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
+        if (!activity.getSubevent().getId().equals(subeventId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.ACTIVITY, ResourceName.SUBEVENT);
         }
     }
 
@@ -311,7 +289,11 @@ public class SessionService {
                     Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
                     Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
                     Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
-
+                    /* TODO - PRECISA CONFIRMAR, POR EXEMPLO:
+                       QUE NÃO VAI TER UMA LOCATION E UM SPACE, SEM A AREA
+                       OU SÓ UMA AREA || SPACE
+                       OU SOMENTE UMA AREA E SPACE
+                     */
                     return new SessionSchedule(
                             s.getExecution_start(),
                             s.getExecution_end(),

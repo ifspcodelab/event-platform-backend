@@ -92,7 +92,7 @@ public enum BusinessRuleType {
     SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
-    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
+    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
     SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     SESSION_CANCEL_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com status cancelado"),
     SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão em uma atividade com status de rascunho"),
@@ -101,7 +101,9 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um evento em rascunho"),
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um subevento em rascunho"),
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
-    SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento");
+    SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
+    SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS("Não é possível criar uma sessão com uma atividade cancelada"),
+    SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de inscrição do evento é antes de hoje");
 
 
     String message;

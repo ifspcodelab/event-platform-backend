@@ -51,7 +51,7 @@ public class AccountService {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
         }
 
-        if(accountRepository.existsByCpf(myDataUpdateDto.getCpf())) {
+        if (accountRepository.existsByCpfAndIdNot(myDataUpdateDto.getCpf(), UUID.fromString(decodedToken.getSubject()))) {
             throw new ResourceAlreadyExistsException(ResourceName.CPF, "CPF", myDataUpdateDto.getCpf());
         }
 
@@ -64,11 +64,13 @@ public class AccountService {
         account.setName(myDataUpdateDto.getName());
         account.setCpf(myDataUpdateDto.getCpf());
 
+        accountRepository.save(account);
+
         log.info("Account with email={} updated data. Before: name={}, cpf={}. Now: name={}, cpf={}",
                 account.getEmail(), oldName, oldCpf, myDataUpdateDto.getName(), myDataUpdateDto.getCpf()
         );
 
-        return accountRepository.save(account);
+        return account;
     }
 
     public void updatePassword(String accessToken, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {

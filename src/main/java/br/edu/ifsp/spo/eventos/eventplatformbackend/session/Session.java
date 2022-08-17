@@ -25,7 +25,7 @@ public class Session {
     private boolean isCanceled;
     @ManyToOne
     private Activity activity;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "session_id", nullable = false)
     private List<SessionSchedule> sessionsSchedules;
 

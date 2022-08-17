@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class SubeventService {
     private final SubeventRepository subeventRepository;
     private final EventRepository eventRepository;
+    private final ActivityService activityService;
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
@@ -185,6 +187,7 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_CANCEL_WITH_CANCELED_STATUS);
         }
 
+        activityService.cancelAllBySubeventId(eventId, subeventId);
         subevent.setStatus(EventStatus.CANCELED);
         subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
@@ -268,6 +271,7 @@ public class SubeventService {
             }
         }
         subeventRepository.saveAll(subevents);
+
     }
 
     @Transactional

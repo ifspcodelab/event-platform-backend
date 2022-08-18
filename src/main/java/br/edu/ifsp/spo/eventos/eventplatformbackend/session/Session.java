@@ -27,15 +27,15 @@ public class Session {
     private Activity activity;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "session_id", nullable = false)
-    private List<SessionSchedule> sessionsSchedules;
+    private List<SessionSchedule> sessionsSchedule;
 
-    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedules) {
+    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedule) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.seats = seats;
         this.cancellationMessage = null;
         this.activity = activity;
-        this.sessionsSchedules = sessionsShedules;
+        this.sessionsSchedule = sessionsShedule;
     }
 }
 

@@ -16,5 +16,5 @@ public class SessionDto {
     String cancellationMessage;
     boolean isCanceled;
     Activity activity;
-    List<SessionSchedule> sessionsSchedules;
+    List<SessionSchedule> sessionsSchedule;
 }

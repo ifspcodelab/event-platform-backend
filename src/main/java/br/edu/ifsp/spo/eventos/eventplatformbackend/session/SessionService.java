@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 
 // TODO FAZER OS TRECOS PARA CANCELAR TUDO, OU FAZER A VALIDAÇÃO AQUI MESMO
-// TODO MUDAR SESSIONSSCHEDULES PARA SESSONSSCHEDULE
 @Service
 @AllArgsConstructor
 public class SessionService {
@@ -46,13 +45,13 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
-        List<SessionSchedule> sessionSchedules = getSessionsSchedules(activity, dto);
+        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);
 
         Session session = new Session(
                 dto.getTitle(),
                 dto.getSeats(),
                 activity,
-                sessionSchedules
+                sessionsSchedule
         );
 
         return sessionRepository.save(session);
@@ -75,13 +74,13 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
-        List<SessionSchedule> sessionSchedules = getSessionsSchedules(activity, dto);
+        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);
 
         Session session = new Session(
                 dto.getTitle(),
                 dto.getSeats(),
                 activity,
-                sessionSchedules
+                sessionsSchedule
         );
 
         return sessionRepository.save(session);
@@ -382,8 +381,8 @@ public class SessionService {
 //                    if(s.getExecution_start().isEqual(session.get))
 //                })
 //    }
-    private List<SessionSchedule> getSessionsSchedules(Activity activity, SessionCreateDto dto) {
-        return dto.getSessionsSchedules().stream()
+    private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {
+        return dto.getSessionsSchedule().stream()
                 .map(s -> {
                     Location location = null;
                     Area area = null;

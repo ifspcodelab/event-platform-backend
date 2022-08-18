@@ -25,11 +25,7 @@ public class RegistrationController {
     private final RecaptchaService recaptchaService;
 
     @PostMapping("registration")
-    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto, HttpServletRequest request) throws InterruptedException {
-        String response = request.getParameter("re-captcha-response");
-
-        recaptchaService.isValid(response);
-
+    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) throws InterruptedException {
         Account account = registrationService.create(accountCreateDto);
 
         AccountDto accountDto = accountMapper.to(account);

@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
@@ -13,7 +13,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RegistrationService {
+public class SignupService {
     private final AccountRepository accountRepository;
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
@@ -94,11 +93,11 @@ public class RegistrationService {
 
     public Account verify(UUID token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN));
+                .orElseThrow(() -> new SignupException(SignupRuleType.NONEXISTENT_TOKEN));
 
         if (verificationToken.getExpiresIn().isBefore(Instant.now())) {
-            throw new RegistrationException(
-                RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
+            throw new SignupException(
+                SignupRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
             );
         }
 

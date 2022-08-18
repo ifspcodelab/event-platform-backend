@@ -5,8 +5,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -24,8 +22,6 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
-    private final ActivitySpeakerRepository activitySpeakerRepository;
-    private final SpeakerRepository speakerRepository;
 
     public Activity create(UUID eventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
@@ -50,10 +46,9 @@ public class ActivityService {
                 dto.getTitle(),
                 dto.getSlug(),
                 dto.getDescription(),
-                dto.getType(),
-                dto.getModality(),
+                dto.getActivityType(),
+                dto.isOnline(),
                 dto.isNeedRegistration(),
-                dto.getDuration(),
                 event
         );
 
@@ -89,10 +84,9 @@ public class ActivityService {
                 dto.getTitle(),
                 dto.getSlug(),
                 dto.getDescription(),
-                dto.getType(),
-                dto.getModality(),
+                dto.getActivityType(),
+                dto.isOnline(),
                 dto.isNeedRegistration(),
-                dto.getDuration(),
                 event,
                 subevent
         );
@@ -128,10 +122,9 @@ public class ActivityService {
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
-        activity.setType(dto.getType());
-        activity.setModality(dto.getModality());
+        activity.setType(dto.getActivityType());
+        activity.setOnline(dto.isOnline());
         activity.setNeedRegistration(dto.isNeedRegistration());
-        activity.setDuration(dto.getDuration());
 
         return activityRepository.save(activity);
     }
@@ -174,10 +167,9 @@ public class ActivityService {
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
-        activity.setType(dto.getType());
-        activity.setModality(dto.getModality());
+        activity.setType(dto.getActivityType());
+        activity.setOnline(dto.isOnline());
         activity.setNeedRegistration(dto.isNeedRegistration());
-        activity.setDuration(dto.getDuration());
 
         return activityRepository.save(activity);
     }
@@ -382,7 +374,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public List<Activity> findALl(UUID eventId) {
+    public List<Activity> findAll(UUID eventId) {
         checksEventExists(eventId);
         return activityRepository.findAllByEventIdAndSubeventNull(eventId);
     }
@@ -468,76 +460,6 @@ public class ActivityService {
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
     }
 
-    public ActivitySpeaker addActivityEventSpeaker(UUID eventId, UUID activityId, ActivitySpeakerCreateDto dto) {
-        Event event = getEvent(eventId);
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_EVENT_CANCELED_STATUS);
-        }
-
-        Activity activity = getActivity(activityId);
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS);
-        }
-
-        Speaker speaker = getSpeaker(dto.getSpeakerId());
-
-        ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
-
-        return activitySpeakerRepository.save(activitySpeaker);
-    }
-
-    public ActivitySpeaker addActivitySubEventSpeaker(UUID eventId, UUID subeventId, UUID activityId, ActivitySpeakerCreateDto dto) {
-        Event event = getEvent(eventId);
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_EVENT_CANCELED_STATUS);
-        }
-
-        Subevent subevent = getSubEvent(subeventId);
-        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS);
-        }
-
-        Activity activity = getActivity(activityId);
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS);
-        }
-
-        Speaker speaker = getSpeaker(dto.getSpeakerId());
-
-        ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
-
-        return activitySpeakerRepository.save(activitySpeaker);
-    }
-
-    public void deleteActivityEventSpeaker(UUID eventId, UUID activityId, UUID activitySpeakerId) {
-        Event event = getEvent(eventId);
-        Activity activity = getActivity(activityId);
-        checksIfEventIsAssociateToActivity(eventId, activity);
-        activitySpeakerRepository.deleteById(activitySpeakerId);
-        log.info("Activity Speaker deleted: id={}, title={}", activityId, activity.getTitle());
-    }
-
-    public void deleteActivitySubEventSpeaker(UUID eventId, UUID subeventId, UUID activityId, UUID activitySpeakerId) {
-        Event event = getEvent(eventId);
-        Subevent subevent = getSubEvent(subeventId);
-        Activity activity = getActivity(activityId);
-        checkIfEventIsAssociateToSubevent(eventId, subevent);
-        checksIfSubeventIsAssociateToActivity(subeventId, activity);
-        activitySpeakerRepository.deleteById(activitySpeakerId);
-        log.info("Activity Speaker deleted: id={}, title={}", activityId, activity.getTitle());
-    }
-
-    public List<ActivitySpeaker> findAllActivityEventSpeaker(UUID eventId, UUID activityId) {
-        checksEventExists(eventId);
-        return activitySpeakerRepository.findAllByActivityId(activityId);
-    }
-
-    public List<ActivitySpeaker> findAllActivitySubEventSpeaker(UUID eventId, UUID subeventId, UUID activityId) {
-        checksEventExists(eventId);
-        checksSubeventExists(subeventId);
-        return activitySpeakerRepository.findAllByActivityId(activityId);
-    }
-
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
@@ -546,11 +468,6 @@ public class ActivityService {
     private Subevent getSubEvent(UUID subeventId) {
         return subeventRepository.findById(subeventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
-    }
-
-    private Speaker getSpeaker(UUID speakerId) {
-        return speakerRepository.findById(speakerId)
-            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SPEAKER, speakerId));
     }
 
     private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {

@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountCreateDto;
@@ -19,8 +19,8 @@ import java.util.UUID;
 @RequestMapping("api/v1/accounts")
 @AllArgsConstructor
 @CrossOrigin(origins = "*")
-public class RegistrationController {
-    private final RegistrationService registrationService;
+public class SignupController {
+    private final SignupService signupService;
     private final AccountMapper accountMapper;
     private final RecaptchaService recaptchaService;
 
@@ -30,7 +30,7 @@ public class RegistrationController {
 
         recaptchaService.isValid(response);
 
-        Account account = registrationService.create(accountCreateDto);
+        Account account = signupService.create(accountCreateDto);
 
         AccountDto accountDto = accountMapper.to(account);
 
@@ -39,14 +39,14 @@ public class RegistrationController {
 
     @PatchMapping("registration/verification/{token}")
     public ResponseEntity<AccountDto> verification(@PathVariable UUID token) {
-        Account account = registrationService.verify(token);
+        Account account = signupService.verify(token);
 
         return ResponseEntity.ok(accountMapper.to(account));
     }
 
     @GetMapping("searchName/{name}")
     public ResponseEntity<List<AccountDto>> findByName(@PathVariable String name) {
-        List<Account> results = registrationService.search(name, true);
+        List<Account> results = signupService.search(name, true);
         return ResponseEntity.ok(accountMapper.to(results));
     }
 }

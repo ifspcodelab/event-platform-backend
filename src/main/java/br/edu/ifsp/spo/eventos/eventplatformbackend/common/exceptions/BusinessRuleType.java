@@ -80,7 +80,6 @@ public enum BusinessRuleType {
     ACTIVITY_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma atividade com um subevento em rascunho"),
     ACTIVITY_PUBLISH_WITH_EVENT_CANCELED_STATUS("Não é possível publicar uma atividade com um evento cancelado"),
     ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível publicar uma atividade em que o período de inscrição do evento é antes de hoje"),
-    ACTIVITY_PUBLISH_WITH_EVENT_DRAFT_STATUS("Não é possível publicar uma atividade com um evento em rascunho"),
     ACTIVITY_PUBLISH_WITH_SUBEVENT_CANCELED_STATUS("Não é possível publicar uma atividade com um subevento cancelado"),
     ACTIVITY_PUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível publicar uma atividade em que o período de execução é antes de hoje"),
     ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS("Não é possível publicar uma atividade com status publicado"),
@@ -92,7 +91,20 @@ public enum BusinessRuleType {
     ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar uma atividade com status de rascunho"),
     SPEAKER_ADD_WITH_EVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um evento cancelado"),
     SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um subevento cancelado"),
-    SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada");
+    SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada"),
+    SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
+    SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
+    SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
+    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
+    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
+    SESSION_CANCEL_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com status cancelado"),
+    SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão em uma atividade com status de rascunho"),
+    SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível cancelar uma sesão em uma atividade com status cancelado"),
+    SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão depois que o período de execução do evento foi finalizado"),
+    SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um evento em rascunho"),
+    SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um subevento em rascunho"),
+    SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
+    SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento");
 
     String message;
 

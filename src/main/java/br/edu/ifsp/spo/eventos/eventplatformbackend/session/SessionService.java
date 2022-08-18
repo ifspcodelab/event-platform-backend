@@ -333,14 +333,21 @@ public class SessionService {
     private List<SessionSchedule> getSessionSchedules(Activity activity, SessionCreateDto dto) {
         return dto.getSessionsSchedules().stream()
                 .map(s -> {
-                    Location location = s.getLocationId() != null ? getLocation(s.getLocationId()) : null;
-                    Area area = s.getAreaId() != null ? getArea(s.getAreaId()) : null;
-                    Space space = s.getSpaceId() != null ? getSpace(s.getSpaceId()) : null;
-                    /* TODO - PRECISA CONFIRMAR, POR EXEMPLO:
-                       QUE NÃO VAI TER UMA LOCATION E UM SPACE, SEM A AREA
-                       OU SÓ UMA AREA || SPACE
-                       OU SOMENTE UMA AREA E SPACE
-                     */
+                    Location location = null;
+                    Area area = null;
+                    Space space = null;
+
+                    if(s.getLocationId() != null) {
+                         location = getLocation(s.getLocationId());
+
+                        if(s.getAreaId() != null) {
+                             area = getArea(s.getAreaId());
+
+                            if(s.getSpaceId() != null){
+                                 space = getSpace(s.getSpaceId());
+                            }
+                        }
+                    }
 
                     if(s.getExecution_start().isAfter(s.getExecution_end())) {
                         throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);

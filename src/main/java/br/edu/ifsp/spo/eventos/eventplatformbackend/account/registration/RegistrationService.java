@@ -9,18 +9,23 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
-import lombok.AllArgsConstructor;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class RegistrationService {
     private final AccountRepository accountRepository;
@@ -28,6 +33,10 @@ public class RegistrationService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final SpeakerRepository speakerRepository;
+    private final EmailService emailService;
+
+
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -43,11 +52,11 @@ public class RegistrationService {
         }
 
         Account account = new Account(
-                dto.getName(),
-                dto.getEmail(),
-                dto.getCpf(),
-                passwordEncoder.encode(dto.getPassword()),
-                dto.getAgreed()
+            dto.getName(),
+            dto.getEmail(),
+            dto.getCpf(),
+            passwordEncoder.encode(dto.getPassword()),
+            dto.getAgreed()
         );
 
         account = accountRepository.save(account);
@@ -61,6 +70,25 @@ public class RegistrationService {
 
         log.debug("Verification token {} for email {} was created", verificationToken.getToken(), account.getEmail());
 
+        Optional<Speaker> optionalSpeaker = speakerRepository.findByCpf(account.getCpf());
+        if (optionalSpeaker.isPresent()) {
+            Speaker speaker = optionalSpeaker.get();
+            speaker.setAccount(account);
+            speakerRepository.save(speaker);
+
+            log.info(
+                "Speaker with name={} and email={} was associated with account with id {}",
+                speaker.getName(), speaker.getEmail(), account.getId()
+            );
+        }
+
+        try {
+            emailService.sendVerificationEmail(account, verificationToken);
+            log.info("Verification e-mail was sent to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
+        }
+
         return account;
     }
 
@@ -70,7 +98,7 @@ public class RegistrationService {
 
         if (verificationToken.getExpiresIn().isBefore(Instant.now())) {
             throw new RegistrationException(
-                    RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
+                RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
             );
         }
 

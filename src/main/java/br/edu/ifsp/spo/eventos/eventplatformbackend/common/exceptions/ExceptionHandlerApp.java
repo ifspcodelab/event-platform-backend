@@ -15,11 +15,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.*;
+import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND;
 
 @ControllerAdvice
 @Slf4j
@@ -42,7 +44,7 @@ public class ExceptionHandlerApp {
         ResourceNotFoundException ex,
         HttpServletRequest request
     ) {
-        String message = "Recurso não encontrado com id " + ex.getResourceId();
+        String message = "Recurso não encontrado com valor " + ex.getResourceId();
         ProblemDetail problemDetail = new ProblemDetail(
             "Resource not found exception",
             List.of(new Violation(ex.getResourceName().getName(), message))
@@ -134,7 +136,6 @@ public class ExceptionHandlerApp {
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
-
         return ResponseEntity.accepted().build();
     }
     
@@ -192,6 +193,13 @@ public class ExceptionHandlerApp {
         ProblemDetail problemDetail = new ProblemDetail("Invalid recaptcha", List.of());
 
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity<ProblemDetail> handlerMessagingException(MessagingException ex) {
+        log.warn("Verification e-mail not sent", ex);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @ExceptionHandler(MyDataResetPasswordException.class)

@@ -66,6 +66,11 @@ public class EventService {
         return getEvent(eventId);
     }
 
+    public Event findBySlug(String slug) {
+        return  eventRepository.findEventBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, slug));
+    }
+
     public List<Event> findAll() {
         return eventRepository.findAll();
     }

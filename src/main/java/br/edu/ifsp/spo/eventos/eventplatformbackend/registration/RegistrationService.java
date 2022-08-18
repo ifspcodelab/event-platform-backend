@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -66,10 +67,6 @@ public class RegistrationService {
         return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
     }
 
-    public Registration cancel(UUID accountId, UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
-        return null;
-    }
-
     public Registration create(UUID accountId, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
         var account = getAccount(accountId);
         var event = getEvent(eventId);
@@ -105,8 +102,22 @@ public class RegistrationService {
         return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
     }
 
+    public Registration cancel(UUID accountId, UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
+        return null;
+    }
+
     public Registration cancel(UUID accountId, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID registrationId) {
         return null;
+    }
+
+    public List<Registration> findAll(UUID eventId, UUID activityId, UUID sessionId) {
+        // TODO: Checar se entidades existem/estão associadas
+        return registrationRepository.findAllBySessionId(sessionId);
+    }
+
+    public List<Registration> findAll(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        // TODO: Checar se entidades existem/estão associadas
+        return registrationRepository.findAllBySessionId(sessionId);
     }
 
     private Account getAccount(UUID accountId) {

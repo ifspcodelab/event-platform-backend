@@ -21,8 +21,8 @@ import java.util.UUID;
 public class SessionSchedule {
     @Id
     private UUID id;
-    private LocalDateTime execution_start;
-    private LocalDateTime execution_end;
+    private LocalDateTime executionStart;
+    private LocalDateTime executionEnd;
     private String url;
     @ManyToOne
     private Location location;
@@ -31,10 +31,10 @@ public class SessionSchedule {
     @ManyToOne
     private Space space;
 
-    public SessionSchedule(LocalDateTime execution_start, LocalDateTime execution_end, String url, Location location, Area area, Space space) {
+    public SessionSchedule(LocalDateTime executionStart, LocalDateTime executionEnd, String url, Location location, Area area, Space space) {
         this.id = UUID.randomUUID();
-        this.execution_start = execution_start;
-        this.execution_end = execution_end;
+        this.executionStart = executionStart;
+        this.executionEnd = executionEnd;
         this.url = url;
         this.location = location;
         this.area = area;

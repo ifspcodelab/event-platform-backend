@@ -103,6 +103,7 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
     SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS("Não é possível criar uma sessão com uma atividade cancelada"),
+    SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS("Não é possível editar uma sessão com uma atividade cancelada"),
     SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de inscrição do evento é antes de hoje"),
     SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução de um ou mais horários está no passado"),
     SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT("Data de início do horário de uma ou mais sessão é anterior à data de início do evento"),
@@ -110,7 +111,11 @@ public enum BusinessRuleType {
     SESSION_SCHEDULE_EXECUTION_BEFORE_SUBEVENT_EXECUTATION("Data de início do horário da sessão é anterior à data de início do subevento"),
     SESSION_SCHEDULE_EXECUTION_AFTER_SUBEVENT_EXECUTATION("A data de fim da sessão é posterior à data de fim do subevento"),
     SESSION_CREATE_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de execução do subevento é antes de hoje"),
-    SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END("A data de início de execução de um ou mais horários de sessão é depois da data de finalização");
+    SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END("A data de início de execução de um ou mais horários de sessão é depois da data de finalização"),
+    SESSION_UPDATE_WITH_CANCELED_STATUS("Não é possível editar uma sessão cancelada"),
+    SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
+    SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do evento");
+
 
 
     String message;

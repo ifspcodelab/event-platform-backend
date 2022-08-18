@@ -13,8 +13,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SessionScheduleDto {
     UUID id;
-    LocalDateTime execution_start;
-    LocalDateTime execution_end;
+    LocalDateTime executionStart;
+    LocalDateTime executionEnd;
     String url;
     Location location;
     Area area;

@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface SessionRepository extends JpaRepository<Session, UUID> {
     List<Session> findAllByActivityId(UUID activityId);
     boolean existsByTitleIgnoreCaseAndActivityId(String title, UUID activityId);
+    boolean existsByTitleIgnoreCaseAndActivityIdAndIdNot(String title, UUID activityId, UUID sessionId);
 }

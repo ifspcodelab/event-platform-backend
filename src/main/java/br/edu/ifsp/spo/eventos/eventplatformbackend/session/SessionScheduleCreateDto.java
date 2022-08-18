@@ -10,9 +10,9 @@ import java.util.UUID;
 @Value
 public class SessionScheduleCreateDto {
     @NotNull
-    LocalDateTime execution_start;
+    LocalDateTime executionStart;
     @NotNull
-    LocalDateTime execution_end;
+    LocalDateTime executionEnd;
     @URL
     String url;
     UUID locationId;

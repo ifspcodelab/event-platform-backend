@@ -19,7 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-// TODO MUDAR O NOME DO EXECUTION DE SESSION SCHEDULE
+// TODO FAZER OS TRECOS PARA CANCELAR TUDO, OU FAZER A VALIDAÇÃO AQUI MESMO
+// TODO MUDAR SESSIONSSCHEDULES PARA SESSONSSCHEDULE
 @Service
 @AllArgsConstructor
 public class SessionService {
@@ -45,7 +46,7 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
-        List<SessionSchedule> sessionSchedules = getSessionSchedules(activity, dto);
+        List<SessionSchedule> sessionSchedules = getSessionsSchedules(activity, dto);
 
         Session session = new Session(
                 dto.getTitle(),
@@ -74,7 +75,7 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
-        List<SessionSchedule> sessionSchedules = getSessionSchedules(activity, dto);
+        List<SessionSchedule> sessionSchedules = getSessionsSchedules(activity, dto);
 
         Session session = new Session(
                 dto.getTitle(),
@@ -88,7 +89,28 @@ public class SessionService {
 
 //    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
 //        Session session = getSession(sessionId);
-//        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
+//        checksIfEventIsAssociateToSession(eventId, session);
+//        checksIfActivityIsAssociateToSession(activityId, session);
+//
+//        if(session.isCanceled()) {
+//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
+//        }
+//
+//        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
+//            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+//        }
+//
+//        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
+//        }
+//
+//        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+//            if (session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+//                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
+//            }
+//        }
+//
+//        List<SessionSchedule> sessionSchedule = getSessionsSchedules(session.getActivity(), dto);
 //
 //        session.setTitle(dto.getTitle());
 //        session.setSeats(dto.getSeats());
@@ -100,7 +122,30 @@ public class SessionService {
 //
 //    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
 //        Session session = getSession(sessionId);
-//        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
+//        checksIfEventIsAssociateToSession(eventId, session);
+//        checksIfSubeventIsAssociateToSession(subeventId, session);
+//        checksIfActivityIsAssociateToSession(activityId, session);
+//
+//        if(session.isCanceled()) {
+//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
+//        }
+//
+//        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
+//            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+//        }
+//
+//        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
+//        }
+//
+//
+//        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+//            if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+//                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
+//            }
+//        }
+//
+//        List<SessionSchedule> sessionSchedule = getSessionsSchedules(session.getActivity(), dto);
 //
 //        session.setTitle(dto.getTitle());
 //        session.setSeats(dto.getSeats());
@@ -330,7 +375,14 @@ public class SessionService {
 //        sessionRepository.saveAll(sessions);
 //    }
 
-    private List<SessionSchedule> getSessionSchedules(Activity activity, SessionCreateDto dto) {
+
+//    private void checksIfSessionExecutionPeriodHasChangedAfterRegistrationEventPeriodStart(Session session, List<SessionSchedule> sessionSchedules) {
+//        sessionSchedules.stream()
+//                .map(s -> {
+//                    if(s.getExecution_start().isEqual(session.get))
+//                })
+//    }
+    private List<SessionSchedule> getSessionsSchedules(Activity activity, SessionCreateDto dto) {
         return dto.getSessionsSchedules().stream()
                 .map(s -> {
                     Location location = null;
@@ -349,37 +401,37 @@ public class SessionService {
                         }
                     }
 
-                    if(s.getExecution_start().isAfter(s.getExecution_end())) {
+                    if(s.getExecutionStart().isAfter(s.getExecutionEnd())) {
                         throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);
                     }
 
-                    if (s.getExecution_start().isBefore(LocalDateTime.now()) ||
-                            s.getExecution_end().isBefore(LocalDateTime.now())
+                    if (s.getExecutionStart().isBefore(LocalDateTime.now()) ||
+                            s.getExecutionEnd().isBefore(LocalDateTime.now())
                     ) {
                         throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
                     }
 
-                    if (s.getExecution_start().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
+                    if (s.getExecutionStart().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
                         throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT);
                     }
 
-                    if (s.getExecution_end().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
+                    if (s.getExecutionEnd().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
                         throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT);
                     }
 
                     if (activity.getSubevent() != null) {
-                        if (s.getExecution_start().toLocalDate().isBefore(activity.getSubevent().getExecutionPeriod().getStartDate())) {
+                        if (s.getExecutionStart().toLocalDate().isBefore(activity.getSubevent().getExecutionPeriod().getStartDate())) {
                             throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_SUBEVENT_EXECUTATION);
                         }
 
-                        if (s.getExecution_end().toLocalDate().isAfter(activity.getSubevent().getExecutionPeriod().getEndDate())) {
+                        if (s.getExecutionEnd().toLocalDate().isAfter(activity.getSubevent().getExecutionPeriod().getEndDate())) {
                             throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_SUBEVENT_EXECUTATION);
                         }
                     }
 
                     return new SessionSchedule(
-                            s.getExecution_start(),
-                            s.getExecution_end(),
+                            s.getExecutionStart(),
+                            s.getExecutionEnd(),
                             s.getUrl(),
                             location,
                             area,

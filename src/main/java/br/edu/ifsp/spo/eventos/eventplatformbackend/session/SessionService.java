@@ -108,7 +108,7 @@ public class SessionService {
             throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
         }
 
-        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
         }
 
@@ -117,7 +117,7 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
             }
         }
-
+        // se esta no periodo de inscrição (datadeinio) nao pode editar os horarios
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
         session.setTitle(dto.getTitle());
@@ -146,7 +146,6 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
         }
 
-
         if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
             if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
@@ -173,6 +172,21 @@ public class SessionService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         return sessionRepository.findAllByActivityId(activityId);
+    }
+
+    public Session findById(UUID eventId, UUID activityId, UUID sessionId) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        return session;
+    }
+
+    public Session findById(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfSubeventIsAssociateToSession(subeventId, session);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        return session;
     }
 
     public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
@@ -382,14 +396,8 @@ public class SessionService {
         sessionRepository.saveAll(sessions);
     }
 
-//    private void checksIfSessionExecutionPeriodHasChangedAfterRegistrationEventPeriodStart(Session session, List<SessionSchedule> sessionSchedules) {
-//        // um map dentro do outro?
-//                    if(sessionSchedules.stream().map(SessionSchedule::getExecutionStart).equals(session.getSessionsSchedule().stream().map(SessionSchedule::getExecutionStart()))) {
-//
-//        }
-//    }
-
     private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {
+        // nao pode registrar uma sessao no mesmo ESPAÇO e horario - precisa do sessionScheduleRepository
         return dto.getSessionsSchedule().stream()
                 .map(s -> {
                     Location location = null;
@@ -410,6 +418,10 @@ public class SessionService {
 
                     if(s.getExecutionStart().isAfter(s.getExecutionEnd())) {
                         throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);
+                    }
+
+                    if(s.getExecutionStart().equals(s.getExecutionEnd())) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO__EXECUTION_END);
                     }
 
                     if (s.getExecutionStart().isBefore(LocalDateTime.now()) ||

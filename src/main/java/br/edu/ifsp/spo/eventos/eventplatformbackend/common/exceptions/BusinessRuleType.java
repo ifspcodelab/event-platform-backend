@@ -114,7 +114,8 @@ public enum BusinessRuleType {
     SESSION_UPDATE_WITH_CANCELED_STATUS("Não é possível editar uma sessão cancelada"),
     SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do evento"),
-    SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível criar uma sessão em uma atividade cancelada");
+    SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível criar uma sessão em uma atividade cancelada"),
+    SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO__EXECUTION_END("Não é possível criar horário(s) de sessão em que a data de início de execução é igual a data de finalização");
 
 
     String message;

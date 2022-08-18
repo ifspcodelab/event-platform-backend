@@ -104,7 +104,11 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um evento em rascunho"),
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão com um subevento em rascunho"),
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
-    SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento");
+    SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
+    REGISTRATION_CREATE_ALREADY_EXISTS("Não é possível se registrar em uma sessão em que já está registrado"),
+    REGISTRATION_CREATE_WITH_CANCELED_SESSION("Não é possível se registrar em uma sessão cancelada"),
+    REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED("Não é possível se registrar em uma sessão em que sua atividade não esteja publicada"),
+    REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD("Não é possível se registrar em uma sessão em que o período de inscrições do evento não tenha iniciado");
 
     String message;
 

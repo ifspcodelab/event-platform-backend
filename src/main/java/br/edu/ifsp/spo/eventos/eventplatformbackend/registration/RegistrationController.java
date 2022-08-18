@@ -26,7 +26,7 @@ public class RegistrationController {
     public ResponseEntity<RegistrationDto> create(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
         UUID accountId = UUID.fromString("4162a226-9187-460f-a54b-a378c580e2a5");
 
-        var registration = registrationService.create(accountId, eventId, activityId, sessionId);
+        var registration = registrationService.create(accountId, eventId, subeventId, activityId, sessionId);
 
         return new ResponseEntity<>(registrationMapper.to(registration), HttpStatus.CREATED);
     }

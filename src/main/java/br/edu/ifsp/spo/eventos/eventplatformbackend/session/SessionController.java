@@ -23,13 +23,13 @@ public class SessionController {
         SessionDto sessionDto = sessionMapper.to(session);
         return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
     }
-//
-//    @PostMapping("sub-events/{subeventId}/activities/{activityId}/sessions")
-//    public ResponseEntity<SessionDto> create (@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {
-//        Session session = sessionService.create(eventId, subeventId, activityId, sessionCreateDto);
-//        SessionDto sessionDto = sessionMapper.to(session);
-//        return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
-//    }
+
+    @PostMapping("sub-events/{subeventId}/activities/{activityId}/sessions")
+    public ResponseEntity<SessionDto> create (@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {
+        Session session = sessionService.create(eventId, subeventId, activityId, sessionCreateDto);
+        SessionDto sessionDto = sessionMapper.to(session);
+        return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
+    }
 //
 //    @PutMapping("activities/{activityId}/sessions/{sessionId}")
 //    public ResponseEntity<SessionDto> update(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {

@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+// TODO MUDAR O NOME DO EXECUTION DE SESSION SCHEDULE
 @Service
 @AllArgsConstructor
 public class SessionService {
@@ -46,32 +47,45 @@ public class SessionService {
 
         List<SessionSchedule> sessionSchedules = getSessionSchedules(activity, dto);
 
+        Session session = new Session(
+                dto.getTitle(),
+                dto.getSeats(),
+                activity,
+                sessionSchedules
+        );
+
+        return sessionRepository.save(session);
+    }
+
+    public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
+        Activity activity = getActivity(activityId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+
+        if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
+
+        if (activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS);
+        }
+
+        if (activity.getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
+        List<SessionSchedule> sessionSchedules = getSessionSchedules(activity, dto);
 
         Session session = new Session(
                 dto.getTitle(),
                 dto.getSeats(),
                 activity,
                 sessionSchedules
-
         );
 
         return sessionRepository.save(session);
     }
 
-//
-//    public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
-//        Activity activity = getActivity(activityId);
-//
-//        Session session = new Session(
-//                dto.getTitle(),
-//                dto.getSeats(),
-//                activity,
-//                getSessionSchedules(dto)
-//        );
-//
-//        return sessionRepository.save(session);
-//    }
-//
 //    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
 //        Session session = getSession(sessionId);
 //        List<SessionSchedule> sessionSchedule = getSessionSchedules(dto); // do DTO
@@ -316,27 +330,6 @@ public class SessionService {
 //        sessionRepository.saveAll(sessions);
 //    }
 
-//    // TODO MUDAR O NOME DO EXECUTION DE SESSION SCHEDULE
-//    // SEM
-//    private List<SessionSchedule> validationsSessionSchedules(Activity activity, List<SessionSchedule> sessionSchedules) {
-//        sessionSchedules.stream()
-//                .map(s -> {
-//                    if (s.getExecution_start().isBefore(LocalDateTime.now()) ||
-//                            s.getExecution_end().isBefore(LocalDateTime.now())
-//                    ) {
-//                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
-//                    }
-//
-//                    if(s.getExecution_start().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
-//                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT);
-//                    }
-//
-//                    if(s.getExecution_end().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
-//                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT);
-//                    }
-//                }
-//    }
-
     private List<SessionSchedule> getSessionSchedules(Activity activity, SessionCreateDto dto) {
         return dto.getSessionsSchedules().stream()
                 .map(s -> {
@@ -349,19 +342,33 @@ public class SessionService {
                        OU SOMENTE UMA AREA E SPACE
                      */
 
-                        if (s.getExecution_start().isBefore(LocalDateTime.now()) ||
-                                s.getExecution_end().isBefore(LocalDateTime.now())
-                        ) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
+                    if(s.getExecution_start().isAfter(s.getExecution_end())) {
+                        throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);
+                    }
+
+                    if (s.getExecution_start().isBefore(LocalDateTime.now()) ||
+                            s.getExecution_end().isBefore(LocalDateTime.now())
+                    ) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
+                    }
+
+                    if (s.getExecution_start().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT);
+                    }
+
+                    if (s.getExecution_end().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT);
+                    }
+
+                    if (activity.getSubevent() != null) {
+                        if (s.getExecution_start().toLocalDate().isBefore(activity.getSubevent().getExecutionPeriod().getStartDate())) {
+                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_SUBEVENT_EXECUTATION);
                         }
 
-                        if (s.getExecution_start().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT);
+                        if (s.getExecution_end().toLocalDate().isAfter(activity.getSubevent().getExecutionPeriod().getEndDate())) {
+                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_SUBEVENT_EXECUTATION);
                         }
-
-                        if (s.getExecution_end().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT);
-                        }
+                    }
 
                     return new SessionSchedule(
                             s.getExecution_start(),
@@ -374,4 +381,3 @@ public class SessionService {
                 }).toList();
         }
     }
-

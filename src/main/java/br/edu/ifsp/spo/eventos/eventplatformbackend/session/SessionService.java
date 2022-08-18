@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// TODO FAZER OS TRECOS PARA CANCELAR TUDO, OU FAZER A VALIDAÇÃO AQUI MESMO
 @Service
 @AllArgsConstructor
 public class SessionService {
@@ -35,15 +34,19 @@ public class SessionService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
 
-        if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
+        }
+
+        if(sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
         }
 
-        if (activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_ACTIVITY_CANCELED_STATUS);
         }
 
-        if (activity.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(activity.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -63,6 +66,10 @@ public class SessionService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
+
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
+        }
 
         if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
@@ -208,7 +215,6 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_CANCELED_STATUS);
         }
 
-        // se ao cancelar um evento e os subeventos sao cancelados também, entao não precisa verificar se o evento está cncelado...
         if(session.getActivity().getSubevent().getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS);
         }

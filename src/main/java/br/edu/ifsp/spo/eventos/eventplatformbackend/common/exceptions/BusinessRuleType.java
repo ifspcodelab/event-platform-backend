@@ -89,7 +89,6 @@ public enum BusinessRuleType {
     ACTIVITY_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar uma atividade status com status cancelado"),
     ACTIVITY_UNPUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível despublicar uma atividade em que o período de execução do subevento já tenha iniciado"),
     ACTIVITY_UNPUBLISH_WITH_DRAFT_STATUS("Não é possível despublicar uma atividade com status de rascunho"),
-    SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
     SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
@@ -114,8 +113,8 @@ public enum BusinessRuleType {
     SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END("A data de início de execução de um ou mais horários de sessão é depois da data de finalização"),
     SESSION_UPDATE_WITH_CANCELED_STATUS("Não é possível editar uma sessão cancelada"),
     SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
-    SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do evento");
-
+    SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do evento"),
+    SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível criar uma sessão em uma atividade cancelada");
 
 
     String message;

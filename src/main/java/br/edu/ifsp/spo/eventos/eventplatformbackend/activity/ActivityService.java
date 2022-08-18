@@ -5,7 +5,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
@@ -332,7 +331,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-//        sessionService.cancelAllByActivityId(eventId, activityId);
+        sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -374,7 +373,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
         }
 
-//        sessionService.cancelAllByActivityId(eventId, subeventId, activityId);
+        sessionService.cancelAllByActivityId(eventId, subeventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -512,39 +511,46 @@ public class ActivityService {
         }
     }
 
-//    @Transactional
-//    public void cancelAllByEventId(UUID eventId) {
-//
-//        List<Activity> activities = new ArrayList<>();
-//        for (Activity activity : this.findAll(eventId)) {
-//
-//            if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
-//                    (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-//                            activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now()))
-//            ) {
-//                activity.setStatus(EventStatus.CANCELED);
-//                activities.add(activity);
-//            }
-//        }
-//        activityRepository.saveAll(activities);
-//    }
+    @Transactional
+    public void cancelAllByEventId(UUID eventId) {
 
-//    @Transactional
-//    public void cancelAllBySubeventId(UUID eventId, UUID subeventId) {
-//
-//        List<Activity> activities = new ArrayList<>();
-//        for (Activity activity : this.findAll(eventId, subeventId)) {
-//
-//            if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
-//                    (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-//                            activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())) &&
-//                    (activity.getSubevent().getExecutionPeriod().getEndDate().isAfter(LocalDate.now()) ||
-//                            activity.getSubevent().getExecutionPeriod().getEndDate().isEqual(LocalDate.now()))
-//            ) {
-//                activity.setStatus(EventStatus.CANCELED);
-//                activities.add(activity);
-//            }
-//        }
-//        activityRepository.saveAll(activities);
-//    }
+        List<Activity> activities = new ArrayList<>();
+        for (Activity activity : this.findAll(eventId)) {
+
+            if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
+                    (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                            activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now()))
+            ) {
+                activity.setStatus(EventStatus.CANCELED);
+                activities.add(activity);
+            }
+
+            sessionService.cancelAllByActivityId(eventId, activity.getId());
+
+        }
+
+        activityRepository.saveAll(activities);
+    }
+
+    @Transactional
+    public void cancelAllBySubeventId(UUID eventId, UUID subeventId) {
+
+        List<Activity> activities = new ArrayList<>();
+        for (Activity activity : this.findAll(eventId, subeventId)) {
+
+            if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
+                    (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                            activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())) &&
+                    (activity.getSubevent().getExecutionPeriod().getEndDate().isAfter(LocalDate.now()) ||
+                            activity.getSubevent().getExecutionPeriod().getEndDate().isEqual(LocalDate.now()))
+            ) {
+                activity.setStatus(EventStatus.CANCELED);
+                activities.add(activity);
+            }
+
+            sessionService.cancelAllByActivityId(eventId, subeventId, activity.getId());
+        }
+
+        activityRepository.saveAll(activities);
+    }
 }

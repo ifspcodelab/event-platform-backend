@@ -14,8 +14,10 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -86,73 +88,73 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-//    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
-//        Session session = getSession(sessionId);
-//        checksIfEventIsAssociateToSession(eventId, session);
-//        checksIfActivityIsAssociateToSession(activityId, session);
-//
-//        if(session.isCanceled()) {
-//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
-//        }
-//
-//        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
-//            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-//        }
-//
-//        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
-//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
-//        }
-//
-//        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-//            if (session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-//                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
-//            }
-//        }
-//
-//        List<SessionSchedule> sessionSchedule = getSessionsSchedules(session.getActivity(), dto);
-//
-//        session.setTitle(dto.getTitle());
-//        session.setSeats(dto.getSeats());
-//
-//        session.setSessionsSchedules(sessionSchedule);
-//
-//        return sessionRepository.save(session);
-//    }
-//
-//    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
-//        Session session = getSession(sessionId);
-//        checksIfEventIsAssociateToSession(eventId, session);
-//        checksIfSubeventIsAssociateToSession(subeventId, session);
-//        checksIfActivityIsAssociateToSession(activityId, session);
-//
-//        if(session.isCanceled()) {
-//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
-//        }
-//
-//        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
-//            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-//        }
-//
-//        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
-//            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
-//        }
-//
-//
-//        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-//            if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-//                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
-//            }
-//        }
-//
-//        List<SessionSchedule> sessionSchedule = getSessionsSchedules(session.getActivity(), dto);
-//
-//        session.setTitle(dto.getTitle());
-//        session.setSeats(dto.getSeats());
-//
-//        session.setSessionsSchedules(sessionSchedule);
-//
-//        return sessionRepository.save(session);
-//    }
+    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfActivityIsAssociateToSession(activityId, session);
+
+        if(session.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
+        }
+
+        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
+
+        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
+        }
+
+        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+            if (session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
+            }
+        }
+
+        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
+
+        session.setTitle(dto.getTitle());
+        session.setSeats(dto.getSeats());
+
+        session.setSessionsSchedule(sessionSchedule);
+
+        return sessionRepository.save(session);
+    }
+
+    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfSubeventIsAssociateToSession(subeventId, session);
+        checksIfActivityIsAssociateToSession(activityId, session);
+
+        if(session.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
+        }
+
+        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
+
+        if (session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_CANCELED_STATUS);
+        }
+
+
+        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+            if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
+            }
+        }
+
+        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
+
+        session.setTitle(dto.getTitle());
+        session.setSeats(dto.getSeats());
+
+        session.setSessionsSchedule(sessionSchedule);
+
+        return sessionRepository.save(session);
+    }
 
     public List<Session> findAll(UUID eventId, UUID activityId) {
         checksIfEventIsAssociateToActivity(eventId, getActivity(activityId));
@@ -344,43 +346,43 @@ public class SessionService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
     }
 
-//    @Transactional
-//    public void cancelAllByActivityId(UUID eventId, UUID activityId) {
-//
-//        List<Session> sessions = new ArrayList<>();
-//        for (Session session : this.findAll(eventId, activityId)) {
-//
-//            if(!session.isCanceled())
-//             {
-//                session.setCanceled(true);
-//                sessions.add(session);
-//            }
-//        }
-//        sessionRepository.saveAll(sessions);
-//    }
-//
-//    @Transactional
-//    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId) {
-//
-//        List<Session> sessions = new ArrayList<>();
-//        for (Session session : this.findAll(eventId, subeventId, activityId)) {
-//
-//            if(!session.isCanceled())
-//            {
-//                session.setCanceled(true);
-//                sessions.add(session);
-//            }
-//        }
-//        sessionRepository.saveAll(sessions);
-//    }
+    @Transactional
+    public void cancelAllByActivityId(UUID eventId, UUID activityId) {
 
+        List<Session> sessions = new ArrayList<>();
+        for (Session session : this.findAll(eventId, activityId)) {
+
+            if(!session.isCanceled())
+             {
+                session.setCanceled(true);
+                sessions.add(session);
+            }
+        }
+        sessionRepository.saveAll(sessions);
+    }
+
+    @Transactional
+    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId) {
+
+        List<Session> sessions = new ArrayList<>();
+        for (Session session : this.findAll(eventId, subeventId, activityId)) {
+
+            if(!session.isCanceled())
+            {
+                session.setCanceled(true);
+                sessions.add(session);
+            }
+        }
+        sessionRepository.saveAll(sessions);
+    }
 
 //    private void checksIfSessionExecutionPeriodHasChangedAfterRegistrationEventPeriodStart(Session session, List<SessionSchedule> sessionSchedules) {
-//        sessionSchedules.stream()
-//                .map(s -> {
-//                    if(s.getExecution_start().isEqual(session.get))
-//                })
+//        // um map dentro do outro?
+//                    if(sessionSchedules.stream().map(SessionSchedule::getExecutionStart).equals(session.getSessionsSchedule().stream().map(SessionSchedule::getExecutionStart()))) {
+//
+//        }
 //    }
+
     private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {
         return dto.getSessionsSchedule().stream()
                 .map(s -> {

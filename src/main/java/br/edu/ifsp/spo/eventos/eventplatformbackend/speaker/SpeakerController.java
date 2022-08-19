@@ -1,13 +1,17 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -25,7 +29,9 @@ public class SpeakerController {
     }
 
     @PutMapping("{speakerId}")
-    public ResponseEntity<SpeakerDto> update(@PathVariable UUID speakerId, @RequestBody @Valid SpeakerCreateDto dto) {
+    public ResponseEntity<SpeakerDto> update(@PathVariable UUID speakerId, @RequestBody @Valid SpeakerCreateDto dto, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        System.out.println(jwtUserDetails);
         Speaker speaker = speakerService.update(speakerId, dto);
         SpeakerDto speakerDto = speakerMapper.to(speaker);
         return ResponseEntity.ok(speakerDto);

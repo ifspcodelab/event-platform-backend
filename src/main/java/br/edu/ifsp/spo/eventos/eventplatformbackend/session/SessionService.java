@@ -117,8 +117,26 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
             }
         }
-        // se esta no periodo de inscrição (datadeinio) nao pode editar os horarios
+
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
+
+        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+            if(!session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionStart).toList()
+                    .equals(sessionSchedule.stream()
+                            .map(SessionSchedule::getExecutionStart).toList())){
+                throw new BusinessRuleException(BusinessRuleType.UPDATE_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
+            }
+        }
+
+        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+            if(!session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionEnd).toList()
+                    .equals(sessionSchedule.stream()
+                            .map(SessionSchedule::getExecutionEnd).toList())){
+                throw new BusinessRuleException(BusinessRuleType.UPDATE_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
+            }
+        }
 
         session.setTitle(dto.getTitle());
         session.setSeats(dto.getSeats());
@@ -153,6 +171,24 @@ public class SessionService {
         }
 
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
+
+        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+            if(!session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionStart).toList()
+                    .equals(sessionSchedule.stream()
+                            .map(SessionSchedule::getExecutionStart).toList())){
+                throw new BusinessRuleException(BusinessRuleType.UPDATE_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
+            }
+        }
+
+        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+            if(!session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionEnd).toList()
+                    .equals(sessionSchedule.stream()
+                            .map(SessionSchedule::getExecutionEnd).toList())){
+                throw new BusinessRuleException(BusinessRuleType.UPDATE_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
+            }
+        }
 
         session.setTitle(dto.getTitle());
         session.setSeats(dto.getSeats());
@@ -433,7 +469,7 @@ public class SessionService {
                     }
 
                     if(s.getExecutionStart().equals(s.getExecutionEnd())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO__EXECUTION_END);
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO_EXECUTION_END);
                     }
 
                     if (s.getExecutionStart().isBefore(LocalDateTime.now()) ||

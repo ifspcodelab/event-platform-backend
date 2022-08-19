@@ -404,6 +404,18 @@ public class SessionService {
                     Area area = null;
                     Space space = null;
 
+                    if(s.getLocationId() == null) {
+                        if(s.getAreaId() != null || s.getSpaceId() != null) {
+                            throw new BusinessRuleException(BusinessRuleType.ADD_AREA_OR_SPACE_IN_A_NULL_LOCATION);
+                        }
+                    }
+
+                    if(s.getLocationId() != null) {
+                        if(s.getAreaId() == null && s.getSpaceId() != null) {
+                            throw new BusinessRuleException(BusinessRuleType.ADD_SPACE_IN_A_NULL_AREA);
+                        }
+                    }
+
                     if(s.getLocationId() != null) {
                          location = getLocation(s.getLocationId());
 

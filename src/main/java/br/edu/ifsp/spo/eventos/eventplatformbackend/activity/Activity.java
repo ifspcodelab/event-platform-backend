@@ -31,13 +31,24 @@ public class Activity {
     private ActivityModality modality;
     private boolean needRegistration;
     private Integer duration;
+    private Integer setupTime;
     private String cancellationMessage;
     @ManyToOne
     private Event event;
     @ManyToOne
     private Subevent subevent;
 
-    public Activity(String title, String slug, String description, ActivityType type, ActivityModality modality, boolean needRegistration, Integer duration, Event event) {
+    public Activity(
+        String title,
+        String slug,
+        String description,
+        ActivityType type,
+        ActivityModality modality,
+        boolean needRegistration,
+        Integer duration,
+        Integer setupTime,
+        Event event
+    ) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.slug = slug;
@@ -47,11 +58,23 @@ public class Activity {
         this.modality = modality;
         this.needRegistration = needRegistration;
         this.duration = duration;
+        this.setupTime = setupTime;
         this.cancellationMessage = null;
         this.event = event;
     }
 
-    public Activity(String title, String slug, String description, ActivityType type, ActivityModality modality, boolean needRegistration, Integer duration, Event event, Subevent subevent) {
+    public Activity(
+        String title,
+        String slug,
+        String description,
+        ActivityType type,
+        ActivityModality modality,
+        boolean needRegistration,
+        Integer duration,
+        Integer setupTime,
+        Event event,
+        Subevent subevent
+    ) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.slug = slug;
@@ -61,6 +84,7 @@ public class Activity {
         this.modality = modality;
         this.needRegistration = needRegistration;
         this.duration = duration;
+        this.setupTime = setupTime;
         this.cancellationMessage = null;
         this.event = event;
         this.subevent = subevent;

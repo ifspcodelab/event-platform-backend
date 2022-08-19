@@ -20,6 +20,7 @@ public class ActivityDto {
     ActivityModality modality;
     boolean needRegistration;
     Integer duration;
+    Integer setupTime;
     String cancellationMessage;
     Event event;
     Subevent subevent;

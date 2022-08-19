@@ -31,4 +31,7 @@ public class ActivityCreateDto {
     @NotNull
     @Min(value = 10)
     Integer duration;
+    @NotNull
+    @Min(value = 5)
+    Integer setupTime;
 }

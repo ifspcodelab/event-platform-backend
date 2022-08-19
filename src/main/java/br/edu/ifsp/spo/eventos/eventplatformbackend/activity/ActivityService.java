@@ -47,14 +47,15 @@ public class ActivityService {
         }
 
         Activity activity = new Activity(
-                dto.getTitle(),
-                dto.getSlug(),
-                dto.getDescription(),
-                dto.getType(),
-                dto.getModality(),
-                dto.isNeedRegistration(),
-                dto.getDuration(),
-                event
+            dto.getTitle(),
+            dto.getSlug(),
+            dto.getDescription(),
+            dto.getType(),
+            dto.getModality(),
+            dto.isNeedRegistration(),
+            dto.getDuration(),
+            dto.getSetupTime(),
+            event
         );
 
         return activityRepository.save(activity);
@@ -86,15 +87,16 @@ public class ActivityService {
         }
 
         Activity activity = new Activity(
-                dto.getTitle(),
-                dto.getSlug(),
-                dto.getDescription(),
-                dto.getType(),
-                dto.getModality(),
-                dto.isNeedRegistration(),
-                dto.getDuration(),
-                event,
-                subevent
+            dto.getTitle(),
+            dto.getSlug(),
+            dto.getDescription(),
+            dto.getType(),
+            dto.getModality(),
+            dto.isNeedRegistration(),
+            dto.getDuration(),
+            dto.getSetupTime(),
+            event,
+            subevent
         );
 
         return activityRepository.save(activity);
@@ -132,6 +134,7 @@ public class ActivityService {
         activity.setModality(dto.getModality());
         activity.setNeedRegistration(dto.isNeedRegistration());
         activity.setDuration(dto.getDuration());
+        activity.setSetupTime(dto.getSetupTime());
 
         return activityRepository.save(activity);
     }
@@ -178,6 +181,7 @@ public class ActivityService {
         activity.setModality(dto.getModality());
         activity.setNeedRegistration(dto.isNeedRegistration());
         activity.setDuration(dto.getDuration());
+        activity.setSetupTime(dto.getSetupTime());
 
         return activityRepository.save(activity);
     }
@@ -479,6 +483,10 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS);
         }
 
+        if(activitySpeakerRepository.existsBySpeakerIdAndActivityId(dto.getSpeakerId(), activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_ALREADY_EXISTS);
+        }
+
         Speaker speaker = getSpeaker(dto.getSpeakerId());
 
         ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
@@ -500,6 +508,10 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS);
+        }
+
+        if(activitySpeakerRepository.existsBySpeakerIdAndActivityId(dto.getSpeakerId(), activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_ALREADY_EXISTS);
         }
 
         Speaker speaker = getSpeaker(dto.getSpeakerId());

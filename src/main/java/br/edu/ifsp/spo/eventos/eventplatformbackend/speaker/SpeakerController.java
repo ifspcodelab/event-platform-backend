@@ -7,11 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -54,5 +53,10 @@ public class SpeakerController {
     public ResponseEntity<Void> delete(@PathVariable UUID speakerId) {
         speakerService.delete(speakerId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("searchName/{name}")
+    public ResponseEntity<List<SpeakerDto>> findByName(@PathVariable String name) {
+         return ResponseEntity.ok(speakerMapper.to(speakerService.findByName(name)));
     }
 }

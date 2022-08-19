@@ -4,41 +4,59 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import lombok.AllArgsConstructor;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class RegistrationService {
     private final AccountRepository accountRepository;
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RecaptchaService recaptchaService;
+    private final SpeakerRepository speakerRepository;
+    private final EmailService emailService;
+
+
 
     @Transactional
     public Account create(AccountCreateDto dto) {
+        if (!recaptchaService.isValid(dto.getUserRecaptcha())) {
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
+        }
+
         if(accountRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "e-mail", dto.getEmail());
+            throw new ResourceAlreadyExistsException(ResourceName.EMAIL, "e-mail", dto.getEmail());
         }
         if(accountRepository.existsByCpf(dto.getCpf())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "cpf", dto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.CPF, "cpf", dto.getCpf());
         }
 
         Account account = new Account(
-                dto.getName(),
-                dto.getEmail(),
-                dto.getCpf(),
-                passwordEncoder.encode(dto.getPassword()),
-                dto.getAgreed()
+            dto.getName(),
+            dto.getEmail(),
+            dto.getCpf(),
+            passwordEncoder.encode(dto.getPassword()),
+            dto.getAgreed()
         );
 
         account = accountRepository.save(account);
@@ -52,6 +70,25 @@ public class RegistrationService {
 
         log.debug("Verification token {} for email {} was created", verificationToken.getToken(), account.getEmail());
 
+        Optional<Speaker> optionalSpeaker = speakerRepository.findByCpf(account.getCpf());
+        if (optionalSpeaker.isPresent()) {
+            Speaker speaker = optionalSpeaker.get();
+            speaker.setAccount(account);
+            speakerRepository.save(speaker);
+
+            log.info(
+                "Speaker with name={} and email={} was associated with account with id {}",
+                speaker.getName(), speaker.getEmail(), account.getId()
+            );
+        }
+
+        try {
+            emailService.sendVerificationEmail(account, verificationToken);
+            log.info("Verification e-mail was sent to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
+        }
+
         return account;
     }
 
@@ -61,7 +98,7 @@ public class RegistrationService {
 
         if (verificationToken.getExpiresIn().isBefore(Instant.now())) {
             throw new RegistrationException(
-                    RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
+                RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
             );
         }
 
@@ -72,5 +109,10 @@ public class RegistrationService {
         verificationTokenRepository.delete(verificationToken);
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;
+    }
+
+    public List<Account> search(String name, Boolean verified) {
+        List<Account> accounts = accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
+        return accounts;
     }
 }

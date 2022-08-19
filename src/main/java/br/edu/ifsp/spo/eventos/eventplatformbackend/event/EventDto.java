@@ -16,4 +16,5 @@ public class EventDto {
     String smallerImage;
     String biggerImage;
     EventStatus status;
+    String cancellationMessage;
 }

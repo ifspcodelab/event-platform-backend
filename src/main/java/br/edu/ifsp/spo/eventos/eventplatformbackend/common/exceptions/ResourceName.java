@@ -11,7 +11,13 @@ public enum ResourceName {
     SPACE("Space"),
     EVENT("Event"),
     SUBEVENT("Subevent"),
-    ACCOUNT("Account");
+    ACCOUNT("Account"),
+    SPEAKER("Speaker"),
+    ORGANIZER("Organizer"),
+    ORGANIZERSUBEVENT("Organizer Subevent"),
+    EMAIL("E-mail"),
+    CPF("Cpf"),
+    ACTIVITY("Activity");
 
     private String name;
 }

@@ -1,0 +1,28 @@
+package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
+
+public enum ActivityType {
+    INAUGURAL_CLASS,
+    MAGNA_CLASS,
+    CERTIFICATION,
+    COURSE,
+    GRADUATION,
+    MEETING,
+    EXHIBITION,
+    FAIR,
+    GYMKHANA,
+    OPENING,
+    ROUND_TABLE,
+    MINI_COURSE,
+    CULTURAL_SHOW,
+    MUSICAL,
+    WORKSHOP,
+    OLYMPICS,
+    OTHER,
+    TALK,
+    PANEL,
+    POSSESSION,
+    SEMINAR,
+    TECHNICAL_VISIT,
+    WEBINAR,
+    WORK_PRESENTATION,
+}

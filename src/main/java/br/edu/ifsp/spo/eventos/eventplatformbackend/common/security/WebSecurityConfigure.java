@@ -25,11 +25,9 @@ public class WebSecurityConfigure {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         var accountOpenPaths = List.of(
             "/api/v1/accounts/registration",
+            "/api/v1/accounts/registration/verification/{token}",
             "/api/v1/accounts/login",
             "/api/v1/accounts/refresh-token-rotation",
-            "/api/v1/accounts/logout",
-            "/api/v1/accounts/registration",
-            "/api/v1/accounts/registration/verification/{token}",
             "/api/v1/accounts/password/forgot",
             "/api/v1/accounts/password/reset"
         );
@@ -44,7 +42,11 @@ public class WebSecurityConfigure {
             "/api/v1/events",
             "/api/v1/events/{eventId}",
             "/api/v1/events/{eventId}/sub-events",
-            "/api/v1/events/{eventId}/sub-events/{subeventId}"
+            "/api/v1/events/{eventId}/sub-events/{subeventId}",
+            "/api/v1/events/{eventId}/activities",
+            "/api/v1/events/{eventId}/activities/{activityId}",
+            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities",
+            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities/{activityId}"
         );
 
         http

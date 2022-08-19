@@ -16,6 +16,6 @@ public class NameValidator implements ConstraintValidator<Name, String> {
         if(value.isBlank()) {
             return false;
         }
-        return value.matches("^[A-Za-záàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ'-[\\s]]*$");
+        return value.matches("^[a-zA-ZáàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ'\\-`\\s]+ [a-zA-ZáàâãéèêíóôõúçñÁÀÂÃÉÈÍÓÔÕÚÇ'\\-`\\s]+$");
     }
 }

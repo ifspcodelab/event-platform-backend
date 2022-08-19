@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,12 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventDto>> index() {
+    public ResponseEntity<List<EventDto>> index(@RequestParam(required = false) String slug) {
+        if(slug != null) {
+            List<Event> events = List.of(eventService.findBySlug(slug));
+            return ResponseEntity.ok(eventMapper.to(events));
+        }
+
         List<Event> events = eventService.findAll();
 
         return ResponseEntity.ok(eventMapper.to(events));
@@ -54,8 +60,8 @@ public class EventController {
     }
 
     @PatchMapping("{eventId}/cancel")
-    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId) {
-        Event event = eventService.cancel(eventId);
+    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessage) {
+        Event event = eventService.cancel(eventId, cancellationMessage);
 
         return ResponseEntity.ok(eventMapper.to(event));
     }

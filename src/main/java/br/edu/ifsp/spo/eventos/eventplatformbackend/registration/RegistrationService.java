@@ -4,15 +4,13 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +35,11 @@ public class RegistrationService {
         var event = getEvent(eventId);
         var activity = getActivity(activityId);
         var session = getSession(sessionId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
 
         if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.CONFIRMED)
-                || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.WAITING_LIST)
+            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.WAITING_LIST)
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
         }
@@ -70,11 +70,16 @@ public class RegistrationService {
     public Registration create(UUID accountId, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
         var account = getAccount(accountId);
         var event = getEvent(eventId);
+        var subevent = getSubevent(subeventId);
         var activity = getActivity(activityId);
         var session = getSession(sessionId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
 
         if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.CONFIRMED)
-                || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.WAITING_LIST)
+            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.WAITING_LIST)
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
         }
@@ -88,14 +93,14 @@ public class RegistrationService {
         }
 
         if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now()) ||
-                event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
+            event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
         }
 
         if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
-                sessionId,
-                RegistrationStatus.CONFIRMED))) {
+            sessionId,
+            RegistrationStatus.CONFIRMED))) {
             return registrationRepository.save(Registration.createWithWaitingListdStatus(account,session));
         }
 
@@ -111,13 +116,48 @@ public class RegistrationService {
     }
 
     public List<Registration> findAll(UUID eventId, UUID activityId, UUID sessionId) {
-        // TODO: Checar se entidades existem/estão associadas
+        var activity = getActivity(activityId);
+        var session = getSession(sessionId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+
         return registrationRepository.findAllBySessionId(sessionId);
     }
 
     public List<Registration> findAll(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
-        // TODO: Checar se entidades existem/estão associadas
+        var subevent = getSubevent(subeventId);
+        var activity = getActivity(activityId);
+        var session = getSession(sessionId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+
         return registrationRepository.findAllBySessionId(sessionId);
+    }
+
+    private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {
+        if (!subevent.getEvent().getId().equals(eventId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.SUBEVENT, ResourceName.EVENT);
+        }
+    }
+
+    private void checksIfSubeventIsAssociateToActivity(UUID subeventId, Activity activity) {
+        if (!activity.getSubevent().getId().equals(subeventId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_SUBEVENT);
+        }
+    }
+
+    private void checksIfEventIsAssociateToActivity(UUID eventId, Activity activity) {
+        if (!activity.getEvent().getId().equals(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_EVENT);
+        }
+    }
+
+    private void checksIfActivityIsAssociateToSession(UUID activityId, Session session) {
+        if (!session.getActivity().getId().equals(activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY);
+        }
     }
 
     private Account getAccount(UUID accountId) {
@@ -128,6 +168,11 @@ public class RegistrationService {
     private Event getEvent(UUID eventId) {
         return eventRepository.findById(eventId)
             .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
+    }
+
+    private Subevent getSubevent(UUID subeventId) {
+        return subeventRepository.findById(subeventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
     }
 
     private Activity getActivity(UUID activityId) {

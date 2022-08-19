@@ -35,6 +35,7 @@ public class RegistrationController {
 
     @GetMapping("activities/{activityId}/sessions/{sessionId}/registrations")
     public ResponseEntity<List<RegistrationDto>> index(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
+        UUID accountId = UUID.fromString("4162a226-9187-460f-a54b-a378c580e2a5");
         List<Registration> registrations = registrationService.findAll(eventId, activityId, sessionId);
 
         return ResponseEntity.ok(registrationMapper.to(registrations));
@@ -42,6 +43,7 @@ public class RegistrationController {
 
     @GetMapping("sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}/registrations")
     public ResponseEntity<List<RegistrationDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
+        UUID accountId = UUID.fromString("4162a226-9187-460f-a54b-a378c580e2a5");
         List<Registration> registrations = registrationService.findAll(eventId, subeventId, activityId, sessionId);
 
         return ResponseEntity.ok(registrationMapper.to(registrations));

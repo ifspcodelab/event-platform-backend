@@ -16,6 +16,7 @@ import java.util.UUID;
 public class ActivityController {
     private final ActivityService activityService;
     private final ActivityMapper activityMapper;
+    private final ActivitySpeakerMapper activitySpeakerMapper;
 
     @PostMapping("activities")
     public ResponseEntity<ActivityDto> create (@PathVariable UUID eventId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
@@ -117,5 +118,68 @@ public class ActivityController {
     public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
         activityService.delete(eventId, subeventId, activityId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("activities/{activityId}/speakers")
+    public ResponseEntity<ActivitySpeakerDto> addActivityEventSpeaker(
+        @PathVariable UUID eventId,
+        @PathVariable UUID activityId,
+        @Valid @RequestBody ActivitySpeakerCreateDto dto
+    ) {
+        ActivitySpeaker activitySpeaker = activityService.addActivityEventSpeaker(eventId, activityId, dto);
+        ActivitySpeakerDto activitySpeakerDto = activitySpeakerMapper.to(activitySpeaker);
+        return ResponseEntity.ok(activitySpeakerDto);
+    }
+
+    @PostMapping("sub-events/{subeventId}/activities/{activityId}/speakers")
+    public ResponseEntity<ActivitySpeakerDto> addActivitySubEventSpeaker(
+        @PathVariable UUID eventId,
+        @PathVariable UUID subeventId,
+        @PathVariable UUID activityId,
+        @Valid @RequestBody ActivitySpeakerCreateDto dto
+    ) {
+        ActivitySpeaker activitySpeaker = activityService.addActivitySubEventSpeaker(eventId, subeventId, activityId, dto);
+        ActivitySpeakerDto activitySpeakerDto = activitySpeakerMapper.to(activitySpeaker);
+        return ResponseEntity.ok(activitySpeakerDto);
+    }
+
+    @DeleteMapping("activities/{activityId}/speakers/{activitySpeakerId}")
+    public ResponseEntity<Void> deleteActivityEventSpeaker(
+        @PathVariable UUID eventId,
+        @PathVariable UUID activityId,
+        @PathVariable UUID activitySpeakerId
+    ) {
+        activityService.deleteActivityEventSpeaker(eventId, activityId, activitySpeakerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("sub-events/{subeventId}/activities/{activityId}/speakers/{activitySpeakerId}")
+    public ResponseEntity<Void> deleteActivitySubEventSpeaker(
+        @PathVariable UUID eventId,
+        @PathVariable UUID subeventId,
+        @PathVariable UUID activityId,
+        @PathVariable UUID activitySpeakerId
+    ) {
+        activityService.deleteActivitySubEventSpeaker(eventId, subeventId, activityId, activitySpeakerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("activities/{activityId}/speakers")
+    public ResponseEntity<List<ActivitySpeakerDto>> findAllActivityEventSpeaker(
+        @PathVariable UUID eventId,
+        @PathVariable UUID activityId
+    ) {
+        List<ActivitySpeaker> activitySpeaker = activityService.findAllActivityEventSpeaker(eventId, activityId);
+        return ResponseEntity.ok(activitySpeakerMapper.to(activitySpeaker));
+    }
+
+    @GetMapping("sub-events/{subeventId}/activities/{activityId}/speakers")
+    public ResponseEntity<List<ActivitySpeakerDto>> findAllActivitySubEventSpeaker(
+        @PathVariable UUID eventId,
+        @PathVariable UUID subeventId,
+        @PathVariable UUID activityId
+    ) {
+        List<ActivitySpeaker> activitySpeaker = activityService.findAllActivitySubEventSpeaker(eventId, subeventId, activityId);
+        return ResponseEntity.ok(activitySpeakerMapper.to(activitySpeaker));
     }
 }

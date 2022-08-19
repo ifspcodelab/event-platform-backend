@@ -341,12 +341,6 @@ public class SessionService {
             }
         }
 
-        //TODO ACHO QUE NÃO PRECISA DESSA VALIDAÇÃO
-        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-            if(session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
-            }
-        }
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
     }

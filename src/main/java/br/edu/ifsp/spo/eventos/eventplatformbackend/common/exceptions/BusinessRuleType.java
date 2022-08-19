@@ -112,7 +112,6 @@ public enum BusinessRuleType {
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível excluir uma sessão em uma atividade com status cancelado"),
     SESSION_DELETE_WITH_AN_ACTIVITY_WITH_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START("Não é possível excluir uma sessão em uma atividade com status publicado e depois que o período de inscrições do evento tenha se iniciado"),
-    SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma sessão em uma atividade em uma atividade status publicado e após o período de execução do subevento"),
     SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução de um ou mais horários da sessão está no passado"),
     SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT_EXECUTION("Data de início de um ou mais horário da sessão é anterior à data de início do evento"),
     SESSION_SCHEDULE_EXECUTION_AFTER_EVENT_EXECUTION("Data final de um ou mais horário da sessão é posterior à data de fim do evento"),
@@ -122,8 +121,6 @@ public enum BusinessRuleType {
     SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO_EXECUTION_END("Não é possível criar um ou mais horário da sessão em que a data de início de execução é igual a data de finalização"),
     SESSION_SCHEDULE_ADD_AREA_OR_SPACE_IN_A_NULL_LOCATION("Não é possível criar um ou mais horário da sessão adicionando uma área ou um espaço em um local vazio"),
     SESSION_SCHEDULE_ADD_SPACE_IN_A_NULL_AREA("Não é possível criar um ou mais horário da sessão adicionando um espaço em uma área vazia");
-
-    //TODO Melhorar as mensagens
 
     String message;
 

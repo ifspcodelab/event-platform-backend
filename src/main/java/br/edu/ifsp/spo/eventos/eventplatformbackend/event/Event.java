@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -61,4 +62,13 @@ public class Event {
         this.status = EventStatus.DRAFT;
         this.cancellationMessage = null;
     }
+
+    public boolean isRegistrationPeriodEnded() {
+        return this.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now());
+    }
+
+    public boolean isExecutionPeriodEnded() {
+        return this.getExecutionPeriod().getEndDate().isBefore(LocalDate.now());
+    }
+
 }

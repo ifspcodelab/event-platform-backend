@@ -35,20 +35,17 @@ public class SessionService {
     public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfSessionTitleExists(dto, activityId);
 
-        if(activity.getEvent().getStatus().equals(EventStatus.CANCELED)) {
+        if(activity.isEventCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_EVENT_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(activity.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-        }
-
-        if(activity.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(activity.getEvent().isRegistrationPeriodEnded()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -68,24 +65,21 @@ public class SessionService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfSessionTitleExists(dto, activityId);
 
-        if(activity.getEvent().getStatus().equals(EventStatus.CANCELED)) {
+        if(activity.isEventCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_EVENT_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getSubevent().getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_A_SUBEVENT_WITH_CANCELED_STATUS);
+        if(activity.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-        }
-
-        if(activity.getEvent().getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(activity.getEvent().isRegistrationPeriodEnded()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -105,39 +99,40 @@ public class SessionService {
         Session session = getSession(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
+        checksIfSessionTitleExistsExcludedId(dto, activityId, sessionId);
 
         if(session.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-        }
-
-        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-            if(session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
-            }
+        if(session.getActivity().isPublished() && session.getActivity().getEvent().isExecutionPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
         if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-            if(!session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionStart).toList()
-                    .equals(sessionSchedule.stream()
-                            .map(SessionSchedule::getExecutionStart).toList())){
+            var executionStartList = session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionStart).toList();
+
+            var newExecutionStartList = sessionSchedule.stream()
+                    .map(SessionSchedule::getExecutionStart).toList();
+
+            if(!executionStartList.equals(newExecutionStartList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
 
-            if(!session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionEnd).toList()
-                    .equals(sessionSchedule.stream()
-                            .map(SessionSchedule::getExecutionEnd).toList())) {
+            var executionEndList = session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionEnd).toList();
+
+            var newExecutionEndList = sessionSchedule.stream()
+                    .map(SessionSchedule::getExecutionEnd).toList();
+
+            if(!executionEndList.equals(newExecutionEndList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
         }
@@ -154,20 +149,17 @@ public class SessionService {
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfSubeventIsAssociateToSession(subeventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
+        checksIfSessionTitleExistsExcludedId(dto, activityId, sessionId);
 
         if(session.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if(sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-        }
-
-        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
+        if(session.getActivity().isPublished()) {
             if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
@@ -176,17 +168,23 @@ public class SessionService {
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
         if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-            if(!session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionStart).toList()
-                    .equals(sessionSchedule.stream()
-                            .map(SessionSchedule::getExecutionStart).toList())){
+            var executionStartList = session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionStart).toList();
+
+            var newExecutionStartList = sessionSchedule.stream()
+                    .map(SessionSchedule::getExecutionStart).toList();
+
+            if(!executionStartList.equals(newExecutionStartList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
 
-            if(!session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionEnd).toList()
-                    .equals(sessionSchedule.stream()
-                            .map(SessionSchedule::getExecutionEnd).toList())) {
+            var executionEndList = session.getSessionsSchedule().stream()
+                    .map(SessionSchedule::getExecutionEnd).toList();
+
+            var newExecutionEndList = sessionSchedule.stream()
+                    .map(SessionSchedule::getExecutionEnd).toList();
+
+            if(!executionEndList.equals(newExecutionEndList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
         }
@@ -428,6 +426,18 @@ public class SessionService {
     private Session getSession(UUID sessionId) {
         return sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+    }
+
+    private void checksIfSessionTitleExists(SessionCreateDto dto, UUID activityId) {
+        if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
+    }
+
+    private void checksIfSessionTitleExistsExcludedId(SessionCreateDto dto, UUID activityId, UUID sessionId) {
+        if (sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
     }
 
     private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {

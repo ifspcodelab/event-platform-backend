@@ -65,4 +65,16 @@ public class Activity {
         this.event = event;
         this.subevent = subevent;
     }
+
+    public boolean isEventCanceled() {
+        return this.getEvent().getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isPublished() {
+        return this.getStatus().equals(EventStatus.PUBLISHED);
+    }
 }

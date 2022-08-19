@@ -12,6 +12,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final ActivityRepository activityRepository;
@@ -252,6 +254,7 @@ public class SessionService {
 
         session.setCanceled(true);
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
         return sessionRepository.save(session);
     }
 
@@ -293,6 +296,7 @@ public class SessionService {
 
         session.setCanceled(true);
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
         return sessionRepository.save(session);
     }
 
@@ -314,8 +318,8 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
             }
         }
-
         sessionRepository.delete(session);
+        log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
@@ -343,8 +347,8 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
         }
-
         sessionRepository.delete(session);
+        log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
     }
 
     private void checksIfEventIsAssociateToSession(UUID eventId, Session session) {

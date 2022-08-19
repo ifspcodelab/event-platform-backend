@@ -65,6 +65,7 @@ public enum BusinessRuleType {
     ACTIVITY_UPDATE_WITH_CANCELED_STATUS("Não é possível atualizar uma atividade com status cancelado"),
     ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível atualizar uma atividade em que o período de inscrição do evento é antes de hoje"),
     ACTIVITY_UPDATE_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível atualizar uma atividade em que o período de execução do subevento é antes de hoje"),
+    ACTIVITY_UPDATE_WITH_EVENT_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START("Não é possível editar o slug de uma atividade em um evento publicado em que o seu período de inscrições já tenha iniciado"),
     ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma atividade com status publicado após o período de execução do subevento"),
     ACTIVITY_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma atividade com status cancelado"),
     ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS("Não é possível excluir uma atividade com um evento cancelado"),

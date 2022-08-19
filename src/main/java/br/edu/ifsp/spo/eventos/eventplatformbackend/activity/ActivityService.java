@@ -109,36 +109,47 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
 
-        if(activityRepository.existsByTitleIgnoreCaseAndEventIdAndIdNot(dto.getTitle(), eventId, activityId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY,"title", dto.getTitle());
+        if (activityRepository.existsByTitleIgnoreCaseAndEventIdAndIdNot(dto.getTitle(), eventId, activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "title", dto.getTitle());
         }
 
-        if(activityRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, activityId)) {
+        if (activityRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
         }
 
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
+        if (event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if (activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if (event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
-        activity.setTitle(dto.getTitle());
-        activity.setSlug(dto.getSlug());
-        activity.setDescription(dto.getDescription());
-        activity.setType(dto.getType());
-        activity.setModality(dto.getModality());
-        activity.setNeedRegistration(dto.isNeedRegistration());
-        activity.setDuration(dto.getDuration());
+        if (event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if (event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if (!dto.getSlug().equals(activity.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
+        }
 
-        return activityRepository.save(activity);
-    }
+            activity.setTitle(dto.getTitle());
+            activity.setSlug(dto.getSlug());
+            activity.setDescription(dto.getDescription());
+            activity.setType(dto.getType());
+            activity.setModality(dto.getModality());
+            activity.setNeedRegistration(dto.isNeedRegistration());
+            activity.setDuration(dto.getDuration());
+
+            return activityRepository.save(activity);
+        }
+
 
     public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
@@ -173,6 +184,16 @@ public class ActivityService {
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if (event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if (event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if (!dto.getSlug().equals(activity.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
         }
 
         activity.setTitle(dto.getTitle());

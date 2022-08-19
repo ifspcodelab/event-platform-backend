@@ -1,11 +1,11 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
-import lombok.Value;
+import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
-@Value
+@Data
 public class ActivitySpeakerCreateDto {
     @NotNull
     UUID speakerId;

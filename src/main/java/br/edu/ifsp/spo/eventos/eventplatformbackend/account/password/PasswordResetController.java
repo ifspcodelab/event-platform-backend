@@ -15,12 +15,9 @@ public class PasswordResetController {
     private final PasswordResetService passwordResetService;
 
     @PostMapping("forgot")
-    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordCreateDto dto) throws InterruptedException {
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordCreateDto dto) {
         passwordResetService.createResetPasswordRequest(dto);
-
-
         return ResponseEntity.accepted().build();
-
     }
 
     @PostMapping("reset")

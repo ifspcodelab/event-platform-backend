@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface ActivitySpeakerRepository extends JpaRepository<ActivitySpeaker, UUID> {
     List<ActivitySpeaker> findAllByActivityId(UUID activityId);
+    boolean existsBySpeakerIdAndActivityId(UUID speakerId, UUID activityId);
 }

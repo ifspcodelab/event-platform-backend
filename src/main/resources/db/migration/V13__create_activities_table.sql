@@ -8,6 +8,7 @@ CREATE TABLE activities(
    modality VARCHAR NOT NULL,
    need_registration BOOLEAN NOT NULL,
    duration INT NOT NULL,
+   setup_time INT NOT NULL,
    cancellation_message TEXT,
    event_id UUID NOT NULL,
    subevent_id UUID,

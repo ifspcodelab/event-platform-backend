@@ -57,6 +57,7 @@ public class WebSecurityConfigure {
             .authorizeHttpRequests((authz) -> authz
                 .antMatchers(accountOpenPaths.toArray(String[]::new)).permitAll()
                 .antMatchers(HttpMethod.GET, siteOpenPaths.toArray(String[]::new)).permitAll()
+                .antMatchers("/api/v1/accounts/my-data/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

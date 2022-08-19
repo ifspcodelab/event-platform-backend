@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
@@ -131,7 +133,7 @@ public class ExceptionHandlerApp {
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
-        if(ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
+        if (ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
@@ -185,7 +187,6 @@ public class ExceptionHandlerApp {
         log.warn("Token Expired Exception");
         return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
-    
 
     @ExceptionHandler(RecaptchaException.class)
     public ResponseEntity<ProblemDetail> handlerInvalidRecaptcha(RecaptchaException ex){
@@ -200,5 +201,25 @@ public class ExceptionHandlerApp {
         log.warn("Verification e-mail not sent", ex);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+    @ExceptionHandler(MyDataResetPasswordException.class)
+    public ResponseEntity<Void> handlerMyDataPasswordResetExceptions(MyDataResetPasswordException ex) {
+        ProblemDetail problemDetail = new ProblemDetail("", List.of());
+
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.SAME_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    "New password is the same as current password",
+                    List.of()
+            );
+        }
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.INCORRECT_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    "Current password is incorrect",
+                    List.of()
+            );
+        }
+        log.warn(String.format(ex.getMyDataResetPasswordExceptionType().getMessage(), ex.getEmail()));
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

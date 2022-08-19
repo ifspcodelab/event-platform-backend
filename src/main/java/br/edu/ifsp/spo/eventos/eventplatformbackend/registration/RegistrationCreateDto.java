@@ -1,9 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.registration;
 
-import lombok.Value;
+import lombok.Data;
 import java.util.UUID;
 
-@Value
+@Data
 public class RegistrationCreateDto {
-    UUID userId;
+    UUID accountId;
 }

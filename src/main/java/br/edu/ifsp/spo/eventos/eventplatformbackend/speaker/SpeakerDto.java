@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

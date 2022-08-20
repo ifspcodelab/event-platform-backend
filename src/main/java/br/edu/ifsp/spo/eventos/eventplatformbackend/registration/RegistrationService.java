@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,8 +28,8 @@ public class RegistrationService {
     private final SubeventRepository subeventRepository;
     private final ActivityRepository activityRepository;
     private final SessionRepository sessionRepository;
-    private final AccountRepository accountRepository;
     private final RegistrationRepository registrationRepository;
+    private final AccountRepository accountRepository;
 
     public Registration create(UUID accountId, UUID eventId, UUID activityId, UUID sessionId) {
         var account = getAccount(accountId);
@@ -108,11 +109,54 @@ public class RegistrationService {
     }
 
     public Registration cancel(UUID accountId, UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
-        return null;
+        var account = getAccount(accountId);
+        var activity = getActivity(activityId);
+        var session = getSession(sessionId);
+        var registration = getRegistration(registrationId);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checksIfSessionIsAssociateToRegistration(sessionId, registration);
+
+        //Como saber se a sessão acabou? Pois uma sessão possui uma lista de session-schedule, então como diferenciar uma da outra?
+        registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
+        log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
+
+        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
+            sessionId,
+            RegistrationStatus.CONFIRMED))) {
+            var firstRegistrationInWaitingList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, RegistrationStatus.WAITING_LIST.toString()));
+            firstRegistrationInWaitingList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+        }
+
+        return registrationRepository.save(registration);
     }
 
     public Registration cancel(UUID accountId, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID registrationId) {
-        return null;
+        var subevent = getSubevent(subeventId);
+        var account = getAccount(accountId);
+        var activity = getActivity(activityId);
+        var session = getSession(sessionId);
+        var registration = getRegistration(registrationId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checksIfSessionIsAssociateToRegistration(sessionId, registration);
+
+        //Como saber se a sessão acabou? Pois uma sessão possui uma lista de session-schedule, então como diferenciar uma da outra?
+        registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
+        log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
+
+        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
+            sessionId,
+            RegistrationStatus.CONFIRMED))) {
+            var firstRegistrationInWaitingList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, RegistrationStatus.WAITING_LIST.toString()));
+            firstRegistrationInWaitingList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+        }
+
+        return registrationRepository.save(registration);
     }
 
     public List<Registration> findAll(UUID eventId, UUID activityId, UUID sessionId) {
@@ -160,6 +204,12 @@ public class RegistrationService {
         }
     }
 
+    private void checksIfSessionIsAssociateToRegistration(UUID sessionId, Registration registration) {
+        if (!registration.getSession().getId().equals(sessionId)) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_SESSION);
+        }
+    }
+
     private Account getAccount(UUID accountId) {
         return accountRepository.findById(accountId)
             .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, accountId));
@@ -183,5 +233,10 @@ public class RegistrationService {
     private Session getSession(UUID sessionId) {
         return sessionRepository.findById(sessionId)
             .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+    }
+
+    private Registration getRegistration(UUID registrationId) {
+        return registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, registrationId));
     }
 }

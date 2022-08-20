@@ -18,7 +18,8 @@ public enum ResourceName {
     EMAIL("E-mail"),
     CPF("Cpf"),
     ACTIVITY("Activity"),
-    SESSION("Session");
+    SESSION("Session"),
+    REGISTRATION("Registration");
 
     private String name;
 }

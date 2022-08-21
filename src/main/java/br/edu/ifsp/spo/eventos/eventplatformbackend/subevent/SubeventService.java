@@ -56,6 +56,7 @@ public class SubeventService {
                 dto.getSlug(),
                 dto.getSummary(),
                 dto.getPresentation(),
+                dto.getContact(),
                 dto.getExecutionPeriod(),
                 dto.getSmallerImage(),
                 dto.getBiggerImage(),
@@ -162,6 +163,7 @@ public class SubeventService {
         subevent.setSlug(dto.getSlug());
         subevent.setSummary(dto.getSummary());
         subevent.setPresentation(dto.getPresentation());
+        subevent.setContact(dto.getContact());
         subevent.setExecutionPeriod(dto.getExecutionPeriod());
         subevent.setSmallerImage(dto.getSmallerImage());
         subevent.setBiggerImage(dto.getBiggerImage());

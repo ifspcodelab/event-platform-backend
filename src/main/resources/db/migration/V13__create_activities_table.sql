@@ -2,7 +2,7 @@ CREATE TABLE activities(
    id UUID NOT NULL,
    title VARCHAR NOT NULL,
    slug VARCHAR NOT NULL,
-   description VARCHAR NOT NULL,
+   description TEXT NOT NULL,
    type VARCHAR NOT NULL,
    status VARCHAR NOT NULL,
    modality VARCHAR NOT NULL,

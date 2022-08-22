@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByEmail(String email);
     boolean existsByCpf(String cpf);
+    boolean existsByCpfAndIdNot(String cpf, UUID accountId);
     Optional<Account> findByEmail(String email);
     Optional<Account> findByCpf(String cpf);
     List<Account> findByNameStartingWithIgnoreCaseAndVerified(String name, boolean verified);

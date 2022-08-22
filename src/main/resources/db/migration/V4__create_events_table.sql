@@ -4,6 +4,7 @@ CREATE TABLE events(
     slug VARCHAR NOT NULL UNIQUE,
     summary VARCHAR NOT NULL,
     presentation TEXT NOT NULL,
+    contact TEXT NOT NULL,
     registration_start_date DATE NOT NULL,
     registration_end_date DATE NOT NULL,
     start_date DATE NOT NULL,

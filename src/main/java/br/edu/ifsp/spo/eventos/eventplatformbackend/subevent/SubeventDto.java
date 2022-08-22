@@ -12,6 +12,7 @@ public class SubeventDto {
     String slug;
     String summary;
     String presentation;
+    String contact;
     Period executionPeriod;
     String smallerImage;
     String biggerImage;

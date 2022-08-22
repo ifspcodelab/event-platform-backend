@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
@@ -55,6 +56,7 @@ public class SubeventService {
                 dto.getSlug(),
                 dto.getSummary(),
                 dto.getPresentation(),
+                dto.getContact(),
                 dto.getExecutionPeriod(),
                 dto.getSmallerImage(),
                 dto.getBiggerImage(),
@@ -69,6 +71,13 @@ public class SubeventService {
         checksIfSubeventIsAssociateToEvent(subevent,eventId);
 
         return subevent;
+    }
+
+    public Subevent findBySlug(UUID eventId, String slug) {
+        getEvent(eventId);
+
+        return subeventRepository.findSubeventBySlugAndEventId(slug, eventId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, slug));
     }
 
     public List<Subevent> findAll(UUID eventId) {
@@ -154,6 +163,7 @@ public class SubeventService {
         subevent.setSlug(dto.getSlug());
         subevent.setSummary(dto.getSummary());
         subevent.setPresentation(dto.getPresentation());
+        subevent.setContact(dto.getContact());
         subevent.setExecutionPeriod(dto.getExecutionPeriod());
         subevent.setSmallerImage(dto.getSmallerImage());
         subevent.setBiggerImage(dto.getBiggerImage());

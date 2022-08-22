@@ -12,7 +12,6 @@ public enum PasswordResetExceptionType {
     RESET_TOKEN_NOT_FOUND("Password Reset Exception: reset token not found"),
     RESET_TOKEN_EXPIRED("Password Reset Exception: reset token expired for email=%s");
 
-
     String message;
 
 }

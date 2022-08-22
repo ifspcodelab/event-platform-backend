@@ -26,6 +26,10 @@ public class SubeventCreateDto {
     @NotBlank
     @Size(min = 1000, max = 5000)
     String presentation;
+    @NotNull
+    @NotBlank
+    @Size(min = 100, max = 5000)
+    String contact;
     @Valid
     Period executionPeriod;
     @NotNull

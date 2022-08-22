@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
@@ -52,6 +53,7 @@ public class EventService {
             dto.getSlug(),
             dto.getSummary(),
             dto.getPresentation(),
+            dto.getContact(),
             dto.getRegistrationPeriod(),
             dto.getExecutionPeriod(),
             dto.getSmallerImage(),
@@ -63,6 +65,11 @@ public class EventService {
 
     public Event findById(UUID eventId) {
         return getEvent(eventId);
+    }
+
+    public Event findBySlug(String slug) {
+        return  eventRepository.findEventBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, slug));
     }
 
     public List<Event> findAll() {
@@ -155,6 +162,7 @@ public class EventService {
         event.setSlug(dto.getSlug());
         event.setSummary(dto.getSummary());
         event.setPresentation(dto.getPresentation());
+        event.setContact(dto.getContact());
         event.setRegistrationPeriod(dto.getRegistrationPeriod());
         event.setExecutionPeriod(dto.getExecutionPeriod());
         event.setSmallerImage(dto.getSmallerImage());

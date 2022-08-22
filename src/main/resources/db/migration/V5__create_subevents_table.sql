@@ -4,6 +4,7 @@ CREATE TABLE subevents(
     slug VARCHAR NOT NULL,
     summary VARCHAR NOT NULL,
     presentation TEXT NOT NULL,
+    contact TEXT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     smaller_image VARCHAR,

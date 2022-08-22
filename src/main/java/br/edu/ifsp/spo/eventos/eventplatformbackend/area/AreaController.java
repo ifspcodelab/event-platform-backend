@@ -12,7 +12,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/locations/{locationId}/areas")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
 public class AreaController {
     private final AreaService areaService;
     private final AreaMapper areaMapper;

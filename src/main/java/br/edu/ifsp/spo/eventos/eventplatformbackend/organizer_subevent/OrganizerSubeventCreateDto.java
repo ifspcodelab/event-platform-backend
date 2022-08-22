@@ -8,7 +8,7 @@ import java.util.UUID;
 @Value
 public class OrganizerSubeventCreateDto {
     @NotNull
-    OrganizerSubeventType organizerSubeventType;
+    OrganizerSubeventType type;
     @NotNull
     UUID accountId;
 }

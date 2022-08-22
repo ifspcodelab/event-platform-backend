@@ -110,7 +110,7 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão em um evento com status de rascunho"),
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma sessão em um subevento com status de rascunho"),
     SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
-    SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
+    SESSION_DELETE_WITH_CANCELED_STATUS("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível excluir uma sessão em uma atividade com status cancelado"),
     SESSION_DELETE_WITH_AN_ACTIVITY_WITH_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START("Não é possível excluir uma sessão em uma atividade com status publicado e depois que o período de inscrições do evento tenha se iniciado"),
     SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução de um ou mais horários da sessão está no passado"),

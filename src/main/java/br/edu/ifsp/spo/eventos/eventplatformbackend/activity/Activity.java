@@ -70,8 +70,16 @@ public class Activity {
         return this.getEvent().getStatus().equals(EventStatus.CANCELED);
     }
 
+    public boolean isEventDraft() {
+        return this.getEvent().getStatus().equals(EventStatus.DRAFT);
+    }
+
     public boolean isCanceled() {
         return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isDraft() {
+        return this.getStatus().equals(EventStatus.DRAFT);
     }
 
     public boolean isPublished() {

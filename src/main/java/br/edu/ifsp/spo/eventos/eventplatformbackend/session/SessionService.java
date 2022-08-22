@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,11 +70,11 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_EVENT_WITH_CANCELED_STATUS);
         }
 
-        if(activity.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
+        if(activity.getSubevent().getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_A_SUBEVENT_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(activity.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
@@ -115,7 +114,7 @@ public class SessionService {
 
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
-        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
             var executionStartList = session.getSessionsSchedule().stream()
                     .map(SessionSchedule::getExecutionStart).toList();
 
@@ -160,14 +159,14 @@ public class SessionService {
         }
 
         if(session.getActivity().isPublished()) {
-            if (session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+            if (session.getActivity().getSubevent().isExecutionPeriodEnded()) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
         }
 
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
-        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
             var executionStartList = session.getSessionsSchedule().stream()
                     .map(SessionSchedule::getExecutionStart).toList();
 
@@ -232,23 +231,23 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getEvent().getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().isEventDraft()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().isDraft()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getEvent().isExecutionPeriodEnded()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-        if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isAfter(LocalDate.now())) {
+        if(session.getActivity().getEvent().isRegistrationPeriodNotStart()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_BEFORE_EVENT_REGISTRATION_PERIOD);
         }
 
@@ -272,20 +271,20 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.DRAFT)) {
+        if(session.getActivity().isDraft()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS);
         }
 
-        if(session.getActivity().getEvent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().getEvent().isExecutionPeriodEnded()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-            if(session.getActivity().getSubevent().getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().isPublished()) {
+            if(session.getActivity().getSubevent().isExecutionPeriodEnded()) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
         }
@@ -302,15 +301,15 @@ public class SessionService {
         checksIfActivityIsAssociateToSession(activityId, session);
 
         if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_STATUS_CANCELED);
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-            if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().isPublished()) {
+            if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
             }
         }
@@ -326,15 +325,15 @@ public class SessionService {
         checksIfActivityIsAssociateToSession(activityId, session);
 
         if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_STATUS_CANCELED);
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.CANCELED)) {
+        if(session.getActivity().isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(session.getActivity().getStatus().equals(EventStatus.PUBLISHED)) {
-            if(session.getActivity().getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+        if(session.getActivity().isPublished()) {
+            if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
             }
         }

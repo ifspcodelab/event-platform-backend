@@ -9,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrganizerSubeventService {
     private final OrganizerSubeventRepository organizerSubeventRepository;
     private final AccountRepository accountRepository;
@@ -28,7 +30,7 @@ public class OrganizerSubeventService {
         Subevent subevent = getSubevent(subeventId);
 
         if(organizerSubeventRepository.existsByAccountAndSubeventId(account, subeventId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ORGANIZERSUBEVENT, "account", account.getName());
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_ALREADY_ASSOCIATED);
         }
 
         if(!account.getVerified()) {
@@ -43,7 +45,7 @@ public class OrganizerSubeventService {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_WITH_CANCELED_STATUS);
         }
 
-        OrganizerSubevent organizerSubevent = new OrganizerSubevent(dto.getOrganizerSubeventType(), account, event, subevent);
+        OrganizerSubevent organizerSubevent = new OrganizerSubevent(dto.getType(), account, event, subevent);
         return organizerSubeventRepository.save(organizerSubevent);
     }
 
@@ -67,6 +69,7 @@ public class OrganizerSubeventService {
         }
 
         organizerSubeventRepository.delete(organizerSubevent);
+        log.info("Organizer subevent deleted: organizer id={}, subevent id={}", organizerSubeventId, subeventId);
     }
 
     private OrganizerSubevent getOrganizerSubevent(UUID organizerSubeventId) {

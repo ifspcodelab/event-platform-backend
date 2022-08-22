@@ -53,6 +53,7 @@ public enum BusinessRuleType {
     ORGANIZER_CREATE_WITH_ACCOUNT_UNVERIFIED("Não é possível adicionar um organizador associado a uma conta não verificada"),
     ORGANIZER_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o evento cancelado"),
     ORGANIZER_SUBEVENT_CREATE_WITH_CANCELED_STATUS("Não é possível adicionar um organizador com o subevento cancelado"),
+    ORGANIZER_SUBEVENT_CREATE_ALREADY_ASSOCIATED("Não é possível adicionar um organizador já associado ao subevento"),
     ORGANIZER_SUBEVENT_CREATE_WITH_ACCOUNT_UNVERIFIED("Não é possível associar um organizador com uma conta não verificada"),
     ORGANIZER_SUBEVENT_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o subevento cancelado");
 

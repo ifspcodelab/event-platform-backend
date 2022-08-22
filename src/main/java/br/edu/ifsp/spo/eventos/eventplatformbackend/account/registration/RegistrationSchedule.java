@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @AllArgsConstructor
-public class ScheduleRegistration {
+public class RegistrationSchedule {
     private final RegistrationService registrationService;
 
     @Scheduled(cron = "0 0 0 * * *")

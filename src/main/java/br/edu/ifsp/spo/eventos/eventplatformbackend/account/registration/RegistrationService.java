@@ -129,8 +129,8 @@ public class RegistrationService {
         List<Account> accountsNotVerified = accountRepository.findAllByVerified(Boolean.FALSE);
         for (Account acc : accountsNotVerified) {
             refreshTokenRepository.deleteAllByAccountId(acc.getId());
-            organizersRepository.deleteByAccount(acc);
-            organizerSubeventRepository.deleteByAccount(acc);
+            organizersRepository.deleteAllByAccount(acc);
+            organizerSubeventRepository.deleteAllByAccount(acc);
             speakerRepository.deleteByAccount(acc);
             accountRepository.deleteById(acc.getId());
         }

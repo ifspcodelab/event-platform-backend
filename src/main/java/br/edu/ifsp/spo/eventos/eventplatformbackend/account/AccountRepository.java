@@ -15,4 +15,5 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findByEmail(String email);
     Optional<Account> findByCpf(String cpf);
     List<Account> findByNameStartingWithIgnoreCaseAndVerified(String name, boolean verified);
+    List<Account> findAllByVerified(Boolean verified);
 }

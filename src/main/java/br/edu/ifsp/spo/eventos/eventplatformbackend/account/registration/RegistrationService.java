@@ -2,18 +2,20 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.RefreshTokenRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +37,9 @@ public class RegistrationService {
     private final RecaptchaService recaptchaService;
     private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
-
-
+    private final OrganizerRepository organizersRepository;
+    private final OrganizerSubeventRepository organizerSubeventRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -114,5 +117,22 @@ public class RegistrationService {
     public List<Account> search(String name, Boolean verified) {
         List<Account> accounts = accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
         return accounts;
+    }
+
+    @Transactional
+    public void deleteVerificationTokensExpired() {
+        verificationTokenRepository.deleteAllByExpiresInBefore(Instant.now());
+    }
+
+    @Transactional
+    public void deleteAccountsNotVerified() {
+        List<Account> accountsNotVerified = accountRepository.findAllByVerified(Boolean.FALSE);
+        for (Account acc : accountsNotVerified) {
+            refreshTokenRepository.deleteAllByAccountId(acc.getId());
+            organizersRepository.deleteByAccount(acc);
+            organizerSubeventRepository.deleteByAccount(acc);
+            speakerRepository.deleteByAccount(acc);
+            accountRepository.deleteById(acc.getId());
+        }
     }
 }

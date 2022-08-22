@@ -50,6 +50,7 @@ public enum BusinessRuleType {
     SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar um subevento cancelado "),
     SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("Não é possível despublicar um subevento publicado que o seu período de inscrições ja tenha iniciado"),
     ORGANIZER_CREATE_WITH_CANCELED_STATUS("Não é possível adicionar um organizador com o evento cancelado"),
+    ORGANIZER_CREATE_ALREADY_ASSOCIATED("Não é possível adicionar um organizador já associado ao evento"),
     ORGANIZER_CREATE_WITH_ACCOUNT_UNVERIFIED("Não é possível adicionar um organizador associado a uma conta não verificada"),
     ORGANIZER_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o evento cancelado");
 

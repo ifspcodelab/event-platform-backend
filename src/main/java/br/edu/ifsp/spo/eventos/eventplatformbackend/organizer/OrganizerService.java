@@ -7,6 +7,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrganizerService {
     private OrganizerRepository organizerRepository;
     private AccountRepository accountRepository;
@@ -24,7 +26,7 @@ public class OrganizerService {
         Event event = getEvent(eventId);
 
         if(organizerRepository.existsByAccountAndEventId(account, eventId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ORGANIZER, "account", account.getName());
+            throw new BusinessRuleException(BusinessRuleType.ORGANIZER_CREATE_ALREADY_ASSOCIATED);
         }
 
         if(!account.getVerified()) {
@@ -53,6 +55,7 @@ public class OrganizerService {
         }
 
         organizerRepository.delete(organizer);
+        log.info("Organizer event deleted: organizer id={}, event id={}", organizerId, eventId);
     }
 
     private Organizer getOrganizer(UUID organizerId) {

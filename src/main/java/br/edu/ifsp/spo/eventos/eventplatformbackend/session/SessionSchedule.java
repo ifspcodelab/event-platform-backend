@@ -40,4 +40,40 @@ public class SessionSchedule {
         this.area = area;
         this.space = space;
     }
+
+    public boolean hasConflict(SessionSchedule sessionSchedule) {
+        if(this.execution_start.isEqual(sessionSchedule.execution_start) ||
+            this.execution_end.isEqual(sessionSchedule.execution_end)
+        ) {
+            return true;
+        }
+
+        if(this.execution_start.isBefore(sessionSchedule.execution_start) &&
+            this.execution_end.isAfter(sessionSchedule.execution_start)
+        ) {
+            return true;
+        }
+
+        if(this.execution_start.isBefore(sessionSchedule.execution_end) &&
+            this.execution_end.isAfter(sessionSchedule.execution_end)
+        ) {
+            return true;
+        }
+
+        if(this.execution_start.isBefore(sessionSchedule.execution_start) &&
+            this.execution_end.isAfter(sessionSchedule.execution_end)
+        ) {
+            return true;
+        }
+
+        if(this.execution_start.isAfter(sessionSchedule.execution_start) &&
+            this.execution_end.isBefore(sessionSchedule.execution_end)
+        ) {
+            return true;
+        }
+
+
+
+        return false;
+    }
 }

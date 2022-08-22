@@ -10,6 +10,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -31,16 +32,70 @@ public class RegistrationService {
     private final RegistrationRepository registrationRepository;
     private final AccountRepository accountRepository;
 
-    public Registration create(UUID accountId, UUID eventId, UUID activityId, UUID sessionId) {
-        var account = getAccount(accountId);
+    public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID activityId, UUID sessionId) {
+        var account = getAccount(registrationCreateDto.getAccountId());
         var event = getEvent(eventId);
         var activity = getActivity(activityId);
         var session = getSession(sessionId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
 
-        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.CONFIRMED)
-            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.WAITING_LIST)
+        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.CONFIRMED)
+            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.WAITING_LIST)
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
+        }
+
+        if(session.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_CANCELED_SESSION);
+        }
+
+        if(activity.getStatus() != EventStatus.PUBLISHED) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED);
+        }
+
+        if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now()) ||
+            event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
+        ) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
+        }
+
+        List<Registration> registrationsWithCornfirmedStatus = registrationRepository.findAllByAccountIdAndRegistrationStatus(account.getId(), RegistrationStatus.CONFIRMED);
+        
+        for(var registration : registrationsWithCornfirmedStatus) {
+            List<SessionSchedule> sessionsSchedules = registration.getSession().getSessionsSchedules();
+
+            for(var schedule : sessionsSchedules) {
+                for(var sessionSchedule : session.getSessionsSchedules()) {
+                    if(schedule.hasConflict(sessionSchedule)) {
+                        throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
+                    }
+                }
+            }
+        }
+
+        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
+            sessionId,
+            RegistrationStatus.CONFIRMED))) {
+            return registrationRepository.save(Registration.createWithWaitingListdStatus(account,session));
+        }
+
+        return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
+    }
+
+    public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        var account = getAccount(registrationCreateDto.getAccountId());
+        var event = getEvent(eventId);
+        var subevent = getSubevent(subeventId);
+        var activity = getActivity(activityId);
+        var session = getSession(sessionId);
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+
+        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.CONFIRMED)
+            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.WAITING_LIST)
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
         }
@@ -68,19 +123,14 @@ public class RegistrationService {
         return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
     }
 
-    public Registration create(UUID accountId, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
-        var account = getAccount(accountId);
-        var event = getEvent(eventId);
-        var subevent = getSubevent(subeventId);
-        var activity = getActivity(activityId);
+    public Registration create(RegistrationCreateDto registrationCreateDto, UUID sessionId) {
+        var account = getAccount(registrationCreateDto.getAccountId());
         var session = getSession(sessionId);
-        checkIfEventIsAssociateToSubevent(eventId, subevent);
-        checksIfSubeventIsAssociateToActivity(subeventId, activity);
-        checksIfEventIsAssociateToActivity(eventId, activity);
-        checksIfActivityIsAssociateToSession(activityId, session);
+        var activity = session.getActivity();
+        var event = activity.getEvent();
 
-        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.CONFIRMED)
-            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, accountId, RegistrationStatus.WAITING_LIST)
+        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.CONFIRMED)
+            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.WAITING_LIST)
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
         }

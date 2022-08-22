@@ -111,7 +111,8 @@ public enum BusinessRuleType {
     REGISTRATION_CREATE_ALREADY_EXISTS("Não é possível registrar em uma sessão em que já está registrado"),
     REGISTRATION_CREATE_WITH_CANCELED_SESSION("Não é possível registrar em uma sessão cancelada"),
     REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED("Não é possível registrar em uma sessão em que sua atividade não esteja publicada"),
-    REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD("Não é possível registrar em uma sessão em que o período de inscrições do evento não tenha iniciado");
+    REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD("Não é possível registrar em uma sessão em que o período de inscrições do evento não tenha iniciado"),
+    REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT("Não é possível registrar em uma sessão que tenha conflito com outra sessão em que já esteja confirmado.");
 
     String message;
 

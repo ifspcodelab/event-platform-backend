@@ -114,6 +114,20 @@ public class RegistrationService {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
         }
 
+        List<Registration> registrationsWithCornfirmedStatus = registrationRepository.findAllByAccountIdAndRegistrationStatus(account.getId(), RegistrationStatus.CONFIRMED);
+
+        for(var registration : registrationsWithCornfirmedStatus) {
+            List<SessionSchedule> sessionsSchedules = registration.getSession().getSessionsSchedules();
+
+            for(var schedule : sessionsSchedules) {
+                for(var sessionSchedule : session.getSessionsSchedules()) {
+                    if(schedule.hasConflict(sessionSchedule)) {
+                        throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
+                    }
+                }
+            }
+        }
+
         if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
             sessionId,
             RegistrationStatus.CONFIRMED))) {
@@ -147,6 +161,20 @@ public class RegistrationService {
             event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
+        }
+
+        List<Registration> registrationsWithCornfirmedStatus = registrationRepository.findAllByAccountIdAndRegistrationStatus(account.getId(), RegistrationStatus.CONFIRMED);
+
+        for(var registration : registrationsWithCornfirmedStatus) {
+            List<SessionSchedule> sessionsSchedules = registration.getSession().getSessionsSchedules();
+
+            for(var schedule : sessionsSchedules) {
+                for(var sessionSchedule : session.getSessionsSchedules()) {
+                    if(schedule.hasConflict(sessionSchedule)) {
+                        throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
+                    }
+                }
+            }
         }
 
         if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(

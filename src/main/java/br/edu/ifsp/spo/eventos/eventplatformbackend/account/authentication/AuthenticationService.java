@@ -74,7 +74,7 @@ public class AuthenticationService {
 
         log.info("Successful logout for the email {}", accountEmail);
 
-        auditService.logDelete(getAccount(accountId), ResourceName.REFRESH_TOKEN, "Logout");
+        auditService.logDelete(getAccount(accountId), ResourceName.REFRESH_TOKEN, "Desconectou da aplicação");
     }
 
     @Transactional

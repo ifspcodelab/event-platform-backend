@@ -120,19 +120,14 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void deleteVerificationTokensExpired() {
-        verificationTokenRepository.deleteAllByExpiresInBefore(Instant.now());
-    }
-
-    @Transactional
-    public void deleteAccountsNotVerified() {
-        List<Account> accountsNotVerified = accountRepository.findAllByVerified(Boolean.FALSE);
-        for (Account acc : accountsNotVerified) {
-            refreshTokenRepository.deleteAllByAccountId(acc.getId());
-            organizersRepository.deleteAllByAccount(acc);
-            organizerSubeventRepository.deleteAllByAccount(acc);
-            speakerRepository.deleteByAccount(acc);
-            accountRepository.deleteById(acc.getId());
-        }
+    public void deleteVerificationTokenAndAccount() {
+        verificationTokenRepository.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
+            Account account = token.getAccount();
+            // TODO: apagar os logs do usuario com esse id
+            verificationTokenRepository.delete(token);
+            accountRepository.delete(account);
+            log.info("Verification token: token {} - removed by registration scheduler", token.getToken());
+            log.info("Account: id {}, email {} - removed by registration scheduler", account.getId(), account.getEmail());
+        });
     }
 }

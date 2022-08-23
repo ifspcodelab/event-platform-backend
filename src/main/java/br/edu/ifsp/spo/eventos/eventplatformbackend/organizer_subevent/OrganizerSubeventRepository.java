@@ -11,5 +11,4 @@ import java.util.UUID;
 public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSubevent, UUID> {
     List<OrganizerSubevent> findAllBySubeventId(UUID subeventId);
     boolean existsByAccountAndSubeventId(Account account, UUID subeventId);
-    void deleteAllByAccount(Account acc);
 }

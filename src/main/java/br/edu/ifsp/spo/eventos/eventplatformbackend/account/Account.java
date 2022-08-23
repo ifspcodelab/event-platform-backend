@@ -26,6 +26,7 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountRole role;
     private Boolean verified;
+    private Boolean allowEmail;
     private Instant registrationTimestamp;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
@@ -37,6 +38,7 @@ public class Account {
         this.agreed = agreed;
         this.role = AccountRole.ATTENDANT;
         this.verified = false;
+        this.allowEmail = true;
         this.registrationTimestamp = Instant.now();
     }
 }

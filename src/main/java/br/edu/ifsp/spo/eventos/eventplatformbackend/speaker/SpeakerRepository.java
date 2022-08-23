@@ -14,5 +14,4 @@ public interface SpeakerRepository extends JpaRepository<Speaker, UUID> {
     boolean existsByEmailAndIdNot(String email, UUID speakerId);
     Optional<Speaker> findByCpf(String cpf);
     List<Speaker> findByNameStartingWithIgnoreCase(String name);
-    void deleteByAccount(Account acc);
 }

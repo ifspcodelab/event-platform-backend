@@ -4,8 +4,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
@@ -60,14 +58,16 @@ public class AccountService {
         Account account = getAccount(accountId);
         String oldName = account.getName();
         String oldCpf = account.getCpf();
+        Boolean oldAllowEmail = account.getAllowEmail();
 
         account.setName(myDataUpdateDto.getName());
         account.setCpf(myDataUpdateDto.getCpf());
+        account.setAllowEmail(myDataUpdateDto.getAllowEmail());
 
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data. Before: name={}, cpf={}. Now: name={}, cpf={}",
-                account.getEmail(), oldName, oldCpf, myDataUpdateDto.getName(), myDataUpdateDto.getCpf()
+        log.info("Account with email={} updated data. Before: name={}, cpf={}, allow_email: {}. Now: name={}, cpf={}, allow_email: {}",
+                account.getEmail(), oldName, oldCpf, oldAllowEmail, myDataUpdateDto.getName(), myDataUpdateDto.getCpf(),myDataUpdateDto.getAllowEmail()
         );
 
         return account;

@@ -108,6 +108,7 @@ public class RegistrationService {
         accountRepository.save(account);
         log.info("Account with e-mail {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
+        auditService.logUpdate(ResourceName.ACCOUNT, account, "Conta verificada");
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;
     }

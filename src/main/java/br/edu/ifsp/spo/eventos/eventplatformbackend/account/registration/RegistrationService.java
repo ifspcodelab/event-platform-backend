@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
@@ -35,8 +36,7 @@ public class RegistrationService {
     private final RecaptchaService recaptchaService;
     private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
-
-
+    private final AuditService auditService;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -84,6 +84,7 @@ public class RegistrationService {
 
         try {
             emailService.sendVerificationEmail(account, verificationToken);
+            auditService.logCreate(ResourceName.ACCOUNT, account);
             log.info("Verification e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);

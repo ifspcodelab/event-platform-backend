@@ -14,7 +14,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +46,7 @@ public class RegistrationService {
         if(accountRepository.existsByEmail(dto.getEmail())) {
             throw new ResourceAlreadyExistsException(ResourceName.EMAIL, "e-mail", dto.getEmail());
         }
+
         if(accountRepository.existsByCpf(dto.getCpf())) {
             throw new ResourceAlreadyExistsException(ResourceName.CPF, "cpf", dto.getCpf());
         }
@@ -108,7 +108,7 @@ public class RegistrationService {
         accountRepository.save(account);
         log.info("Account with e-mail {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
-        auditService.logUpdate(ResourceName.ACCOUNT, account, "Conta verificada");
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Conta verificada");
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;
     }

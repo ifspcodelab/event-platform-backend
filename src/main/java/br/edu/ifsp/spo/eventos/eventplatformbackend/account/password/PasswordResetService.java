@@ -58,7 +58,7 @@ public class PasswordResetService {
 
         try {
             emailService.sendPasswordResetEmail(account, passwordResetToken);
-            auditService.logCreate(ResourceName.PASSWORD_RESET_TOKEN, account, "Requisição de alteração de senha");
+            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de alteração de senha");
             log.info("Password reset e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send password reset e-mail to {}",account.getEmail(), ex);

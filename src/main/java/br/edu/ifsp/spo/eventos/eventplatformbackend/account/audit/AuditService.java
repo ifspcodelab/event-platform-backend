@@ -10,32 +10,32 @@ import org.springframework.stereotype.Service;
 public class AuditService {
     private final LogRepository logRepository;
 
-    public void log(Action action, ResourceName resourceName, Account account, String resourceData) {
+    public void log(Account account, Action action, ResourceName resourceName, String resourceData) {
         Log log = new Log(account, action, resourceName, resourceData);
 
         logRepository.save(log);
     }
 
-    public void log(Action action, ResourceName resourceName, Account account) {
+    public void log(Account account, Action action, ResourceName resourceName) {
         Log log = new Log(account, action, resourceName, "");
 
         logRepository.save(log);
     }
 
-    public void logCreate(ResourceName resourceName, Account account, String resourceData) {
-        log(Action.CREATE, resourceName, account, resourceData);
+    public void logCreate(Account account, ResourceName resourceName, String resourceData) {
+        log(account, Action.CREATE, resourceName, resourceData);
     }
 
     public void logCreate(ResourceName resourceName, Account account) {
-        log(Action.CREATE, resourceName, account);
+        log(account, Action.CREATE, resourceName);
     }
 
-    public void logUpdate(ResourceName resourceName, Account account, String resourceData) {
-        log(Action.UPDATE, resourceName, account, resourceData);
+    public void logUpdate(Account account, ResourceName resourceName, String resourceData) {
+        log(account, Action.UPDATE, resourceName, resourceData);
     }
 
-    public void logUpdate(ResourceName resourceName, Account account) {
-        log(Action.UPDATE, resourceName, account);
+    public void logUpdate(Account account, ResourceName resourceName) {
+        log(account, Action.UPDATE, resourceName);
     }
 
 }

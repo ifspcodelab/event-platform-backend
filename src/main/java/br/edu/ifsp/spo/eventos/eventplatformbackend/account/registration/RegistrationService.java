@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
@@ -84,7 +85,7 @@ public class RegistrationService {
 
         try {
             emailService.sendVerificationEmail(account, verificationToken);
-            auditService.logCreate(account, ResourceName.ACCOUNT);
+            auditService.log(account, Action.SIGN_UP, ResourceName.ACCOUNT);
             log.info("Verification e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);

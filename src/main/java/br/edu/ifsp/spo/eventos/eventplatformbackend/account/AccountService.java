@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
@@ -28,6 +29,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
     private final RecaptchaService recaptchaService;
+    private final AuditService auditService;
 
     private Account getAccount(UUID id) {
         return accountRepository.findById(id).orElseThrow(
@@ -70,6 +72,9 @@ public class AccountService {
                 account.getEmail(), oldName, oldCpf, myDataUpdateDto.getName(), myDataUpdateDto.getCpf()
         );
 
+        //TODO: especificar o que foi mudado
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Edição em 'Meus dados'");
+
         return account;
     }
 
@@ -95,5 +100,7 @@ public class AccountService {
         accountRepository.save(account);
 
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
+
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Alteração de senha via edição em 'Meus dados'");
     }
 }

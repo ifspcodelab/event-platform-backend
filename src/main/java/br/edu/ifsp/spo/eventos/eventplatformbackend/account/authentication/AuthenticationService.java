@@ -2,8 +2,10 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -24,6 +26,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final AuditService auditService;
 
     @Transactional
     public TokensDto login(LoginCreateDto loginCreateDto){
@@ -56,6 +59,8 @@ public class AuthenticationService {
 
         log.info("Successful login for the email {}", account.getEmail());
 
+        auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login");
+
         return tokensDto;
     }
 
@@ -68,6 +73,8 @@ public class AuthenticationService {
         refreshTokenRepository.deleteAllByAccountId(accountId);
 
         log.info("Successful logout for the email {}", accountEmail);
+
+        auditService.logDelete(getAccount(accountId), ResourceName.REFRESH_TOKEN, "Logout");
     }
 
     @Transactional

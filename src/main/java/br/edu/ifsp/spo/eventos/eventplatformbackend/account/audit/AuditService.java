@@ -5,6 +5,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 public class AuditService {
@@ -26,7 +28,7 @@ public class AuditService {
         log(account, Action.CREATE, resourceName, resourceData);
     }
 
-    public void logCreate(ResourceName resourceName, Account account) {
+    public void logCreate(Account account, ResourceName resourceName) {
         log(account, Action.CREATE, resourceName);
     }
 
@@ -38,4 +40,11 @@ public class AuditService {
         log(account, Action.UPDATE, resourceName);
     }
 
+    public void logDelete(Account account, ResourceName resourceName, String resourceData) {
+        log(account, Action.DELETE, resourceName, resourceData);
+    }
+
+    public void logDelete(Account account, ResourceName resourceName) {
+        log(account, Action.DELETE, resourceName);
+    }
 }

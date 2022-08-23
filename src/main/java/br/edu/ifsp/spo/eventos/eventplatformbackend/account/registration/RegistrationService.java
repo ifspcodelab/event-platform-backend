@@ -84,7 +84,7 @@ public class RegistrationService {
 
         try {
             emailService.sendVerificationEmail(account, verificationToken);
-            auditService.logCreate(ResourceName.ACCOUNT, account);
+            auditService.logCreate(account, ResourceName.ACCOUNT);
             log.info("Verification e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);

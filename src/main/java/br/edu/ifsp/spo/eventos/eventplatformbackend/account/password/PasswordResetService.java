@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
@@ -87,6 +88,7 @@ public class PasswordResetService {
         accountRepository.save(account);
         log.info("Password Reset: password update for account: {}", account.getEmail());
         tokenRepo.deleteById(passwordResetToken.getId());
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Senha alterada");
         log.info("Password Reset: reset token deleted");
     }
 

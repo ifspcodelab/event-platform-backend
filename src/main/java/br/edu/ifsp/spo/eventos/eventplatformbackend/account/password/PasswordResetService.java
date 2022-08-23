@@ -3,9 +3,11 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,7 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
     private final EmailService emailService;
-
+    private final AuditService auditService;
 
     public void createResetPasswordRequest(ForgotPasswordCreateDto dto) {
 
@@ -56,6 +58,7 @@ public class PasswordResetService {
 
         try {
             emailService.sendPasswordResetEmail(account, passwordResetToken);
+            auditService.logCreate(ResourceName.PASSWORD_RESET_TOKEN, account, "Requisição de alteração de senha");
             log.info("Password reset e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send password reset e-mail to {}",account.getEmail(), ex);

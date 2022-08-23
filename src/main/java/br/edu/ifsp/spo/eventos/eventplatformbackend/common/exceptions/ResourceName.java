@@ -17,7 +17,8 @@ public enum ResourceName {
     ORGANIZERSUBEVENT("Organizer Subevent"),
     EMAIL("E-mail"),
     CPF("CPF"),
-    ACTIVITY("Activity");
+    ACTIVITY("Activity"),
+    PASSWORD_RESET_TOKEN("Password reset token");
 
     private String name;
 }

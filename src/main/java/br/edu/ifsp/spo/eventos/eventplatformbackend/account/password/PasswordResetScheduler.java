@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationService;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

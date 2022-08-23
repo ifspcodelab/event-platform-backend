@@ -37,7 +37,7 @@ frontend:
   url: ${FRONTEND_URL:http://localhost:4200}
 
 account:
-  verification-token-expires-in: 30
+  verification-token-expires-in: 900
   password-reset-token-expires-in: 900
 
 jwt:
@@ -52,7 +52,9 @@ recaptcha:
 
 scheduler:
   registration:
-    interval: ${SCHEDULER_REGISTRATION_INTERVAL:60000}
+    interval: ${SCHEDULER_REGISTRATION_INTERVAL:300000}
+  password-reset:
+    interval: ${SCHEDULER_PASSWORD_RESET_INTERVAL:300000}
 
 logging:
   level:

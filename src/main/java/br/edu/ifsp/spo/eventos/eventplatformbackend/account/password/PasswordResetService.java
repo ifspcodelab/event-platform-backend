@@ -28,7 +28,7 @@ public class PasswordResetService {
     private final RecaptchaService recaptchaService;
     private final EmailService emailService;
 
-
+    @Transactional
     public void createResetPasswordRequest(ForgotPasswordCreateDto dto) {
 
         //implementar caminho de volta com essa exceção levando o erro para o front end
@@ -49,13 +49,11 @@ public class PasswordResetService {
             throw new PasswordResetException(PasswordResetExceptionType.OPEN_REQUEST, dto.getEmail());
         }
 
-        PasswordResetToken passwordResetToken =
-                new PasswordResetToken(account, accountConfig.getPasswordResetTokenExpiresIn());
-        tokenRepo.save(passwordResetToken);
-        log.info("Password Reset: token generated for account {}", dto.getEmail());
-
         try {
+            PasswordResetToken passwordResetToken = new PasswordResetToken(account, accountConfig.getPasswordResetTokenExpiresIn());
+            tokenRepo.save(passwordResetToken);
             emailService.sendPasswordResetEmail(account, passwordResetToken);
+            log.info("Password Reset: token generated for account {}", dto.getEmail());
             log.info("Password reset e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send password reset e-mail to {}",account.getEmail(), ex);
@@ -87,4 +85,13 @@ public class PasswordResetService {
         log.info("Password Reset: reset token deleted");
     }
 
+    @Transactional
+    public void removePasswordResetTokens() {
+        tokenRepo.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
+            Account account = token.getAccount();
+            // TODO:
+            tokenRepo.delete(token);
+            log.info("Password Reset token: token {}, account id {}, email {} - removed by password reset scheduler", token.getToken(), account.getId(),account.getEmail());
+        });
+    }
 }

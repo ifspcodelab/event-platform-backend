@@ -95,7 +95,7 @@ public class AccountService {
         }
 
         if (accountRepository.existsByCpfAndIdNot(myDataUpdateDto.getCpf(), UUID.fromString(decodedToken.getSubject()))) {
-            throw new ResourceAlreadyExistsException(ResourceName.CPF, "CPF", myDataUpdateDto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "CPF", myDataUpdateDto.getCpf());
         }
 
         UUID accountId = UUID.fromString(decodedToken.getSubject());
@@ -103,14 +103,16 @@ public class AccountService {
         Account account = getAccount(accountId);
         String oldName = account.getName();
         String oldCpf = account.getCpf();
+        Boolean oldAllowEmail = account.getAllowEmail();
 
         account.setName(myDataUpdateDto.getName());
         account.setCpf(myDataUpdateDto.getCpf());
+        account.setAllowEmail(myDataUpdateDto.getAllowEmail());
 
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data. Before: name={}, cpf={}. Now: name={}, cpf={}",
-                account.getEmail(), oldName, oldCpf, myDataUpdateDto.getName(), myDataUpdateDto.getCpf()
+        log.info("Account with email={} updated data. Before: name={}, cpf={}, allow_email: {}. Now: name={}, cpf={}, allow_email: {}",
+                account.getEmail(), oldName, oldCpf, oldAllowEmail, myDataUpdateDto.getName(), myDataUpdateDto.getCpf(),myDataUpdateDto.getAllowEmail()
         );
 
         return account;

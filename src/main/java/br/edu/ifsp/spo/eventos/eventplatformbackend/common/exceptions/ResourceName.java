@@ -15,8 +15,6 @@ public enum ResourceName {
     SPEAKER("Speaker"),
     ORGANIZER("Organizer"),
     ORGANIZERSUBEVENT("Organizer Subevent"),
-    EMAIL("E-mail"),
-    CPF("CPF"),
     ACTIVITY("Activity");
 
     private String name;

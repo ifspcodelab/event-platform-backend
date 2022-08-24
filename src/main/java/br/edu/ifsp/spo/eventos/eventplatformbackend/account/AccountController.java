@@ -20,10 +20,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @CrossOrigin(origins = "*")
 public class AccountController {
-
     private final AccountService accountService;
     private final AccountMapper accountMapper;
-
 
     @GetMapping()
     public ResponseEntity<Page<AccountDto>> index(
@@ -35,14 +33,12 @@ public class AccountController {
         return ResponseEntity.ok(accounts.map(accountMapper::to));
     }
 
-
     @GetMapping("{accountId}")
         public ResponseEntity<AccountDto> show(@PathVariable UUID accountId) {
         Account account = accountService.findById(accountId);
         AccountDto accountDto = accountMapper.to(account);
         return ResponseEntity.ok(accountDto);
     }
-
 
     @PutMapping("{accountId}")
     public ResponseEntity<AccountDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountUpdateDto dto) {

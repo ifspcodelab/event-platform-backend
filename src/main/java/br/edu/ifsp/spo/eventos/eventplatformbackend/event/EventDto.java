@@ -11,6 +11,7 @@ public class EventDto {
     String slug;
     String summary;
     String presentation;
+    String contact;
     Period registrationPeriod;
     Period executionPeriod;
     String smallerImage;

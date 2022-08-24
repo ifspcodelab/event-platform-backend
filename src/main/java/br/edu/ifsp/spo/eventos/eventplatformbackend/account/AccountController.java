@@ -1,19 +1,19 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
+
 
 @RestController
 @RequestMapping("api/v1/accounts")
@@ -57,4 +57,25 @@ public class AccountController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("my-data")
+    public ResponseEntity<AccountDto> show(@RequestHeader("Authorization") String accessToken) {
+        Account account = accountService.getUserByAccessToken(accessToken.replace("Bearer ", ""));
+        AccountDto accountDto = accountMapper.to(account);
+
+        return ResponseEntity.ok(accountDto);
+    }
+
+    @PatchMapping("my-data")
+    public ResponseEntity<AccountDto> update(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody MyDataUpdateDto myDataUpdateDto) {
+        Account account = accountService.update(accessToken.replace("Bearer ", ""), myDataUpdateDto);
+
+        return ResponseEntity.ok(accountMapper.to(account));
+    }
+
+    @PatchMapping("my-data/password")
+    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
+        accountService.updatePassword(accessToken.replace("Bearer ", ""), myDataUpdatePasswordDto);
+
+        return ResponseEntity.noContent().build();
+    }
 }

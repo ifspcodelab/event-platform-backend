@@ -21,6 +21,7 @@ public class Event {
     private String slug;
     private String summary;
     private String presentation;
+    private String contact;
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "startDate", column = @Column(name = "registration_start_date")),
@@ -44,6 +45,7 @@ public class Event {
         String slug,
         String summary,
         String presentation,
+        String contact,
         Period registrationPeriod,
         Period executionPeriod,
         String smallerImage,
@@ -54,6 +56,7 @@ public class Event {
         this.slug = slug;
         this.summary = summary;
         this.presentation = presentation;
+        this.contact = contact;
         this.registrationPeriod = registrationPeriod;
         this.executionPeriod = executionPeriod;
         this.smallerImage = smallerImage;

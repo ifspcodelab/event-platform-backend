@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
@@ -52,6 +53,7 @@ public class EventService {
             dto.getSlug(),
             dto.getSummary(),
             dto.getPresentation(),
+            dto.getContact(),
             dto.getRegistrationPeriod(),
             dto.getExecutionPeriod(),
             dto.getSmallerImage(),
@@ -65,6 +67,11 @@ public class EventService {
         return getEvent(eventId);
     }
 
+    public Event findBySlug(String slug) {
+        return  eventRepository.findEventBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, slug));
+    }
+
     public List<Event> findAll() {
         return eventRepository.findAll();
     }
@@ -76,17 +83,12 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_CANCELED_STATUS);
         }
 
-        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-            event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
-        }
-
-        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-            event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-            event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_IN_REGISTRATION_PERIOD);
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
         }
 
         if(subeventRepository.existsByEventId(eventId)) {
@@ -100,6 +102,11 @@ public class EventService {
 
     public Event update(UUID eventId, EventCreateDto dto) {
         Event event = getEvent(eventId);
+
+        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
+            event.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        }
 
         if(eventRepository.existsByTitleAndIdNot(dto.getTitle(), eventId)) {
             throw new ResourceAlreadyExistsException(ResourceName.EVENT, "title", dto.getTitle());
@@ -129,20 +136,33 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END);
         }
 
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
+        if(event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if(!dto.getSlug().equals(event.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
+
+                if(!dto.getRegistrationPeriod().getStartDate().isEqual(event.getRegistrationPeriod().getStartDate())) {
+                    throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_RERISTRATION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
+                }
+
+                if(!dto.getExecutionPeriod().getStartDate().isEqual(event.getExecutionPeriod().getStartDate())) {
+                    throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_EXECUTION_PERIOD_START_MODIFIED_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
         }
 
-        if(event.getStatus().equals(EventStatus.PUBLISHED) &&
-            event.getExecutionPeriod().getEndDate().isAfter(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD);
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
         event.setTitle(dto.getTitle());
         event.setSlug(dto.getSlug());
         event.setSummary(dto.getSummary());
         event.setPresentation(dto.getPresentation());
+        event.setContact(dto.getContact());
         event.setRegistrationPeriod(dto.getRegistrationPeriod());
         event.setExecutionPeriod(dto.getExecutionPeriod());
         event.setSmallerImage(dto.getSmallerImage());
@@ -189,10 +209,8 @@ public class EventService {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
-            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(
-                    BusinessRuleType.EVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_START
-                );
+            if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.EVENT_PUBLISH_WITH_DRAFT_STATUS_AND_REGISTRATION_PERIOD_END);
             }
         }
 

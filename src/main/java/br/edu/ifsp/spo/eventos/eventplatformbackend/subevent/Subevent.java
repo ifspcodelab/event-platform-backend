@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class Subevent {
     private String slug;
     private String summary;
     private String presentation;
+    private String contact;
     private String cancellationMessage;
     @Embedded
     @AttributeOverrides({
@@ -32,16 +34,17 @@ public class Subevent {
     private Period executionPeriod;
     private String smallerImage;
     private String biggerImage;
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
     @ManyToOne
     private Event event;
+    @Enumerated(EnumType.STRING)
+    private EventStatus status;
 
     public Subevent(
         String title,
         String slug,
         String summary,
         String presentation,
+        String contact,
         Period executionPeriod,
         String smallerImage,
         String biggerImage,
@@ -52,6 +55,7 @@ public class Subevent {
         this.slug = slug;
         this.summary = summary;
         this.presentation = presentation;
+        this.contact = contact;
         this.executionPeriod = executionPeriod;
         this.smallerImage = smallerImage;
         this.biggerImage = biggerImage;

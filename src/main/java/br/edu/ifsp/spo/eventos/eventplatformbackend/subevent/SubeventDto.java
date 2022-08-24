@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.Data;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public class SubeventDto {
     String slug;
     String summary;
     String presentation;
+    String contact;
     Period executionPeriod;
     String smallerImage;
     String biggerImage;

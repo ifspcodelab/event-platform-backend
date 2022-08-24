@@ -39,7 +39,7 @@ public class RegistrationService {
         }
 
         if(accountRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "e-mail", dto.getEmail());
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "email", dto.getEmail());
         }
 
         if(accountRepository.existsByCpf(dto.getCpf())) {
@@ -68,7 +68,7 @@ public class RegistrationService {
             }
 
             emailService.sendVerificationEmail(account, verificationToken);
-            log.info("Verification e-mail was sent to {}", account.getEmail());
+            log.info("Verification email was sent to {}", account.getEmail());
             return account;
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
@@ -89,7 +89,7 @@ public class RegistrationService {
         Account account = verificationToken.getAccount();
         account.setVerified(true);
         accountRepository.save(account);
-        log.info("Account with e-mail {} was verified", account.getEmail());
+        log.info("Account with email {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;

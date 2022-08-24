@@ -10,8 +10,10 @@ import java.util.UUID;
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, UUID> {
     Integer countRegistrationsBySessionIdAndRegistrationStatus(UUID sessionId, RegistrationStatus registrationStatus);
-    boolean existsBySessionIdAndAccountIdAndRegistrationStatus(UUID sessionId, UUID accountId, RegistrationStatus registrationStatus);
+    boolean existsBySessionIdAndAccountIdAndRegistrationStatusIn(UUID sessionId, UUID accountId, List<RegistrationStatus> registrationStatus);
+    boolean existsByRegistrationStatus(RegistrationStatus registrationStatus);
     List<Registration> findAllByAccountIdAndRegistrationStatus(UUID accountId, RegistrationStatus registrationStatus);
+    List<Registration> findAllByAccountIdAndRegistrationStatusIn(UUID accountId, List<RegistrationStatus> registrationStatus);
     List<Registration> findAllBySessionId(UUID sessionId);
     Optional<Registration> getFirstByRegistrationStatus(RegistrationStatus registrationStatus);
 }

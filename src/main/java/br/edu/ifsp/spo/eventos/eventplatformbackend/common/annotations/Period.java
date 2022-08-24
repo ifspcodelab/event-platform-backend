@@ -20,4 +20,22 @@ public class Period {
     LocalDate startDate;
     @NotNull
     LocalDate endDate;
+
+    public boolean started() {
+        return startDate.equals(LocalDate.now()) || startDate.isBefore(LocalDate.now());
+    }
+
+    public boolean ended() {
+        return endDate.isBefore(LocalDate.now());
+    }
+
+    public boolean todayIsWithinThePeriod() {
+        return started() && !ended();
+    }
+
+    public boolean todayIsOutOfPeriod() {
+        return !started() || ended();
+    }
+
+
 }

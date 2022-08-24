@@ -21,6 +21,7 @@ public class Session {
     private UUID id;
     private String title;
     private Integer seats;
+    private Integer confirmedSeats;
     private String cancellationMessage;
     private boolean isCanceled;
     @ManyToOne
@@ -33,9 +34,18 @@ public class Session {
         this.id = UUID.randomUUID();
         this.title = title;
         this.seats = seats;
+        this.confirmedSeats = 0;
         this.cancellationMessage = null;
         this.activity = activity;
         this.sessionsSchedules = sessionsShedules;
+    }
+
+    public boolean isFull() {
+        return this.getSeats().equals(this.getConfirmedSeats());
+    }
+
+    public void incrementNumberOfConfirmedSeats() {
+        this.confirmedSeats++;
     }
 }
 

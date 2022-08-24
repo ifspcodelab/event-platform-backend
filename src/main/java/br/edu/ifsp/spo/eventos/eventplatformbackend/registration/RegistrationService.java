@@ -10,13 +10,12 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -32,214 +31,267 @@ public class RegistrationService {
     private final RegistrationRepository registrationRepository;
     private final AccountRepository accountRepository;
 
+    //TODO: Método que verifica se uma sessão acabou para poder finalziar as inscrições (alterar o status)
+
+    @Transactional
     public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID activityId, UUID sessionId) {
         var account = getAccount(registrationCreateDto.getAccountId());
-        var event = getEvent(eventId);
-        var activity = getActivity(activityId);
         var session = getSession(sessionId);
+        var activity = session.getActivity();
+        var event = activity.getEvent();
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
+        checkIfSessionIsCancelled(session);
+        checkIfActivityIsNotPublished(activity);
+        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
 
-        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.CONFIRMED)
-            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.WAITING_LIST)
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
-        }
+        Account accountLock = accountRepository.findByIdWithPessimisticLock(account.getId()).get();
 
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_CANCELED_SESSION);
-        }
+        checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        if(activity.getStatus() != EventStatus.PUBLISHED) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED);
-        }
+        var registrations = registrationRepository.findAllByAccountIdAndRegistrationStatus(
+            accountLock.getId(),
+            RegistrationStatus.CONFIRMED
+        );
 
-        if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now()) ||
-            event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
-        }
-
-        List<Registration> registrationsWithCornfirmedStatus = registrationRepository.findAllByAccountIdAndRegistrationStatus(account.getId(), RegistrationStatus.CONFIRMED);
-        
-        for(var registration : registrationsWithCornfirmedStatus) {
-            List<SessionSchedule> sessionsSchedules = registration.getSession().getSessionsSchedules();
-
-            for(var schedule : sessionsSchedules) {
-                for(var sessionSchedule : session.getSessionsSchedules()) {
-                    if(schedule.hasConflict(sessionSchedule)) {
-                        throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
-                    }
+        registrations.stream()
+            .flatMap(registration -> registration.getSession().getSessionsSchedules().stream())
+            .forEach(schedule -> {
+                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                    throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
                 }
-            }
-        }
+            });
 
-        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
-            sessionId,
-            RegistrationStatus.CONFIRMED))) {
-            return registrationRepository.save(Registration.createWithWaitingListdStatus(account,session));
-        }
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
-        return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
+        checkIfSessionLockIsFull(sessionLock);
+
+        sessionLock.incrementNumberOfConfirmedSeats();
+        sessionRepository.save(sessionLock);
+
+        return registrationRepository.save(Registration.createWithConfirmedStatus(accountLock,sessionLock));
     }
 
+    @Transactional
     public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
         var account = getAccount(registrationCreateDto.getAccountId());
-        var event = getEvent(eventId);
-        var subevent = getSubevent(subeventId);
-        var activity = getActivity(activityId);
         var session = getSession(sessionId);
+        var activity = session.getActivity();
+        var subevent = activity.getSubevent();
+        var event = subevent.getEvent();
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
+        checkIfSessionIsCancelled(session);
+        checkIfActivityIsNotPublished(activity);
+        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
 
-        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.CONFIRMED)
-            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.WAITING_LIST)
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
-        }
+        Account accountLock = accountRepository.findByIdWithPessimisticLock(account.getId()).get();
 
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_CANCELED_SESSION);
-        }
+        checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        if(activity.getStatus() != EventStatus.PUBLISHED) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED);
-        }
+        var registrations = registrationRepository.findAllByAccountIdAndRegistrationStatus(
+                accountLock.getId(),
+                RegistrationStatus.CONFIRMED
+        );
 
-        if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now()) ||
-            event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
-        }
-
-        List<Registration> registrationsWithCornfirmedStatus = registrationRepository.findAllByAccountIdAndRegistrationStatus(account.getId(), RegistrationStatus.CONFIRMED);
-
-        for(var registration : registrationsWithCornfirmedStatus) {
-            List<SessionSchedule> sessionsSchedules = registration.getSession().getSessionsSchedules();
-
-            for(var schedule : sessionsSchedules) {
-                for(var sessionSchedule : session.getSessionsSchedules()) {
-                    if(schedule.hasConflict(sessionSchedule)) {
-                        throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
-                    }
+        registrations.stream()
+            .flatMap(registration -> registration.getSession().getSessionsSchedules().stream())
+            .forEach(schedule -> {
+                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                    throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
                 }
-            }
-        }
+            });
 
-        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
-            sessionId,
-            RegistrationStatus.CONFIRMED))) {
-            return registrationRepository.save(Registration.createWithWaitingListdStatus(account,session));
-        }
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
-        return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
+        checkIfSessionLockIsFull(sessionLock);
+
+        sessionLock.incrementNumberOfConfirmedSeats();
+        sessionRepository.save(sessionLock);
+
+        return registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock));
     }
 
+    @Transactional
     public Registration create(RegistrationCreateDto registrationCreateDto, UUID sessionId) {
         var account = getAccount(registrationCreateDto.getAccountId());
         var session = getSession(sessionId);
         var activity = session.getActivity();
         var event = activity.getEvent();
+        checkIfSessionIsCancelled(session);
+        checkIfActivityIsNotPublished(activity);
+        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
 
-        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.CONFIRMED)
-            || registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatus(sessionId, registrationCreateDto.getAccountId(), RegistrationStatus.WAITING_LIST)
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
-        }
+        Account accountLock = accountRepository.findByIdWithPessimisticLock(account.getId()).get();
 
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_CANCELED_SESSION);
-        }
+        checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        if(activity.getStatus() != EventStatus.PUBLISHED) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED);
-        }
+        var registrations = registrationRepository.findAllByAccountIdAndRegistrationStatus(
+                accountLock.getId(),
+                RegistrationStatus.CONFIRMED
+        );
 
-        if(event.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now()) ||
-            event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())
-        ) {
-            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
-        }
-
-        List<Registration> registrationsWithCornfirmedStatus = registrationRepository.findAllByAccountIdAndRegistrationStatus(account.getId(), RegistrationStatus.CONFIRMED);
-
-        for(var registration : registrationsWithCornfirmedStatus) {
-            List<SessionSchedule> sessionsSchedules = registration.getSession().getSessionsSchedules();
-
-            for(var schedule : sessionsSchedules) {
-                for(var sessionSchedule : session.getSessionsSchedules()) {
-                    if(schedule.hasConflict(sessionSchedule)) {
-                        throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
-                    }
+        registrations.stream()
+            .flatMap(registration -> registration.getSession().getSessionsSchedules().stream())
+            .forEach(schedule -> {
+                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                    throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
                 }
-            }
-        }
+            });
 
-        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
-            sessionId,
-            RegistrationStatus.CONFIRMED))) {
-            return registrationRepository.save(Registration.createWithWaitingListdStatus(account,session));
-        }
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
-        return registrationRepository.save(Registration.createWithConfirmedStatus(account,session));
+        checkIfSessionLockIsFull(sessionLock);
+
+        sessionLock.incrementNumberOfConfirmedSeats();
+        sessionRepository.save(sessionLock);
+
+        return registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock));
     }
 
-    public Registration cancel(UUID accountId, UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
-        var account = getAccount(accountId);
-        var activity = getActivity(activityId);
+    @Transactional
+    public Registration createRegistrationInWaitList(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID activityId, UUID sessionId) {
+        var account = getAccount(registrationCreateDto.getAccountId());
         var session = getSession(sessionId);
+        var activity = session.getActivity();
+        var event = activity.getEvent();
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checkIfSessionIsCancelled(session);
+        checkIfActivityIsNotPublished(activity);
+        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+
+        Account accountLock = accountRepository.findByIdWithPessimisticLock(account.getId()).get();
+
+        checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
+
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+
+        checkIfSessionIsNotFull(sessionLock);
+
+        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock));
+    }
+
+    @Transactional
+    public Registration createRegistrationInWaitList(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        var account = getAccount(registrationCreateDto.getAccountId());
+        var session = getSession(sessionId);
+        var activity = session.getActivity();
+        var subevent = activity.getSubevent();
+        var event = subevent.getEvent();
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checkIfSessionIsCancelled(session);
+        checkIfActivityIsNotPublished(activity);
+        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+
+        Account accountLock = accountRepository.findByIdWithPessimisticLock(account.getId()).get();
+
+        checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
+
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+
+        checkIfSessionIsNotFull(sessionLock);
+
+        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock));
+    }
+
+    @Transactional
+    public Registration createRegistrationInWaitList(RegistrationCreateDto registrationCreateDto, UUID sessionId) {
+        var account = getAccount(registrationCreateDto.getAccountId());
+        var session = getSession(sessionId);
+        var activity = session.getActivity();
+        var event = activity.getEvent();
+
+        Account accountLock = accountRepository.findByIdWithPessimisticLock(account.getId()).get();
+
+        checkIfSessionIsCancelled(session);
+        checkIfActivityIsNotPublished(activity);
+        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+        checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+
+        checkIfSessionIsNotFull(sessionLock);
+
+        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock));
+    }
+
+    public Registration cancel(UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
         var registration = getRegistration(registrationId);
+        var session = registration.getSession();
+        var activity = session.getActivity();
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
 
-        //Como saber se a sessão acabou? Pois uma sessão possui uma lista de session-schedule, então como diferenciar uma da outra?
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+
+        if(sessionLock.isFull() && checkIfExistAnyRegistrationInWaitList()) {
+           var firstRegistrationInWaitList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST).get();
+           firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+           registrationRepository.save(firstRegistrationInWaitList);
+           //email
+        }
+
         registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
         log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
-
-        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
-            sessionId,
-            RegistrationStatus.CONFIRMED))) {
-            var firstRegistrationInWaitingList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, RegistrationStatus.WAITING_LIST.toString()));
-            firstRegistrationInWaitingList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
-        }
 
         return registrationRepository.save(registration);
     }
 
-    public Registration cancel(UUID accountId, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID registrationId) {
-        var subevent = getSubevent(subeventId);
-        var account = getAccount(accountId);
-        var activity = getActivity(activityId);
-        var session = getSession(sessionId);
+    public Registration cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID registrationId) {
         var registration = getRegistration(registrationId);
+        var session = registration.getSession();
+        var activity = session.getActivity();
+        var subevent = activity.getSubevent();
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
 
-        //Como saber se a sessão acabou? Pois uma sessão possui uma lista de session-schedule, então como diferenciar uma da outra?
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+
+        if(sessionLock.isFull() && checkIfExistAnyRegistrationInWaitList()) {
+            var firstRegistrationInWaitList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST).get();
+            firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+            registrationRepository.save(firstRegistrationInWaitList);
+            //email
+        }
+
         registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
         log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
 
-        if(session.getSeats().equals(registrationRepository.countRegistrationsBySessionIdAndRegistrationStatus(
-            sessionId,
-            RegistrationStatus.CONFIRMED))) {
-            var firstRegistrationInWaitingList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, RegistrationStatus.WAITING_LIST.toString()));
-            firstRegistrationInWaitingList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+        return registrationRepository.save(registration);
+    }
+
+    public Registration cancel(UUID accountId, UUID registrationId) {
+        var registration = getRegistration(registrationId);
+        var session = registration.getSession();
+        checksIfAccountIsAssociateToRegistration(accountId, registration);
+
+        Session sessionLock = sessionRepository.findByIdWithPessimisticLock(session.getId()).get();
+
+        if(sessionLock.isFull() && checkIfExistAnyRegistrationInWaitList()) {
+            var firstRegistrationInWaitList = registrationRepository.getFirstByRegistrationStatus(RegistrationStatus.WAITING_LIST).get();
+            firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+            registrationRepository.save(firstRegistrationInWaitList);
+            //email
         }
+
+        registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_USER);
+        log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
 
         return registrationRepository.save(registration);
     }
 
     public List<Registration> findAll(UUID eventId, UUID activityId, UUID sessionId) {
-        var activity = getActivity(activityId);
         var session = getSession(sessionId);
+        var activity = session.getActivity();
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
 
@@ -247,15 +299,70 @@ public class RegistrationService {
     }
 
     public List<Registration> findAll(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
-        var subevent = getSubevent(subeventId);
-        var activity = getActivity(activityId);
         var session = getSession(sessionId);
+        var activity = session.getActivity();
+        var subevent = activity.getSubevent();
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
 
         return registrationRepository.findAllBySessionId(sessionId);
+    }
+
+    public List<Registration> findAll(UUID accountId) {
+        var account = getAccount(accountId);
+        return registrationRepository.findAllByAccountIdAndRegistrationStatusIn(
+            accountId,
+            List.of(RegistrationStatus.CONFIRMED,
+                    RegistrationStatus.WAITING_LIST,
+                    RegistrationStatus.WAITING_CONFIRMATION
+            )
+        );
+    }
+
+    private boolean checkIfExistAnyRegistrationInWaitList() {
+        return registrationRepository.existsByRegistrationStatus(RegistrationStatus.WAITING_LIST);
+    }
+
+    private void checkIfSessionLockIsFull(Session sessionLock) {
+        if(sessionLock.isFull()) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_NO_SEATS_AVAILABLE);
+        }
+    }
+
+    private void checkIfSessionIsNotFull(Session session) {
+        if(!session.isFull()) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_IN_WAIT_LIST_WITH_SEATS_VAILABLE);
+        }
+    }
+
+    private void checkIfTodayIsOutOfRegistrationPeriodOfEvent(Event event) {
+        if(event.getRegistrationPeriod().todayIsOutOfPeriod()) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
+        }
+    }
+
+    private void checkIfActivityIsNotPublished(Activity activity) {
+        if(activity.getStatus() != EventStatus.PUBLISHED) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED);
+        }
+    }
+
+    private void checkIfSessionIsCancelled(Session session) {
+        if(session.isCanceled()) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_CANCELED_SESSION);
+        }
+    }
+
+    private void checkIfAccountHasARegistrationInSession(UUID accountId, UUID sessionId) {
+        if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatusIn(
+            sessionId,
+            accountId,
+            List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.WAITING_LIST)
+        )) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
+        }
     }
 
     private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {
@@ -285,6 +392,12 @@ public class RegistrationService {
     private void checksIfSessionIsAssociateToRegistration(UUID sessionId, Registration registration) {
         if (!registration.getSession().getId().equals(sessionId)) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_SESSION);
+        }
+    }
+
+    private void checksIfAccountIsAssociateToRegistration(UUID accountId, Registration registration) {
+        if (!registration.getSession().getId().equals(accountId)) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT);
         }
     }
 

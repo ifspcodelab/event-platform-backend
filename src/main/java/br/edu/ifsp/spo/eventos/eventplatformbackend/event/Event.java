@@ -61,4 +61,20 @@ public class Event {
         this.status = EventStatus.DRAFT;
         this.cancellationMessage = null;
     }
+
+    public boolean isRegistrationPeriodStarted() {
+        return registrationPeriod.started();
+    }
+
+    public boolean isRegistrationPeriodEnded() {
+        return registrationPeriod.ended();
+    }
+
+    public boolean isExecutionPeriodStarted() {
+        return executionPeriod.started();
+    }
+
+    public boolean isExecutionPeriodEnded() {
+        return executionPeriod.ended();
+    }
 }

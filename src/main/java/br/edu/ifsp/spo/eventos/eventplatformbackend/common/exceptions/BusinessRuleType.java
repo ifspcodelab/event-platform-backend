@@ -108,11 +108,14 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível cancelar uma sessão com um subevento cancelado"),
     SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     REGISTRATION_IS_NOT_ASSOCIATED_TO_SESSION("Registro não está associado à sessão"),
+    REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT("Registro não está associado à sessão"),
     REGISTRATION_CREATE_ALREADY_EXISTS("Não é possível registrar em uma sessão em que já está registrado"),
     REGISTRATION_CREATE_WITH_CANCELED_SESSION("Não é possível registrar em uma sessão cancelada"),
     REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED("Não é possível registrar em uma sessão em que sua atividade não esteja publicada"),
     REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD("Não é possível registrar em uma sessão em que o período de inscrições do evento não tenha iniciado"),
-    REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT("Não é possível registrar em uma sessão que tenha conflito com outra sessão em que já esteja confirmado.");
+    REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT("Não é possível registrar em uma sessão que tenha conflito com outra sessão em que já esteja confirmado"),
+    REGISTRATION_CREATE_WITH_NO_SEATS_AVAILABLE("Não é possível registrar em uma sessão em que não há mais vagas abertas"),
+    REGISTRATION_CREATE_IN_WAIT_LIST_WITH_SEATS_VAILABLE("Não é possível criar um registro em lista de espera em uma sessão com vagas abertas");
 
     String message;
 

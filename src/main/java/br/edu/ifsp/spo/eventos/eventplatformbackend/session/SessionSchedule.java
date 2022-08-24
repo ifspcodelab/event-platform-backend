@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,8 +20,8 @@ import java.util.UUID;
 public class SessionSchedule {
     @Id
     private UUID id;
-    private LocalDateTime execution_start;
-    private LocalDateTime execution_end;
+    private LocalDateTime executionStart;
+    private LocalDateTime executionEnd;
     private String url;
     @ManyToOne
     private Location location;
@@ -31,49 +30,27 @@ public class SessionSchedule {
     @ManyToOne
     private Space space;
 
-    public SessionSchedule(LocalDateTime execution_start, LocalDateTime execution_end, String url, Location location, Area area, Space space) {
+    public SessionSchedule(LocalDateTime executionStart, LocalDateTime executionEnd, String url, Location location, Area area, Space space) {
         this.id = UUID.randomUUID();
-        this.execution_start = execution_start;
-        this.execution_end = execution_end;
+        this.executionStart = executionStart;
+        this.executionEnd = executionEnd;
         this.url = url;
         this.location = location;
         this.area = area;
         this.space = space;
     }
 
-    public boolean hasConflict(SessionSchedule sessionSchedule) {
-        if(this.execution_start.isEqual(sessionSchedule.execution_start) ||
-            this.execution_end.isEqual(sessionSchedule.execution_end)
-        ) {
-            return true;
-        }
+    public boolean hasIntersection(SessionSchedule sessionSchedule) {
+        LocalDateTime start1 = this.executionStart;
+        LocalDateTime end1 = this.executionEnd;
+        LocalDateTime start2 = sessionSchedule.getExecutionStart();
+        LocalDateTime end2 = sessionSchedule.getExecutionEnd();
 
-        if(this.execution_start.isBefore(sessionSchedule.execution_start) &&
-            this.execution_end.isAfter(sessionSchedule.execution_start)
-        ) {
-            return true;
-        }
+        var condition1 = start1.isBefore(start2) || start1.isEqual(start2);
+        var condition2 = end1.isAfter(start2);
+        var condition3 = start2.isBefore(start1) || start2.isEqual(start1);
+        var condition4 = end2.isAfter(start1);
 
-        if(this.execution_start.isBefore(sessionSchedule.execution_end) &&
-            this.execution_end.isAfter(sessionSchedule.execution_end)
-        ) {
-            return true;
-        }
-
-        if(this.execution_start.isBefore(sessionSchedule.execution_start) &&
-            this.execution_end.isAfter(sessionSchedule.execution_end)
-        ) {
-            return true;
-        }
-
-        if(this.execution_start.isAfter(sessionSchedule.execution_start) &&
-            this.execution_end.isBefore(sessionSchedule.execution_end)
-        ) {
-            return true;
-        }
-
-
-
-        return false;
+        return (condition1 && condition2) || (condition3 && condition4);
     }
 }

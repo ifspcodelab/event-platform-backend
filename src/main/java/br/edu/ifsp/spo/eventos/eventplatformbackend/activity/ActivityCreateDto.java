@@ -19,7 +19,7 @@ public class ActivityCreateDto {
     String slug;
     @NotNull
     @NotBlank
-    @Size(min = 100, max = 500)
+    @Size(min = 100, max = 5000)
     String description;
     @Valid
     @NotNull

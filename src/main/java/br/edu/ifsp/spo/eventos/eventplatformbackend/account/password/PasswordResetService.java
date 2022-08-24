@@ -31,7 +31,6 @@ public class PasswordResetService {
     @Transactional
     public void createResetPasswordRequest(ForgotPasswordCreateDto dto) {
 
-        //implementar caminho de volta com essa exceção levando o erro para o front end
         if(!recaptchaService.isValid(dto.getUserRecaptcha())){
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
         }
@@ -89,7 +88,7 @@ public class PasswordResetService {
     public void removePasswordResetTokens() {
         tokenRepo.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
             Account account = token.getAccount();
-            // TODO:
+            // TODO: registrar o log
             tokenRepo.delete(token);
             log.info("Password Reset token: token {}, account id {}, email {} - removed by password reset scheduler", token.getToken(), account.getId(),account.getEmail());
         });

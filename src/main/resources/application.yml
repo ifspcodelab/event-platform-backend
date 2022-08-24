@@ -64,3 +64,5 @@ logging:
         ifsp:
           spo:
             eventos: ${APP_LOGGING_LEVEL:TRACE}
+  file:
+    name: app.log

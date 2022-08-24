@@ -24,6 +24,10 @@ public class EventCreateDto {
     @Size(min = 1000, max = 5000)
     String presentation;
     @NotNull
+    @NotBlank
+    @Size(min = 100, max = 5000)
+    String contact;
+    @NotNull
     @Valid
     Period registrationPeriod;
     @NotNull

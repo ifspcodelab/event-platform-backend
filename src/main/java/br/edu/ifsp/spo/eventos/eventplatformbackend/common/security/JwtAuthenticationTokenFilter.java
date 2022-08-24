@@ -44,7 +44,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             log.warn("JWTDecodeException", ex);
             sendErrorResponse(response, "JWTDecodeException");
         } catch (TokenExpiredException ex) {
-            log.warn("TokenExpiredException", ex);
+            log.warn("TokenExpiredException");
             sendErrorResponse(response, "TokenExpiredException");
         } catch (SignatureVerificationException ex) {
             log.warn("SignatureVerificationException", ex);

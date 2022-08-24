@@ -53,6 +53,7 @@ public class EventService {
             dto.getSlug(),
             dto.getSummary(),
             dto.getPresentation(),
+            dto.getContact(),
             dto.getRegistrationPeriod(),
             dto.getExecutionPeriod(),
             dto.getSmallerImage(),
@@ -161,6 +162,7 @@ public class EventService {
         event.setSlug(dto.getSlug());
         event.setSummary(dto.getSummary());
         event.setPresentation(dto.getPresentation());
+        event.setContact(dto.getContact());
         event.setRegistrationPeriod(dto.getRegistrationPeriod());
         event.setExecutionPeriod(dto.getExecutionPeriod());
         event.setSmallerImage(dto.getSmallerImage());

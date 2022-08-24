@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public class AccountController {
 
 
     @PutMapping("{accountId}")
-    public ResponseEntity<AccountDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountDto dto) {
+    public ResponseEntity<AccountDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountUpdateDto dto) {
         Account account = accountService.update(accountId, dto);
         AccountDto accountDto = accountMapper.to(account);
         return ResponseEntity.ok(accountDto);

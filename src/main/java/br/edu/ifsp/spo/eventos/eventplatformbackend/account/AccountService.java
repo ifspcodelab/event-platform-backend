@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.UserNotFoundException;
@@ -53,13 +55,12 @@ public class AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, userId));
     }
 
-    public Account update(UUID accountId, AccountDto dto) {
+    public Account update(UUID accountId, AccountUpdateDto dto) {
         Account account = getAccount(accountId);
 
         account.setName(dto.getName());
         account.setEmail(dto.getEmail());
         account.setCpf(dto.getCpf());
-        account.setAgreed(dto.getAgreed());
         account.setRole(AccountRole.valueOf(dto.getRole()));
         account.setVerified(dto.getVerified());
         log.info("Account with name={} and email={} was updated", account.getName(), account.getEmail());

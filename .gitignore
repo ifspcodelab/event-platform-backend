@@ -36,3 +36,4 @@ out/
 .vscode/
 
 app.log
+app.log*

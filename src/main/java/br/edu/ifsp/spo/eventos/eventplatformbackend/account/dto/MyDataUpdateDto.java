@@ -22,4 +22,6 @@ public class MyDataUpdateDto {
     private String cpf;
     @NotNull
     String userRecaptcha;
+    @NotNull
+    Boolean allowEmail;
 }

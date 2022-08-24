@@ -30,6 +30,7 @@ public class Account implements Diffable<Account> {
     @Enumerated(EnumType.STRING)
     private AccountRole role;
     private Boolean verified;
+    private Boolean allowEmail;
     private Instant registrationTimestamp;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
@@ -41,6 +42,7 @@ public class Account implements Diffable<Account> {
         this.agreed = agreed;
         this.role = AccountRole.ATTENDANT;
         this.verified = false;
+        this.allowEmail = true;
         this.registrationTimestamp = Instant.now();
     }
 
@@ -48,8 +50,8 @@ public class Account implements Diffable<Account> {
     public DiffResult<Account> diff(Account updatedAccount) {
         return new DiffBuilder<>(this, updatedAccount, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("Nome", this.name, updatedAccount.name)
-                .append("email", this.email, updatedAccount.email)
                 .append("CPF", this.cpf, updatedAccount.cpf)
+                .append("Permite comunicação por email", this.allowEmail, updatedAccount.allowEmail)
                 .build();
     }
 }

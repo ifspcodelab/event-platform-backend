@@ -22,7 +22,7 @@ public class RegistrationController {
     private final AccountMapper accountMapper;
 
     @PostMapping("registration")
-    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) throws InterruptedException {
+    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) {
         Account account = registrationService.create(accountCreateDto);
 
         AccountDto accountDto = accountMapper.to(account);

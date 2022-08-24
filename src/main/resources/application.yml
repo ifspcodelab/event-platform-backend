@@ -50,6 +50,12 @@ recaptcha:
   secret: ${RECAPTCHA_SECRET}
   site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
 
+scheduler:
+  registration:
+    interval: ${SCHEDULER_REGISTRATION_INTERVAL:300000}
+  password-reset:
+    interval: ${SCHEDULER_PASSWORD_RESET_INTERVAL:300000}
+
 logging:
   level:
     root: INFO

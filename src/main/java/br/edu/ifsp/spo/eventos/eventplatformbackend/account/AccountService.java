@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
@@ -14,6 +15,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,11 +27,53 @@ import java.util.UUID;
 @AllArgsConstructor
 @Slf4j
 public class AccountService {
+    private final AccountRepository accountRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final AccountRepository accountRepository;
     private final RecaptchaService recaptchaService;
     private final AuditService auditService;
+
+    public Page<Account> findAll(Pageable pageable) {
+        return accountRepository.findAll(pageable);
+    }
+
+    public Account findById(UUID account) {
+        return getAccount(account);
+    }
+
+    public void delete(UUID accountId) {
+        Account account = getAccount(accountId);
+        accountRepository.deleteById(accountId);
+        log.info("Delete account id={}, name={}, email={}", account.getId(), account.getName(), account.getEmail());
+    }
+
+    public Page<Account> getAccounts(Pageable pageable, String searchType, String query){
+
+        if(searchType.equals("name")){
+            return accountRepository.findUsersWithPartOfName(pageable, query);
+        }
+        if(searchType.equals("email")){
+            return accountRepository.findUsersWithPartOfEmail(pageable, query);
+        }
+        if(searchType.equals("cpf")){
+            return accountRepository.findUsersWithPartOfCpf(pageable, query);
+        }
+        return accountRepository.findAll(pageable);
+    }
+
+    public Account update(UUID accountId, AccountUpdateDto dto) {
+        Account account = getAccount(accountId);
+
+        account.setName(dto.getName());
+        account.setEmail(dto.getEmail());
+        account.setCpf(dto.getCpf());
+        account.setRole(AccountRole.valueOf(dto.getRole()));
+        account.setVerified(dto.getVerified());
+        log.info("Account with name={} and email={} was updated", account.getName(), account.getEmail());
+
+        return accountRepository.save(account);
+    }
+
 
     private Account getAccount(UUID id) {
         return accountRepository.findById(id).orElseThrow(
@@ -53,7 +98,7 @@ public class AccountService {
         }
 
         if (accountRepository.existsByCpfAndIdNot(myDataUpdateDto.getCpf(), UUID.fromString(decodedToken.getSubject()))) {
-            throw new ResourceAlreadyExistsException(ResourceName.CPF, "CPF", myDataUpdateDto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "CPF", myDataUpdateDto.getCpf());
         }
 
         UUID accountId = UUID.fromString(decodedToken.getSubject());
@@ -62,19 +107,18 @@ public class AccountService {
 
         Account currentAccount = new Account();
         currentAccount.setName(account.getName());
-        currentAccount.setEmail(account.getEmail());
         currentAccount.setCpf(account.getCpf());
+        currentAccount.setAllowEmail(account.getAllowEmail());
 
         account.setName(myDataUpdateDto.getName());
         account.setCpf(myDataUpdateDto.getCpf());
+        account.setAllowEmail(myDataUpdateDto.getAllowEmail());
 
         DiffResult<?> diffResult = currentAccount.diff(account);
 
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data. {}",
-                account.getEmail(), diffResult.getDiffs().toString()
-        );
+        log.info("Account with email={} updated data. {}", account.getEmail(), diffResult.getDiffs().toString());
 
         auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()));
 

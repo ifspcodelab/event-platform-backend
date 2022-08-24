@@ -52,9 +52,9 @@ public class SessionSchedule {
         LocalDateTime end2 = sessionSchedule.getExecutionEnd();
 
         var condition1 = start1.isBefore(start2) || start1.isEqual(start2);
-        var condition2 = end1.isAfter(start2)    || end1.isEqual(start2);
+        var condition2 = end1.isAfter(start2);
         var condition3 = start2.isBefore(start1) || start2.isEqual(start1);
-        var condition4 = end2.isAfter(start1)    || end2.isEqual(start1);
+        var condition4 = end2.isAfter(start1);
 
         return (condition1 && condition2) || (condition3 && condition4);
     }

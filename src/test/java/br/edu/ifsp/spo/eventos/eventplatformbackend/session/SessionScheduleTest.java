@@ -24,25 +24,6 @@ public class SessionScheduleTest {
         assertThat(s1.hasIntersection(s2)).isTrue();
     }
 
-
-    // s1  s------e
-    // s2         s------e
-    // ------------------
-    // s1         s------e
-    // s2  s------e
-    @Test
-    public void sameStartEndTime() {
-        SessionSchedule s1 = createSessionSchedule(
-            LocalDateTime.of(2022, 1, 1, 7, 0, 0), LocalDateTime.of(2022, 1, 1, 9, 0, 0)
-        );
-        SessionSchedule s2 = createSessionSchedule(
-            LocalDateTime.of(2022, 1, 1, 9, 0, 0), LocalDateTime.of(2022, 1, 1, 10, 0, 0)
-        );
-        assertThat(s1.hasIntersection(s2)).isTrue();
-        assertThat(s2.hasIntersection(s1)).isTrue();
-    }
-
-
     // s1  s------e
     // s2      s------e
     // ------------------
@@ -109,5 +90,39 @@ public class SessionScheduleTest {
         );
         assertThat(s1.hasIntersection(s2)).isFalse();
         assertThat(s2.hasIntersection(s1)).isFalse();
+    }
+
+//     s1  s------e
+//     s2         s------e
+//        ------------------------------------
+//     s2         s------e
+//     s1  s------e
+    @Test
+    public void sameDaySameSecond() {
+        SessionSchedule s1 = createSessionSchedule(
+            LocalDateTime.of(2022, 1, 1, 8, 0, 0), LocalDateTime.of(2022, 1, 1, 9, 0, 0)
+        );
+        SessionSchedule s2 = createSessionSchedule(
+            LocalDateTime.of(2022, 1, 1, 9, 0, 0), LocalDateTime.of(2022, 1, 1, 10, 0, 0)
+        );
+        assertThat(s1.hasIntersection(s2)).isFalse();
+        assertThat(s2.hasIntersection(s1)).isFalse();
+    }
+
+    //     s1  s------e
+    //     s2         s------e
+    //        ------------------------------------
+    //     s2         s------e
+    //     s1  s------e
+    @Test
+    public void sameDayTwoSecondIntersection() {
+        SessionSchedule s1 = createSessionSchedule(
+            LocalDateTime.of(2022, 1, 1, 8, 0, 0), LocalDateTime.of(2022, 1, 1, 9, 0, 0)
+        );
+        SessionSchedule s2 = createSessionSchedule(
+            LocalDateTime.of(2022, 1, 1, 8, 59, 0), LocalDateTime.of(2022, 1, 1, 10, 0, 0)
+        );
+        assertThat(s1.hasIntersection(s2)).isTrue();
+        assertThat(s2.hasIntersection(s1)).isTrue();
     }
 }

@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,7 @@ public class AccountService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final AuditService auditService;
 
     public Page<Account> findAll(Pageable pageable) {
         return accountRepository.findAll(pageable);
@@ -101,19 +104,23 @@ public class AccountService {
         UUID accountId = UUID.fromString(decodedToken.getSubject());
 
         Account account = getAccount(accountId);
-        String oldName = account.getName();
-        String oldCpf = account.getCpf();
-        Boolean oldAllowEmail = account.getAllowEmail();
+
+        Account currentAccount = new Account();
+        currentAccount.setName(account.getName());
+        currentAccount.setCpf(account.getCpf());
+        currentAccount.setAllowEmail(account.getAllowEmail());
 
         account.setName(myDataUpdateDto.getName());
         account.setCpf(myDataUpdateDto.getCpf());
         account.setAllowEmail(myDataUpdateDto.getAllowEmail());
 
+        DiffResult<?> diffResult = currentAccount.diff(account);
+
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data. Before: name={}, cpf={}, allow_email: {}. Now: name={}, cpf={}, allow_email: {}",
-                account.getEmail(), oldName, oldCpf, oldAllowEmail, myDataUpdateDto.getName(), myDataUpdateDto.getCpf(),myDataUpdateDto.getAllowEmail()
-        );
+        log.info("Account with email={} updated data. {}", account.getEmail(), diffResult.getDiffs().toString());
+
+        auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()));
 
         return account;
     }
@@ -140,5 +147,7 @@ public class AccountService {
         accountRepository.save(account);
 
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
+
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Alteração de senha via edição em 'Meus dados'");
     }
 }

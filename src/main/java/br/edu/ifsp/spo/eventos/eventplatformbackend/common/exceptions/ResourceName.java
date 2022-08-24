@@ -15,7 +15,9 @@ public enum ResourceName {
     SPEAKER("Speaker"),
     ORGANIZER("Organizer"),
     ORGANIZERSUBEVENT("Organizer Subevent"),
-    ACTIVITY("Activity");
+    ACTIVITY("Activity"),
+    PASSWORD_RESET_TOKEN("Password reset token"),
+    REFRESH_TOKEN("Refresh token");
 
     private String name;
 }

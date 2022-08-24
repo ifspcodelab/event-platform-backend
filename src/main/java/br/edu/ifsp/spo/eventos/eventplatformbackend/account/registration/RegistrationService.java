@@ -2,8 +2,10 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
@@ -31,6 +33,7 @@ public class RegistrationService {
     private final RecaptchaService recaptchaService;
     private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -69,6 +72,7 @@ public class RegistrationService {
 
             emailService.sendVerificationEmail(account, verificationToken);
             log.info("Verification email was sent to {}", account.getEmail());
+            auditService.log(account, Action.SIGN_UP, ResourceName.ACCOUNT);
             return account;
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
@@ -91,13 +95,13 @@ public class RegistrationService {
         accountRepository.save(account);
         log.info("Account with email {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Conta verificada");
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;
     }
 
     public List<Account> search(String name, Boolean verified) {
-        List<Account> accounts = accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
-        return accounts;
+        return accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
     }
 
     @Transactional

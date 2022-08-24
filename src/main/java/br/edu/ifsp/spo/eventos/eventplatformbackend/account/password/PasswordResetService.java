@@ -3,9 +3,11 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     @Transactional
     public void createResetPasswordRequest(ForgotPasswordCreateDto dto) {
@@ -53,7 +56,8 @@ public class PasswordResetService {
             tokenRepo.save(passwordResetToken);
             emailService.sendPasswordResetEmail(account, passwordResetToken);
             log.info("Password Reset: token generated for account {}", dto.getEmail());
-            log.info("Password reset e-mail was sent to {}", account.getEmail());
+            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de alteração de senha em 'Esqueci minha senha'");
+            log.info("Password Reset e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send password reset e-mail to {}",account.getEmail(), ex);
         }
@@ -81,6 +85,7 @@ public class PasswordResetService {
         accountRepository.save(account);
         log.info("Password Reset: password update for account: {}", account.getEmail());
         tokenRepo.deleteById(passwordResetToken.getId());
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Redefinição de senha via 'Esqueci minha senha'");
         log.info("Password Reset: reset token deleted");
     }
 
@@ -88,7 +93,7 @@ public class PasswordResetService {
     public void removePasswordResetTokens() {
         tokenRepo.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
             Account account = token.getAccount();
-            // TODO: registrar o log
+            auditService.logDelete(account, ResourceName.PASSWORD_RESET_TOKEN, "Solicitação de redefinição de senha removida pelo sistema");
             tokenRepo.delete(token);
             log.info("Password Reset token: token {}, account id {}, email {} - removed by password reset scheduler", token.getToken(), account.getId(),account.getEmail());
         });

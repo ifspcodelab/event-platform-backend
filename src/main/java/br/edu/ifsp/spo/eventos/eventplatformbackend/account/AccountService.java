@@ -5,8 +5,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
@@ -16,6 +14,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -60,20 +59,24 @@ public class AccountService {
         UUID accountId = UUID.fromString(decodedToken.getSubject());
 
         Account account = getAccount(accountId);
-        String oldName = account.getName();
-        String oldCpf = account.getCpf();
+
+        Account currentAccount = new Account();
+        currentAccount.setName(account.getName());
+        currentAccount.setEmail(account.getEmail());
+        currentAccount.setCpf(account.getCpf());
 
         account.setName(myDataUpdateDto.getName());
         account.setCpf(myDataUpdateDto.getCpf());
 
+        DiffResult<?> diffResult = currentAccount.diff(account);
+
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data. Before: name={}, cpf={}. Now: name={}, cpf={}",
-                account.getEmail(), oldName, oldCpf, myDataUpdateDto.getName(), myDataUpdateDto.getCpf()
+        log.info("Account with email={} updated data. {}",
+                account.getEmail(), diffResult.getDiffs().toString()
         );
 
-        //TODO: especificar o que foi mudado
-        auditService.logUpdate(account, ResourceName.ACCOUNT, "Edição em 'Meus dados'");
+        auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()));
 
         return account;
     }

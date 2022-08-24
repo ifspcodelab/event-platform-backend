@@ -59,7 +59,7 @@ public class PasswordResetService {
 
         try {
             emailService.sendPasswordResetEmail(account, passwordResetToken);
-            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de alteração de senha");
+            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de alteração de senha em 'Esqueci minha senha'");
             log.info("Password reset e-mail was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send password reset e-mail to {}",account.getEmail(), ex);
@@ -88,7 +88,7 @@ public class PasswordResetService {
         accountRepository.save(account);
         log.info("Password Reset: password update for account: {}", account.getEmail());
         tokenRepo.deleteById(passwordResetToken.getId());
-        auditService.logUpdate(account, ResourceName.ACCOUNT, "Senha alterada");
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Redefinição de senha via 'Esqueci minha senha'");
         log.info("Password Reset: reset token deleted");
     }
 

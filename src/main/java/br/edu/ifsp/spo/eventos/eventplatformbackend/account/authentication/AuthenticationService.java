@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,10 +66,9 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public void logout(String accessToken) {
-        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
-        UUID accountId = UUID.fromString(decodedToken.getSubject());
-        String accountEmail = decodedToken.getClaim("email").asString();
+    public void logout(JwtUserDetails jwtUserDetails) {
+        UUID accountId = jwtUserDetails.getId();
+        String accountEmail = jwtUserDetails.getUsername();
 
         refreshTokenRepository.deleteAllByAccountId(accountId);
 

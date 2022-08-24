@@ -123,7 +123,8 @@ public enum BusinessRuleType {
     SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO_EXECUTION_END("Não é possível criar um ou mais horário da sessão em que a data de início de execução é igual a data de finalização"),
     SESSION_SCHEDULE_ADD_AREA_OR_SPACE_IN_A_NULL_LOCATION("Não é possível criar um ou mais horário da sessão adicionando uma área ou um espaço em um local vazio"),
     SESSION_SCHEDULE_ADD_SPACE_IN_A_NULL_AREA("Não é possível criar um ou mais horário da sessão adicionando um espaço em uma área vazia"),
-    SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE("Um dos horários de sessão já está reservado no espaço solicitado");
+    SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE("Um dos horários de sessão já está reservado no espaço solicitado"),
+    SESSION_SCHEDULE_INTERSECTION_IN_EXECUTION_TIMES("Os horários definidos possuem intersecção");
 
     String message;
 

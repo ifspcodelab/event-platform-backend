@@ -64,18 +64,18 @@ public class Event {
     }
 
     public boolean isRegistrationPeriodEnded() {
-        return this.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now());
+        return this.registrationPeriod.ended();
     }
 
     public boolean isRegistrationPeriodStarted() {
-        return this.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now());
+        return this.registrationPeriod.started();
     }
 
     public boolean isRegistrationPeriodNotStart(){
-        return this.getRegistrationPeriod().getStartDate().isAfter(LocalDate.now());
+        return !this.registrationPeriod.started();
     }
 
     public boolean isExecutionPeriodEnded() {
-        return this.getExecutionPeriod().getEndDate().isBefore(LocalDate.now());
+        return this.executionPeriod.ended();
     }
 }

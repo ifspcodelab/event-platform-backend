@@ -37,26 +37,21 @@ public class SessionService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSessionTitleExists(dto, activityId);
 
-        if(activity.isEventCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_EVENT_WITH_CANCELED_STATUS);
-        }
-
         if(activity.isCanceled()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getEvent().isRegistrationPeriodEnded()) {
+        if(activity.isNeedRegistration() && activity.getEvent().isRegistrationPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(!activity.isNeedRegistration() && !activity.getEvent().isExecutionPeriodEnded()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
         List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);
 
-        Session session = new Session(
-                dto.getTitle(),
-                dto.getSeats(),
-                activity,
-                sessionsSchedule
-        );
+        Session session = new Session(dto.getTitle(), dto.getSeats(), activity, sessionsSchedule);
 
         return sessionRepository.save(session);
     }
@@ -79,7 +74,11 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
         }
 
-        if(activity.getEvent().isRegistrationPeriodEnded()) {
+        if(activity.isNeedRegistration() && activity.getEvent().isRegistrationPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(!activity.isNeedRegistration() && activity.getEvent().isExecutionPeriodEnded()) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
@@ -441,99 +440,102 @@ public class SessionService {
     }
 
     private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {
-        // TODO Validação: não pode registrar uma sessão no mesmo ESPAÇO e horário
-        return dto.getSessionsSchedule().stream()
-                .map(s -> {
-                    Location location = null;
-                    Area area = null;
-                    Space space = null;
+        return getValidSessionSchedules(dto).stream()
+                .map(sessionSchedule -> {
+                    var event = activity.getEvent();
 
-                    if(s.getLocationId() == null) {
-                        if(s.getAreaId() != null || s.getSpaceId() != null) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_AREA_OR_SPACE_IN_A_NULL_LOCATION);
+                    if(sessionSchedule.getExecutionStart().isAfter(sessionSchedule.getExecutionEnd())) {
+                        throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);
+                    }
+
+                    if(sessionSchedule.getExecutionStart().equals(sessionSchedule.getExecutionEnd())) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO_EXECUTION_END);
+                    }
+
+                    if(sessionSchedule.getExecutionStart().isBefore(LocalDateTime.now()) || sessionSchedule.getExecutionEnd().isBefore(LocalDateTime.now())) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
+                    }
+
+                    if(activity.getSubevent() != null) {
+                        if(!sessionSchedule.isInsidePeriod(activity.getSubevent().getExecutionPeriod())) {
+                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT_EXECUTION);
                         }
                     }
 
-                    if(s.getLocationId() != null) {
-                        if(s.getAreaId() == null && s.getSpaceId() != null) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_SPACE_IN_A_NULL_AREA);
-                        }
+                    if(event.isExecutionPeriodEnded()) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT_EXECUTION);
                     }
 
-                    if(s.getLocationId() != null) {
-                         location = getLocation(s.getLocationId());
+                    if(!sessionSchedule.isInsidePeriod(event.getExecutionPeriod())) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT_EXECUTION);
+                    }
 
-                        if(s.getAreaId() != null) {
-                             area = getArea(s.getAreaId());
+                    if(activity.isNeedRegistration() && event.isRegistrationPeriodEnded()) {
+                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT_EXECUTION);
+                    }
 
-                            if(s.getSpaceId() != null){
-                                 space = getSpace(s.getSpaceId());
 
-                                // TODO - retornar apenas execution start e end
+                    if(sessionSchedule.getSpace() != null){
+                        var sessionScheduleWithSpace = sessionScheduleRepository
+                                .findAllBySpaceIdAndExecutionStartGreaterThanEqual(sessionSchedule.getSpace().getId(), LocalDateTime.now());
 
-                                var sessionScheduleWithSpace = sessionScheduleRepository.findAllWithSpaceId(space.getId());
-
-                                var sessionScheduleWithSpaceExecutionStartList = sessionScheduleWithSpace.stream().map(SessionSchedule::getExecutionStart).toList();
-                                var sessionScheduleWithSpaceExecutionEndList = sessionScheduleWithSpace.stream().map(SessionSchedule::getExecutionStart).toList();
-
-                                // TODO - precisar comparar também somente com o que foi passado
-                                for(int i = 0; i <sessionScheduleWithSpaceExecutionStartList.size(); i++) {
-                                    if(sessionScheduleWithSpaceExecutionStartList.get(i).isAfter(s.getExecutionStart())
-                                            && sessionScheduleWithSpaceExecutionStartList.get(i).isBefore(s.getExecutionStart())){
-                                        // TODO - mudar para uma exception
-                                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE);
-                                    }
-
-                                    if(sessionScheduleWithSpaceExecutionEndList.get(i).isBefore(s.getExecutionEnd())
-                                            && sessionScheduleWithSpaceExecutionEndList.get(i).isAfter(s.getExecutionStart())){
-                                        // TODO - mudar para uma exception
-                                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE);
-                                    }
-                                }
+                        for(SessionSchedule s: sessionScheduleWithSpace) {
+                            if(s.hasIntersection(sessionSchedule)) {
+                                throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE);
                             }
                         }
                     }
 
-                    if(s.getExecutionStart().isAfter(s.getExecutionEnd())) {
-                        throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);
-                    }
-
-                    if(s.getExecutionStart().equals(s.getExecutionEnd())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO_EXECUTION_END);
-                    }
-
-                    if(s.getExecutionStart().isBefore(LocalDateTime.now()) ||
-                            s.getExecutionEnd().isBefore(LocalDateTime.now())
-                    ) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
-                    }
-
-                    if(s.getExecutionStart().toLocalDate().isBefore(activity.getEvent().getExecutionPeriod().getStartDate())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT_EXECUTION);
-                    }
-
-                    if(s.getExecutionEnd().toLocalDate().isAfter(activity.getEvent().getExecutionPeriod().getEndDate())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT_EXECUTION);
-                    }
-
-                    if(activity.getSubevent() != null) {
-                        if(s.getExecutionStart().toLocalDate().isBefore(activity.getSubevent().getExecutionPeriod().getStartDate())) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_SUBEVENT_EXECUTATION);
-                        }
-
-                        if(s.getExecutionEnd().toLocalDate().isAfter(activity.getSubevent().getExecutionPeriod().getEndDate())) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_SUBEVENT_EXECUTATION);
-                        }
-                    }
-
-                    return new SessionSchedule(
-                            s.getExecutionStart(),
-                            s.getExecutionEnd(),
-                            s.getUrl(),
-                            location,
-                            area,
-                            space
-                    );
+                    return sessionSchedule;
                 }).toList();
+    }
+
+    private List<SessionSchedule> getValidSessionSchedules(SessionCreateDto dto) {
+        List<SessionSchedule> sessionScheduleCreate = dto.getSessionsSchedule().stream()
+                .map(this::getValidSessionSchedule).toList();
+
+        for (SessionSchedule outerSession: sessionScheduleCreate) {
+            for (SessionSchedule innerSession: sessionScheduleCreate) {
+                if(!outerSession.equals(innerSession) && outerSession.hasIntersection(innerSession)) {
+                    throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_INTERSECTION_IN_EXECUTION_TIMES);
+                }
+            }
+        }
+
+        return sessionScheduleCreate;
+    }
+
+
+    private SessionSchedule getValidSessionSchedule(SessionScheduleCreateDto dto) {
+        Location location = null;
+        Area area = null;
+        Space space = null;
+
+        if(dto.getLocationId() == null) {
+            if(dto.getAreaId() != null || dto.getSpaceId() != null) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_AREA_OR_SPACE_IN_A_NULL_LOCATION);
+            }
+        }
+
+        if(dto.getLocationId() != null) {
+            if(dto.getAreaId() == null && dto.getSpaceId() != null) {
+                throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_SPACE_IN_A_NULL_AREA);
+            }
+        }
+
+
+        if(dto.getLocationId() != null) {
+            location = getLocation(dto.getLocationId());
+
+            if(dto.getAreaId() != null) {
+                area = getArea(dto.getAreaId());
+
+                if(dto.getSpaceId() != null) {
+                    space = getSpace(dto.getSpaceId());
+                }
+            }
+        }
+
+        return new SessionSchedule(dto.getExecutionStart(), dto.getExecutionEnd(), dto.getUrl(), location, area, space);
     }
 }

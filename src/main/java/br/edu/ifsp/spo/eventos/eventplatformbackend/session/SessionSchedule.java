@@ -2,8 +2,6 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import lombok.AllArgsConstructor;
@@ -11,8 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -45,19 +45,18 @@ public class SessionSchedule {
         this.space = space;
     }
 
-    //      s------e
-    //             s--------e
-
-
-    private boolean datesOverlaps(LocalDateTime dateFrom1, LocalDateTime dateTo1, LocalDateTime dateFrom2, LocalDateTime dateTo2) {
-        return (dateFrom2.isAfter(dateFrom1) || dateFrom2.equals(dateFrom1)) &&
-                (dateFrom2.isBefore(dateTo1) || dateFrom2.equals(dateTo1)) ||
-                (dateTo2.isAfter(dateFrom1) || dateTo2.equals(dateFrom1)) &&
-                        (dateTo2.isBefore(dateTo1) || dateTo2.equals(dateTo1));
-    }
-
     public boolean hasIntersection(SessionSchedule sessionSchedule) {
-        return datesOverlaps(this.executionStart, this.executionEnd, sessionSchedule.getExecutionStart(), sessionSchedule.getExecutionEnd());
+        LocalDateTime start1 = this.executionStart;
+        LocalDateTime end1 = this.executionEnd;
+        LocalDateTime start2 = sessionSchedule.getExecutionStart();
+        LocalDateTime end2 = sessionSchedule.getExecutionEnd();
+
+        var condition1 = start1.isBefore(start2) || start1.isEqual(start2);
+        var condition2 = end1.isAfter(start2)    || end1.isEqual(start2);
+        var condition3 = start2.isBefore(start1) || start2.isEqual(start1);
+        var condition4 = end2.isAfter(start1)    || end2.isEqual(start1);
+
+        return (condition1 && condition2) || (condition3 && condition4);
     }
 
     public boolean isInsidePeriod(Period period) {

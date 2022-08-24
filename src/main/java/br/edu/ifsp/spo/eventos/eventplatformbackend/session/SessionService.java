@@ -26,6 +26,7 @@ import java.util.UUID;
 @Slf4j
 public class SessionService {
     private final SessionRepository sessionRepository;
+    private final SessionScheduleRepository sessionScheduleRepository;
     private final ActivityRepository activityRepository;
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
@@ -440,7 +441,7 @@ public class SessionService {
     }
 
     private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {
-        // TODO Validação: não pode registrar uma sessão no mesmo ESPAÇO e horário - precisa do sessionScheduleRepository
+        // TODO Validação: não pode registrar uma sessão no mesmo ESPAÇO e horário
         return dto.getSessionsSchedule().stream()
                 .map(s -> {
                     Location location = null;
@@ -467,6 +468,28 @@ public class SessionService {
 
                             if(s.getSpaceId() != null){
                                  space = getSpace(s.getSpaceId());
+
+                                // TODO - retornar apenas execution start e end
+
+                                var sessionScheduleWithSpace = sessionScheduleRepository.findAllWithSpaceId(space.getId());
+
+                                var sessionScheduleWithSpaceExecutionStartList = sessionScheduleWithSpace.stream().map(SessionSchedule::getExecutionStart).toList();
+                                var sessionScheduleWithSpaceExecutionEndList = sessionScheduleWithSpace.stream().map(SessionSchedule::getExecutionStart).toList();
+
+                                // TODO - precisar comparar também somente com o que foi passado
+                                for(int i = 0; i <sessionScheduleWithSpaceExecutionStartList.size(); i++) {
+                                    if(sessionScheduleWithSpaceExecutionStartList.get(i).isAfter(s.getExecutionStart())
+                                            && sessionScheduleWithSpaceExecutionStartList.get(i).isBefore(s.getExecutionStart())){
+                                        // TODO - mudar para uma exception
+                                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE);
+                                    }
+
+                                    if(sessionScheduleWithSpaceExecutionEndList.get(i).isBefore(s.getExecutionEnd())
+                                            && sessionScheduleWithSpaceExecutionEndList.get(i).isAfter(s.getExecutionStart())){
+                                        // TODO - mudar para uma exception
+                                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE);
+                                    }
+                                }
                             }
                         }
                     }

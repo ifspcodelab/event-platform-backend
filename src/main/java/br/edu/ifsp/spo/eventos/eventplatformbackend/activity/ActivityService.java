@@ -360,6 +360,10 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
+        if(activity.isPublished() && activity.getEvent().isRegistrationPeriodNotStart()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
+        }
+
         sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
@@ -400,6 +404,10 @@ public class ActivityService {
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
+        }
+
+        if(activity.isPublished() && activity.getEvent().isRegistrationPeriodNotStart()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
         }
 
         sessionService.cancelAllByActivityId(eventId, subeventId, activityId);
@@ -446,14 +454,8 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
-        }
-
-        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
-            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
-            }
+        if(activity.getStatus().equals(EventStatus.PUBLISHED) && event.isRegistrationPeriodStarted()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
         }
 
         activityRepository.delete(activity);
@@ -471,18 +473,8 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SUBEVENT_CANCELED_STATUS);
-        }
-
-        if(event.getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
-        }
-
-        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
-            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
-                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
-            }
+        if(activity.getStatus().equals(EventStatus.PUBLISHED) && event.isRegistrationPeriodStarted()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
         }
 
         if(activity.getStatus().equals(EventStatus.PUBLISHED)) {

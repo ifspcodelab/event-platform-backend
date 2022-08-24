@@ -31,7 +31,6 @@ public class PasswordResetService {
 
     public void createResetPasswordRequest(ForgotPasswordCreateDto dto) {
 
-        //implementar caminho de volta com essa exceção levando o erro para o front end
         if(!recaptchaService.isValid(dto.getUserRecaptcha())){
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
         }
@@ -52,6 +51,7 @@ public class PasswordResetService {
         PasswordResetToken passwordResetToken =
                 new PasswordResetToken(account, accountConfig.getPasswordResetTokenExpiresIn());
         tokenRepo.save(passwordResetToken);
+        log.debug("Password Reset: token generated: {}", passwordResetToken.getToken());
         log.info("Password Reset: token generated for account {}", dto.getEmail());
 
         try {

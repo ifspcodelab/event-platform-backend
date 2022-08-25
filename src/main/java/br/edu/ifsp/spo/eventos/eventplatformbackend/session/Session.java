@@ -1,7 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +27,7 @@ public class Session {
     private Activity activity;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "session_id", nullable = false)
-    private List<SessionSchedule> sessionsSchedule;
+    private List<SessionSchedule> sessionSchedules;
 
     public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedule) {
         this.id = UUID.randomUUID();
@@ -36,7 +35,7 @@ public class Session {
         this.seats = seats;
         this.cancellationMessage = null;
         this.activity = activity;
-        this.sessionsSchedule = sessionsShedule;
+        this.sessionSchedules = sessionsShedule;
     }
 }
 

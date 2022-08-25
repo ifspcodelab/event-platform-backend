@@ -116,7 +116,7 @@ public class SessionService {
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
-            var executionStartList = session.getSessionsSchedule().stream()
+            var executionStartList = session.getSessionSchedules().stream()
                     .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
 
             var newExecutionStartList = sessionSchedule.stream()
@@ -126,7 +126,7 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
 
-            var executionEndList = session.getSessionsSchedule().stream()
+            var executionEndList = session.getSessionSchedules().stream()
                     .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
 
             var newExecutionEndList = sessionSchedule.stream()
@@ -139,7 +139,7 @@ public class SessionService {
 
         session.setTitle(dto.getTitle());
         session.setSeats(dto.getSeats());
-        session.setSessionsSchedule(sessionSchedule);
+        session.setSessionSchedules(sessionSchedule);
 
         return sessionRepository.save(session);
     }
@@ -168,7 +168,7 @@ public class SessionService {
         List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
 
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
-            var executionStartList = session.getSessionsSchedule().stream()
+            var executionStartList = session.getSessionSchedules().stream()
                     .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
 
             var newExecutionStartList = sessionSchedule.stream()
@@ -178,7 +178,7 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
 
-            var executionEndList = session.getSessionsSchedule().stream()
+            var executionEndList = session.getSessionSchedules().stream()
                     .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
 
             var newExecutionEndList = sessionSchedule.stream()
@@ -191,7 +191,7 @@ public class SessionService {
 
         session.setTitle(dto.getTitle());
         session.setSeats(dto.getSeats());
-        session.setSessionsSchedule(sessionSchedule);
+        session.setSessionSchedules(sessionSchedule);
 
         return sessionRepository.save(session);
     }
@@ -492,7 +492,7 @@ public class SessionService {
     }
 
     private List<SessionSchedule> getValidSessionSchedules(SessionCreateDto dto) {
-        List<SessionSchedule> sessionScheduleCreate = dto.getSessionsSchedule().stream()
+        List<SessionSchedule> sessionScheduleCreate = dto.getSessionSchedules().stream()
                 .map(this::getValidSessionSchedule).collect(Collectors.toList());
 
         for (SessionSchedule outerSession: sessionScheduleCreate) {

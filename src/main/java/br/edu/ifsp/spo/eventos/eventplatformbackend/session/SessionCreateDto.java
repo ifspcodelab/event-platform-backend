@@ -18,5 +18,5 @@ public class SessionCreateDto {
     @NotNull
     @Valid
     @Size(min = 1)
-    List<SessionScheduleCreateDto> sessionsSchedule;
+    List<SessionScheduleCreateDto> sessionSchedules;
 }

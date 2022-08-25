@@ -120,7 +120,7 @@ public class AccountService {
 
         log.info("Account with email={} updated data. {}", account.getEmail(), diffResult.getDiffs().toString());
 
-        auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()));
+        auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()), accountId);
 
         return account;
     }
@@ -148,6 +148,6 @@ public class AccountService {
 
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
 
-        auditService.logUpdate(account, ResourceName.ACCOUNT, "Alteração de senha via edição em 'Meus dados'");
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Alteração de senha via edição em 'Meus dados'", accountId);
     }
 }

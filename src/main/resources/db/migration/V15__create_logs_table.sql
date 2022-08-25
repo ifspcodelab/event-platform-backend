@@ -5,6 +5,7 @@ CREATE TABLE logs(
      action VARCHAR NOT NULL,
      resource_name VARCHAR NOT NULL,
      resource_data TEXT,
+     resource_id UUID NOT NULL,
      CONSTRAINT logs_pk PRIMARY KEY (id),
      CONSTRAINT accounts_fk FOREIGN KEY (account_id) REFERENCES accounts(id)
 )

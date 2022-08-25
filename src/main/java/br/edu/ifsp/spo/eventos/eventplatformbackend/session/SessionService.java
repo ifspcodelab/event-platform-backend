@@ -501,14 +501,16 @@ public class SessionService {
         for (SessionSchedule outerSession: sessionScheduleCreate) {
             for (SessionSchedule innerSession: sessionScheduleCreate) {
                 if(!outerSession.equals(innerSession) && outerSession.hasIntersection(innerSession)) {
-                    throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_INTERSECTION_IN_EXECUTION_TIMES);
+                    throw new ResourceIntersectionInExecutionTimesException(
+                            outerSession.getExecutionStart(), outerSession.getExecutionEnd(),
+                            innerSession.getExecutionStart(), innerSession.getExecutionEnd(),
+                            innerSession.getSpace().getName());
                 }
             }
         }
 
         return sessionScheduleCreate;
     }
-
 
     private SessionSchedule getValidSessionSchedule(SessionScheduleCreateDto dto) {
         Location location = null;

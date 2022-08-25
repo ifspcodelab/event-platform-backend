@@ -1,19 +1,14 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 public class ResourceAlreadyReservedInTheSpaceException extends RuntimeException {
-    private final LocalDateTime startSchedule;
-    private final LocalDateTime endSchedule;
-    private final String space;
+    private final SessionSchedule sessionSchedule;
 
-    public ResourceAlreadyReservedInTheSpaceException(LocalDateTime startSchedule, LocalDateTime endSchedule, String space) {
+    public ResourceAlreadyReservedInTheSpaceException(SessionSchedule sessionSchedule) {
         super();
-        this.startSchedule = startSchedule;
-        this.endSchedule = endSchedule;
-        this.space = space;
+        this.sessionSchedule = sessionSchedule;
     }
 }

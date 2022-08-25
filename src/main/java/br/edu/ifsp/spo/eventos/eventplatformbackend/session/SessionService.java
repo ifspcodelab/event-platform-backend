@@ -485,7 +485,7 @@ public class SessionService {
 //                        }
                         for(SessionSchedule s: sessionScheduleWithSpace) {
                             if(s.hasIntersection(sessionSchedule)) {
-                                throw new ResourceAlreadyReservedInTheSpaceException(s.getExecutionStart(), s.getExecutionEnd(), s.getSpace().getName());
+                                throw new ResourceAlreadyReservedInTheSpaceException(s);
                             }
                         }
                     }

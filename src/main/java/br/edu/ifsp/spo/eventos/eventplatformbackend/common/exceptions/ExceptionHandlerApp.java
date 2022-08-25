@@ -96,14 +96,14 @@ public class ExceptionHandlerApp {
             HttpServletRequest request
     ) {
         String message = String.format(
-                "O horário de sessão %s ou %s já está reservado no espaço %s",
-                ex.getStartSchedule(),
-                ex.getEndSchedule(),
-                ex.getSpace()
+                "%s não está disponível neste horário. A sessão %s da atividade %s está reservada neste espaço.",
+                ex.getSessionSchedule().getSpace().getName(),
+                ex.getSessionSchedule().getSession().getTitle(),
+                ex.getSessionSchedule().getSession().getActivity().getTitle()
         );
         ProblemDetail problemDetail = new ProblemDetail(
                 "Resource already reserved in the space exception",
-                List.of(new Violation(ex.getSpace(), message))
+                List.of(new Violation(ex.getSessionSchedule().getSpace().toString(), message))
         );
 
         log.warn("Resource already reserved in the space at {} {}", request.getMethod(), request.getRequestURI());

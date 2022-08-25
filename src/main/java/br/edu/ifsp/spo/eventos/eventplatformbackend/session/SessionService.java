@@ -480,9 +480,12 @@ public class SessionService {
                         var sessionScheduleWithSpace = sessionScheduleRepository
                                 .findAllBySpaceIdAndExecutionStartGreaterThanEqual(sessionSchedule.getSpace().getId(), LocalDateTime.now());
 
+//                        if(true) {
+//                            sessionScheduleWithSpace = sessionScheduleWithSpace.stream().filter(s -> {})
+//                        }
                         for(SessionSchedule s: sessionScheduleWithSpace) {
                             if(s.hasIntersection(sessionSchedule)) {
-                                throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ALREADY_RESERVED_IN_THE_SPACE);
+                                throw new ResourceAlreadyReservedInTheSpaceException(s.getExecutionStart(), s.getExecutionEnd(), s.getSpace().getName());
                             }
                         }
                     }

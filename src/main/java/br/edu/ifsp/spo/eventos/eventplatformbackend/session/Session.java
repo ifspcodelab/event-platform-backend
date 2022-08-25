@@ -29,13 +29,13 @@ public class Session {
     @JoinColumn(name = "session_id", nullable = false)
     private List<SessionSchedule> sessionSchedules;
 
-    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedule) {
+    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionSchedules) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.seats = seats;
         this.cancellationMessage = null;
         this.activity = activity;
-        this.sessionSchedules = sessionsShedule;
+        this.sessionSchedules = sessionSchedules;
     }
 }
 

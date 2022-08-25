@@ -90,6 +90,26 @@ public class ExceptionHandlerApp {
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ResourceAlreadyReservedInTheSpaceException.class)
+    public ResponseEntity<ProblemDetail> handlerResourceAlreadyReservedInTheSpace(
+            ResourceAlreadyReservedInTheSpaceException ex,
+            HttpServletRequest request
+    ) {
+        String message = String.format(
+                "O horário de sessão %s ou %s já está reservado no espaço %s",
+                ex.getStartSchedule(),
+                ex.getEndSchedule(),
+                ex.getSpace()
+        );
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource already reserved in the space exception",
+                List.of(new Violation(ex.getSpace(), message))
+        );
+
+        log.warn("Resource already exists reserved in the space at {} {}", request.getMethod(), request.getRequestURI());
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ResourceReferentialIntegrityException.class)
     public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(
         ResourceReferentialIntegrityException ex,

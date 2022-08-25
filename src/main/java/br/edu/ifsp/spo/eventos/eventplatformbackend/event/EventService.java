@@ -1,11 +1,16 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -18,6 +23,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
     private final SubeventService subeventService;
+    private final AuditService auditService;
 
     public Event create(EventCreateDto dto) {
         if(eventRepository.existsByTitle(dto.getTitle())) {
@@ -100,7 +106,7 @@ public class EventService {
         log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }
 
-    public Event update(UUID eventId, EventCreateDto dto) {
+    public Event update(UUID eventId, EventCreateDto dto, UUID accountId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.PUBLISHED) &&
@@ -167,6 +173,8 @@ public class EventService {
         event.setExecutionPeriod(dto.getExecutionPeriod());
         event.setSmallerImage(dto.getSmallerImage());
         event.setBiggerImage(dto.getBiggerImage());
+
+        auditService.logAdminUpdate(accountId, ResourceName.EVENT, eventId);
 
         return eventRepository.save(event);
     }

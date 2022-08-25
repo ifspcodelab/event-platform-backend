@@ -1,7 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
@@ -53,8 +55,10 @@ public class EventController {
     }
 
     @PutMapping("{eventId}")
-    public ResponseEntity<EventDto> update(@PathVariable UUID eventId, @Valid @RequestBody EventCreateDto eventCreateDto) {
-        Event event = eventService.update(eventId, eventCreateDto);
+    public ResponseEntity<EventDto> update(@PathVariable UUID eventId, @Valid @RequestBody EventCreateDto eventCreateDto, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+
+        Event event = eventService.update(eventId, eventCreateDto, jwtUserDetails.getId());
 
         return ResponseEntity.ok(eventMapper.to(event));
     }

@@ -213,7 +213,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Event publish(UUID eventId) {
+    public Event publish(UUID eventId, UUID accountId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
@@ -234,10 +234,12 @@ public class EventService {
 
         log.info("Event published: id={}, title={}", eventId, event.getTitle());
 
+        auditService.logAdmin(accountId, Action.PUBLISH, ResourceName.EVENT, eventId);
+
         return eventRepository.save(event);
     }
 
-    public Event unpublish(UUID eventId) {
+    public Event unpublish(UUID eventId, UUID accountId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
@@ -262,6 +264,8 @@ public class EventService {
         subeventService.unpublishAllByEventId(eventId);
 
         log.info("Event unpublished: id={}, title={}", eventId, event.getTitle());
+
+        auditService.logAdmin(accountId, Action.UNPUBLISH, ResourceName.EVENT, eventId);
 
         return eventRepository.save(event);
     }

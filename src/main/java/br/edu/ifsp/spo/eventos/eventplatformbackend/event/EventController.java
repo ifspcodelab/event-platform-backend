@@ -71,15 +71,17 @@ public class EventController {
     }
 
     @PatchMapping("{eventId}/publish")
-    public ResponseEntity<EventDto> publish(@PathVariable UUID eventId) {
-        Event event = eventService.publish(eventId);
+    public ResponseEntity<EventDto> publish(@PathVariable UUID eventId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Event event = eventService.publish(eventId, jwtUserDetails.getId());
 
         return ResponseEntity.ok(eventMapper.to(event));
     }
 
     @PatchMapping("{eventId}/unpublish")
-    public ResponseEntity<EventDto> unpublish(@PathVariable UUID eventId) {
-        Event event = eventService.unpublish(eventId);
+    public ResponseEntity<EventDto> unpublish(@PathVariable UUID eventId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Event event = eventService.unpublish(eventId, jwtUserDetails.getId());
 
         return ResponseEntity.ok(eventMapper.to(event));
     }

@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -13,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ public class RegistrationService {
     private final SessionRepository sessionRepository;
     private final RegistrationRepository registrationRepository;
     private final AccountRepository accountRepository;
+    private final EmailService emailService;
 
     //TODO: Método que verifica se uma sessão acabou para poder finalziar as inscrições (alterar o status)
 
@@ -215,7 +218,7 @@ public class RegistrationService {
            firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
            firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
            registrationRepository.save(firstRegistrationInWaitList);
-           //TODO: mandar email
+            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
         }
 
         else {
@@ -248,7 +251,7 @@ public class RegistrationService {
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
             registrationRepository.save(firstRegistrationInWaitList);
-            //TODO: mandar email
+            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
         }
 
         else {
@@ -275,14 +278,13 @@ public class RegistrationService {
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
             registrationRepository.save(firstRegistrationInWaitList);
-            //TODO: mandar email
+            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
         }
 
         else {
             sessionLock.decrementNumberOfConfirmedSeats();
             sessionRepository.save(sessionLock);
         }
-
         registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_USER);
         log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
 
@@ -328,7 +330,7 @@ public class RegistrationService {
         var session = registration.getSession();
         checksIfAccountIsAssociateToRegistration(accountId, registration);
 
-        if(registration.getTimeEmailWasSent().plusHours(12).isAfter(LocalDateTime.now())) {
+        if(registration.getTimeEmailWasSent().plusHours(12).isBefore(LocalDateTime.now())) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS);
         }
 
@@ -343,10 +345,6 @@ public class RegistrationService {
 
     @Transactional
     public Registration denySessionSeat(UUID accountId, UUID registrationId) {
-        // TODO: passou das 12 horas -> status cancelado pelo sistema -> tem wait list?
-        // true -> pega primeiro da wait list -> muda status -> manda email -> registra a data para comparar as 12 horas
-        // false -> decrementar um das vagas confirmadas
-
         var registration = getRegistration(registrationId);
         var session = registration.getSession();
         checksIfAccountIsAssociateToRegistration(accountId, registration);
@@ -356,7 +354,7 @@ public class RegistrationService {
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
             registrationRepository.save(firstRegistrationInWaitList);
-            //email
+            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
         }
 
         else {
@@ -368,6 +366,42 @@ public class RegistrationService {
         log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
 
         return registrationRepository.save(registration);
+    }
+
+    @Transactional
+    public void cancelAllRegistrationInWaitListThatWereNotAccepted() {
+        List<Registration> registrations = registrationRepository.findAllByRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+        registrations.stream().filter(registration -> registration.getTimeEmailWasSent().plusHours(12).isBefore(LocalDateTime.now()))
+            .forEach(registration -> {
+            Session sessionLock = sessionRepository.findByIdWithPessimisticLock(registration.getSession().getId()).get();
+
+            if(checkIfExistAnyRegistrationInWaitListBySessionId(registration.getSession().getId())) {
+                var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatus(registration.getSession().getId(), RegistrationStatus.WAITING_LIST).get();
+                firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+                firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
+                registrationRepository.save(firstRegistrationInWaitList);
+                sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
+            }
+
+            else {
+                sessionLock.decrementNumberOfConfirmedSeats();
+                sessionRepository.save(sessionLock);
+            }
+
+            registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_SYSTEM);
+            log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
+
+            registrationRepository.save(registration);
+        });
+    }
+
+    private void sendEmailToConfirmRegistration(Account account, Registration registration) {
+        try {
+            emailService.sendEmailToConfirmRegistration(account, registration);
+            log.info("To Confirm Registration e-mail was sent to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to confirm registration e-mail to {}",account.getEmail(), ex);
+        }
     }
 
     private void checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(Account accountLock, Session session) {

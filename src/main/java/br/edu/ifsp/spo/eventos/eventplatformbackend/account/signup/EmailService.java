@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.Registration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -57,6 +58,29 @@ public class EmailService {
                 "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
 
         sendEmailToClient("Alteração de Senha de Conta da Plataforma de Eventos IFSP SPO", account.getEmail(), content);
+    }
+
+    public void sendEmailToConfirmRegistration(Account account, Registration registration) throws MessagingException {
+        var aceptRegistrationUrl = "localhost:8080/api/v1/accounts/registrations/"+ registration.getId() +"/acept-session-seat";
+        var denyRegistrationUrl = "localhost:8080/api/v1/accounts/registrations/"+ registration.getId() +"/deny-session-seat";
+
+        var name = account.getName().split(" ")[0];
+
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Confirme seu cadastro na sess&atilde;o " + registration.getSession().getTitle() + "</h1>\n" +
+                "<p>Ol&aacute;, "+ name + ".</p>\n" +
+                "<p>Voc&ecirc; saiu da lista de espera e conseguiu uma vaga.</p>\n" +
+                "<p>Utilize o bot&atilde;o abaixo para confirmar sua presen&ccedil;a.</p>\n" +
+                "<a href=\"" + aceptRegistrationUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">"  +
+                "Confirmar" +
+                "</a>" +
+                "<p>Caso n&atilde;o consiga participar, cancele sua inscri&ccedil;&atilde;o acessando o bot&atilde;o abaixo:</p>\n" +
+                "<a href=\"" + denyRegistrationUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #FF0000; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">" +
+                "Cancelar" +
+                "</a>" +
+                "<p>Atenciosamente,</p>\n" +
+                "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
+
+        sendEmailToClient("Confirmação de Presença em Sessão da Plataforma de Eventos IFSP SPO", account.getEmail(), content);
     }
 
     public void sendEmailToClient(String subject, String email, String content) throws MessagingException {

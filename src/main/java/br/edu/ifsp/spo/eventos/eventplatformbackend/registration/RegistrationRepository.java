@@ -13,6 +13,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     boolean existsBySessionIdAndRegistrationStatus(UUID sessionId, RegistrationStatus registrationStatus);
     List<Registration> findAllByAccountIdAndRegistrationStatus(UUID accountId, RegistrationStatus registrationStatus);
     List<Registration> findAllByAccountIdAndRegistrationStatusIn(UUID accountId, List<RegistrationStatus> registrationsStatus);
+    List<Registration> findAllByRegistrationStatus(RegistrationStatus registrationStatus);
     List<Registration> findAllBySessionId(UUID sessionId);
     Optional<Registration> getFirstBySessionIdAndRegistrationStatus(UUID sesionId, RegistrationStatus registrationStatus);
     List<Registration> findAllByAccountIdAndSessionIdIn(UUID accountId, List<UUID> sessionsId);

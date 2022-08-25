@@ -34,6 +34,8 @@ public class SessionSchedule {
     private Area area;
     @ManyToOne
     private Space space;
+    @ManyToOne(optional = false)
+    private Session session;
 
     public SessionSchedule(LocalDateTime executionStart, LocalDateTime executionEnd, String url, Location location, Area area, Space space) {
         this.id = UUID.randomUUID();

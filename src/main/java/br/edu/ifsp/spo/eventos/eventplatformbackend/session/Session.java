@@ -26,7 +26,7 @@ public class Session {
     @ManyToOne
     private Activity activity;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", nullable = false, insertable = false, updatable = false)
     private List<SessionSchedule> sessionSchedules;
 
     public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionSchedules) {
@@ -36,7 +36,6 @@ public class Session {
         this.cancellationMessage = null;
         this.activity = activity;
         this.sessionSchedules = sessionSchedules;
+        this.sessionSchedules.forEach(sessionSchedule -> sessionSchedule.setSession(this));
     }
 }
-
-

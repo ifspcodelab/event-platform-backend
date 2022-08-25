@@ -47,6 +47,10 @@ public class Session {
     public void incrementNumberOfConfirmedSeats() {
         this.confirmedSeats++;
     }
+
+    public void decrementNumberOfConfirmedSeats() {
+        this.confirmedSeats--;
+    }
 }
 
 

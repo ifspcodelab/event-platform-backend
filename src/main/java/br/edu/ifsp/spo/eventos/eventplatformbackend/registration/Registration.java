@@ -26,6 +26,7 @@ public class Registration {
     private Session session;
     @Enumerated(EnumType.STRING)
     private RegistrationStatus registrationStatus;
+    private LocalDateTime timeEmailWasSent;
 
     public Registration(
         Account account,

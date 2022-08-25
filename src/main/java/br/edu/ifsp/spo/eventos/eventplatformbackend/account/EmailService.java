@@ -1,7 +1,8 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.VerificationToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;

@@ -1,8 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,7 +16,7 @@ public class SessionScheduleDto {
     LocalDateTime executionStart;
     LocalDateTime executionEnd;
     String url;
-    Location location;
-    Area area;
-    Space space;
+    LocationDto location;
+    AreaDto area;
+    SpaceDto space;
 }

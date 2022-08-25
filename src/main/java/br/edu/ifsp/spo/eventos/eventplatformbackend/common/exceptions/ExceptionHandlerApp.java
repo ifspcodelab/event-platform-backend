@@ -1,10 +1,13 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,10 +45,25 @@ public class ExceptionHandlerApp {
         ResourceNotFoundException ex,
         HttpServletRequest request
     ) {
-        String message = "Recurso não encontrado com id " + ex.getResourceId();
+        String message = "Recurso não encontrado com valor " + ex.getResourceId();
         ProblemDetail problemDetail = new ProblemDetail(
             "Resource not found exception",
             List.of(new Violation(ex.getResourceName().getName(), message))
+        );
+
+        log.warn("Resource not found at {} {}", request.getMethod(), request.getRequestURI());
+        return new ResponseEntity(problemDetail, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handlerUserNotFoundException(
+            UserNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        String message = "Usuário não encontrado relacionado à" + ex.getQuery();
+        ProblemDetail problemDetail = new ProblemDetail(
+                "User not found exception",
+                List.of(new Violation(ex.getResourceName().getName(), message))
         );
 
         log.warn("Resource not found at {} {}", request.getMethod(), request.getRequestURI());
@@ -128,7 +148,7 @@ public class ExceptionHandlerApp {
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
-        if(ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
+        if (ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
@@ -182,13 +202,39 @@ public class ExceptionHandlerApp {
         log.warn("Token Expired Exception");
         return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
-    
 
     @ExceptionHandler(RecaptchaException.class)
     public ResponseEntity<ProblemDetail> handlerInvalidRecaptcha(RecaptchaException ex){
         log.warn(String.format(ex.getRecaptchaExceptionType().getMessage(), ex.getEmail()));
         ProblemDetail problemDetail = new ProblemDetail("Invalid recaptcha", List.of());
 
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity<ProblemDetail> handlerMessagingException(MessagingException ex) {
+        log.warn("Verification e-mail not sent", ex);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+    @ExceptionHandler(MyDataResetPasswordException.class)
+    public ResponseEntity<Void> handlerMyDataPasswordResetExceptions(MyDataResetPasswordException ex) {
+        ProblemDetail problemDetail = new ProblemDetail("", List.of());
+
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.SAME_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    "New password is the same as current password",
+                    List.of()
+            );
+        }
+        if (ex.getMyDataResetPasswordExceptionType().equals(MyDataResetPasswordExceptionType.INCORRECT_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    "Current password is incorrect",
+                    List.of()
+            );
+        }
+        log.warn(String.format(ex.getMyDataResetPasswordExceptionType().getMessage(), ex.getEmail()));
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

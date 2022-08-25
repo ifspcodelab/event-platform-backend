@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -116,20 +117,20 @@ public class SessionService {
 
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
             var executionStartList = session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionStart).toList();
+                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
 
             var newExecutionStartList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionStart).toList();
+                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
 
             if(!executionStartList.equals(newExecutionStartList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
 
             var executionEndList = session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionEnd).toList();
+                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
 
             var newExecutionEndList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionEnd).toList();
+                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
 
             if(!executionEndList.equals(newExecutionEndList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
@@ -168,20 +169,20 @@ public class SessionService {
 
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
             var executionStartList = session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionStart).toList();
+                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
 
             var newExecutionStartList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionStart).toList();
+                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
 
             if(!executionStartList.equals(newExecutionStartList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
             }
 
             var executionEndList = session.getSessionsSchedule().stream()
-                    .map(SessionSchedule::getExecutionEnd).toList();
+                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
 
             var newExecutionEndList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionEnd).toList();
+                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
 
             if(!executionEndList.equals(newExecutionEndList)) {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
@@ -487,12 +488,12 @@ public class SessionService {
                     }
 
                     return sessionSchedule;
-                }).toList();
+                }).collect(Collectors.toList());
     }
 
     private List<SessionSchedule> getValidSessionSchedules(SessionCreateDto dto) {
         List<SessionSchedule> sessionScheduleCreate = dto.getSessionsSchedule().stream()
-                .map(this::getValidSessionSchedule).toList();
+                .map(this::getValidSessionSchedule).collect(Collectors.toList());
 
         for (SessionSchedule outerSession: sessionScheduleCreate) {
             for (SessionSchedule innerSession: sessionScheduleCreate) {
@@ -522,7 +523,6 @@ public class SessionService {
                 throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_SPACE_IN_A_NULL_AREA);
             }
         }
-
 
         if(dto.getLocationId() != null) {
             location = getLocation(dto.getLocationId());

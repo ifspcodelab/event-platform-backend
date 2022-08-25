@@ -25,6 +25,7 @@ public class Subevent {
     private String slug;
     private String summary;
     private String presentation;
+    private String contact;
     private String cancellationMessage;
     @Embedded
     @AttributeOverrides({
@@ -44,6 +45,7 @@ public class Subevent {
         String slug,
         String summary,
         String presentation,
+        String contact,
         Period executionPeriod,
         String smallerImage,
         String biggerImage,
@@ -54,6 +56,7 @@ public class Subevent {
         this.slug = slug;
         this.summary = summary;
         this.presentation = presentation;
+        this.contact = contact;
         this.executionPeriod = executionPeriod;
         this.smallerImage = smallerImage;
         this.biggerImage = biggerImage;

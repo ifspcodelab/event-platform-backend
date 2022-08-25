@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum BusinessRuleType {
+    MAIL_SERVER_PROBLEM("Problema com o envio do email, tente novamente mais tarde"),
     EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("O período de incrições está no passado"),
     EVENT_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução está no passado"),
     EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END("A data de fim das incrições é posterior à data de fim de execução"),
@@ -50,9 +51,11 @@ public enum BusinessRuleType {
     SUBEVENT_UNPUBLISH_WITH_CANCELED_STATUS("Não é possível despublicar um subevento cancelado "),
     SUBEVENT_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START("Não é possível despublicar um subevento publicado que o seu período de inscrições ja tenha iniciado"),
     ORGANIZER_CREATE_WITH_CANCELED_STATUS("Não é possível adicionar um organizador com o evento cancelado"),
+    ORGANIZER_CREATE_ALREADY_ASSOCIATED("Não é possível adicionar um organizador já associado ao evento"),
     ORGANIZER_CREATE_WITH_ACCOUNT_UNVERIFIED("Não é possível adicionar um organizador associado a uma conta não verificada"),
     ORGANIZER_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o evento cancelado"),
     ORGANIZER_SUBEVENT_CREATE_WITH_CANCELED_STATUS("Não é possível adicionar um organizador com o subevento cancelado"),
+    ORGANIZER_SUBEVENT_CREATE_ALREADY_ASSOCIATED("Não é possível adicionar um organizador já associado ao subevento"),
     ORGANIZER_SUBEVENT_CREATE_WITH_ACCOUNT_UNVERIFIED("Não é possível associar um organizador com uma conta não verificada"),
     ORGANIZER_SUBEVENT_DELETE_WITH_CANCELED_STATUS("Não é possível deletar um organizador com o subevento cancelado"),
     ACTIVITY_IS_NOT_ASSOCIATED_TO_EVENT("Atividade não está associada ao evento"),
@@ -82,6 +85,7 @@ public enum BusinessRuleType {
     ACTIVITY_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS("Não é possível cancelar uma atividade com um subevento em rascunho"),
     ACTIVITY_PUBLISH_WITH_EVENT_CANCELED_STATUS("Não é possível publicar uma atividade com um evento cancelado"),
     ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível publicar uma atividade em que o período de inscrição do evento é antes de hoje"),
+    ACTIVITY_PUBLISH_WITH_EVENT_DRAFT_STATUS("Não é possível publicar uma atividade com um evento em rascunho"),
     ACTIVITY_PUBLISH_WITH_SUBEVENT_CANCELED_STATUS("Não é possível publicar uma atividade com um subevento cancelado"),
     ACTIVITY_PUBLISH_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível publicar uma atividade em que o período de execução é antes de hoje"),
     ACTIVITY_PUBLISH_WITH_PUBLISHED_STATUS("Não é possível publicar uma atividade com status publicado"),
@@ -94,6 +98,7 @@ public enum BusinessRuleType {
     SPEAKER_ADD_WITH_EVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um evento cancelado"),
     SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um subevento cancelado"),
     SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada"),
+    SPEAKER_ADD_ALREADY_EXISTS("O ministrante já está associado a atividade"),
     SESSION_CREATE_WITH_AN_EVENT_WITH_CANCELED_STATUS("Não é possível criar uma sessão em um evento cancelado"),
     SESSION_CREATE_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível criar uma sessão em um subevento cancelado"),
     SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível criar uma sessão em uma atividade cancelada"),

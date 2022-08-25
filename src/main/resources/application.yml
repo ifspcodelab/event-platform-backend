@@ -9,11 +9,29 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     generate-ddl: false
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    test-connection: false
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enabled: true
+
+support:
+  mail: ${SUPPORT_EMAIL}
 
 frontend:
   url: ${FRONTEND_URL:http://localhost:4200}
@@ -21,15 +39,6 @@ frontend:
 account:
   verification-token-expires-in: 900
   password-reset-token-expires-in: 900
-
-logging:
-  level:
-    root: INFO
-    br:
-      edu:
-        ifsp:
-          spo:
-            eventos: ${APP_LOGGING_LEVEL:TRACE}
 
 jwt:
   issuer: event-platform
@@ -40,3 +49,20 @@ jwt:
 recaptcha:
   secret: ${RECAPTCHA_SECRET}
   site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
+
+scheduler:
+  registration:
+    interval: ${SCHEDULER_REGISTRATION_INTERVAL:300000}
+  password-reset:
+    interval: ${SCHEDULER_PASSWORD_RESET_INTERVAL:300000}
+
+logging:
+  level:
+    root: INFO
+    br:
+      edu:
+        ifsp:
+          spo:
+            eventos: ${APP_LOGGING_LEVEL:TRACE}
+  file:
+    name: app.log

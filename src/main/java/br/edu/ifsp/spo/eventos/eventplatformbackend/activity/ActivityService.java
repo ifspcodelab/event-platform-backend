@@ -5,6 +5,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
@@ -51,14 +53,15 @@ public class ActivityService {
         }
 
         Activity activity = new Activity(
-                dto.getTitle(),
-                dto.getSlug(),
-                dto.getDescription(),
-                dto.getType(),
-                dto.getModality(),
-                dto.isNeedRegistration(),
-                dto.getDuration(),
-                event
+            dto.getTitle(),
+            dto.getSlug(),
+            dto.getDescription(),
+            dto.getType(),
+            dto.getModality(),
+            dto.isNeedRegistration(),
+            dto.getDuration(),
+            dto.getSetupTime(),
+            event
         );
 
         return activityRepository.save(activity);
@@ -66,7 +69,7 @@ public class ActivityService {
 
     public Activity create(UUID eventId, UUID subeventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
 
         if(activityRepository.existsByTitleIgnoreCaseAndSubeventId(dto.getTitle(), subeventId)) {
@@ -90,15 +93,16 @@ public class ActivityService {
         }
 
         Activity activity = new Activity(
-                dto.getTitle(),
-                dto.getSlug(),
-                dto.getDescription(),
-                dto.getType(),
-                dto.getModality(),
-                dto.isNeedRegistration(),
-                dto.getDuration(),
-                event,
-                subevent
+            dto.getTitle(),
+            dto.getSlug(),
+            dto.getDescription(),
+            dto.getType(),
+            dto.getModality(),
+            dto.isNeedRegistration(),
+            dto.getDuration(),
+            dto.getSetupTime(),
+            event,
+            subevent
         );
 
         return activityRepository.save(activity);
@@ -109,51 +113,41 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
 
-        if (activityRepository.existsByTitleIgnoreCaseAndEventIdAndIdNot(dto.getTitle(), eventId, activityId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "title", dto.getTitle());
+        if(activityRepository.existsByTitleIgnoreCaseAndEventIdAndIdNot(dto.getTitle(), eventId, activityId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY,"title", dto.getTitle());
         }
 
-        if (activityRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, activityId)) {
+        if(activityRepository.existsBySlugAndEventIdAndIdNot(dto.getSlug(), eventId, activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.ACTIVITY, "slug", dto.getSlug());
         }
 
-        if (event.getStatus().equals(EventStatus.CANCELED)) {
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if (activity.getStatus().equals(EventStatus.CANCELED)) {
+        if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_CANCELED_STATUS);
         }
 
-        if (event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
-        if (event.getStatus().equals(EventStatus.PUBLISHED)) {
-            if (event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
-            ) {
-                if (!dto.getSlug().equals(activity.getSlug())) {
-                    throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
-                }
-            }
-        }
+        activity.setTitle(dto.getTitle());
+        activity.setSlug(dto.getSlug());
+        activity.setDescription(dto.getDescription());
+        activity.setType(dto.getType());
+        activity.setModality(dto.getModality());
+        activity.setNeedRegistration(dto.isNeedRegistration());
+        activity.setDuration(dto.getDuration());
+        activity.setSetupTime(dto.getSetupTime());
 
-            activity.setTitle(dto.getTitle());
-            activity.setSlug(dto.getSlug());
-            activity.setDescription(dto.getDescription());
-            activity.setType(dto.getType());
-            activity.setModality(dto.getModality());
-            activity.setNeedRegistration(dto.isNeedRegistration());
-            activity.setDuration(dto.getDuration());
-
-            return activityRepository.save(activity);
-        }
-
+        return activityRepository.save(activity);
+    }
 
     public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -203,6 +197,7 @@ public class ActivityService {
         activity.setModality(dto.getModality());
         activity.setNeedRegistration(dto.isNeedRegistration());
         activity.setDuration(dto.getDuration());
+        activity.setSetupTime(dto.getSetupTime());
 
         return activityRepository.save(activity);
     }
@@ -235,7 +230,7 @@ public class ActivityService {
 
     public Activity publish(UUID eventId, UUID subeventId, UUID activityId) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -299,7 +294,7 @@ public class ActivityService {
 
     public Activity unpublish(UUID eventId, UUID subeventId, UUID activityId) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -373,7 +368,7 @@ public class ActivityService {
 
     public Activity cancel(UUID eventId, UUID subeventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -425,7 +420,7 @@ public class ActivityService {
     public List<Activity> findAll(UUID eventId, UUID subeventId) {
         checksEventExists(eventId);
         checksSubeventExists(subeventId);
-        checkIfEventIsAssociateToSubevent(eventId, getSubevent(subeventId));
+        checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
         return activityRepository.findAllBySubeventId(subeventId);
     }
 
@@ -440,7 +435,7 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         checksEventExists(eventId);
         checksSubeventExists(subeventId);
-        checkIfEventIsAssociateToSubevent(eventId, getSubevent(subeventId));
+        checkIfEventIsAssociateToSubevent(eventId, getSubEvent(subeventId));
         checksIfEventIsAssociateToActivity(eventId, activity);
         return activity;
     }
@@ -454,8 +449,14 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(activity.getStatus().equals(EventStatus.PUBLISHED) && event.isRegistrationPeriodStarted()) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
         }
 
         activityRepository.delete(activity);
@@ -464,7 +465,7 @@ public class ActivityService {
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -473,8 +474,18 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_STATUS_CANCELED);
         }
 
-        if(activity.getStatus().equals(EventStatus.PUBLISHED) && event.isRegistrationPeriodStarted()) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+        if(subevent.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SUBEVENT_CANCELED_STATUS);
+        }
+
+        if(event.getStatus().equals(EventStatus.CANCELED)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS);
+        }
+
+        if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
+            if(event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
+            }
         }
 
         if(activity.getStatus().equals(EventStatus.PUBLISHED)) {
@@ -498,6 +509,10 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS);
         }
 
+        if(activitySpeakerRepository.existsBySpeakerIdAndActivityId(dto.getSpeakerId(), activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_ALREADY_EXISTS);
+        }
+
         Speaker speaker = getSpeaker(dto.getSpeakerId());
 
         ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
@@ -511,7 +526,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_EVENT_CANCELED_STATUS);
         }
 
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         if(subevent.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS);
         }
@@ -519,6 +534,10 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
         if(activity.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS);
+        }
+
+        if(activitySpeakerRepository.existsBySpeakerIdAndActivityId(dto.getSpeakerId(), activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.SPEAKER_ADD_ALREADY_EXISTS);
         }
 
         Speaker speaker = getSpeaker(dto.getSpeakerId());
@@ -538,7 +557,7 @@ public class ActivityService {
 
     public void deleteActivitySubEventSpeaker(UUID eventId, UUID subeventId, UUID activityId, UUID activitySpeakerId) {
         Event event = getEvent(eventId);
-        Subevent subevent = getSubevent(subeventId);
+        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
         checkIfEventIsAssociateToSubevent(eventId, subevent);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -562,7 +581,7 @@ public class ActivityService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.EVENT, eventId));
     }
 
-    private Subevent getSubevent(UUID subeventId) {
+    private Subevent getSubEvent(UUID subeventId) {
         return subeventRepository.findById(subeventId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId));
     }
@@ -614,8 +633,8 @@ public class ActivityService {
         for (Activity activity : this.findAll(eventId)) {
 
             if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
-                    (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-                            activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now()))
+                (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now()))
             ) {
                 activity.setStatus(EventStatus.CANCELED);
                 activities.add(activity);
@@ -635,10 +654,10 @@ public class ActivityService {
         for (Activity activity : this.findAll(eventId, subeventId)) {
 
             if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
-                    (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
-                            activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())) &&
-                    (activity.getSubevent().getExecutionPeriod().getEndDate().isAfter(LocalDate.now()) ||
-                            activity.getSubevent().getExecutionPeriod().getEndDate().isEqual(LocalDate.now()))
+                (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())) &&
+                (activity.getSubevent().getExecutionPeriod().getEndDate().isAfter(LocalDate.now()) ||
+                    activity.getSubevent().getExecutionPeriod().getEndDate().isEqual(LocalDate.now()))
             ) {
                 activity.setStatus(EventStatus.CANCELED);
                 activities.add(activity);

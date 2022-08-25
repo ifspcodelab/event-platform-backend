@@ -82,7 +82,7 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public void delete(UUID eventId) {
+    public void delete(UUID eventId, UUID accountId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
@@ -102,6 +102,8 @@ public class EventService {
         }
 
         eventRepository.deleteById(eventId);
+
+        auditService.logAdminDelete(accountId, ResourceName.EVENT, eventId);
 
         log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }
@@ -179,7 +181,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Event cancel(UUID eventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+    public Event cancel(UUID eventId, CancellationMessageCreateDto cancellationMessageCreateDto, UUID accountId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {
@@ -209,6 +211,8 @@ public class EventService {
         subeventService.cancelAllByEventId(eventId);
 
         log.info("Event canceled: id={}, title={}", eventId, event.getTitle());
+
+        auditService.logAdmin(accountId, Action.CANCEL, ResourceName.EVENT, eventId);
 
         return eventRepository.save(event);
     }

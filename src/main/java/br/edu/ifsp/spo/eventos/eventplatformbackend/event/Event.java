@@ -19,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Event{
+public class Event {
     @Id
     private UUID id;
     private String title;

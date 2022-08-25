@@ -50,7 +50,7 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
-        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);
+        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto, true);
 
         Session session = new Session(dto.getTitle(), dto.getSeats(), activity, sessionsSchedule);
 
@@ -83,7 +83,7 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
-        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);
+        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto, true);
 
         Session session = new Session(
                 dto.getTitle(),
@@ -113,7 +113,7 @@ public class SessionService {
             throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
+        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto, false);
 
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
             var executionStartList = session.getSessionSchedules().stream()
@@ -165,7 +165,7 @@ public class SessionService {
             }
         }
 
-        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto);
+        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto, false);
 
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
             var executionStartList = session.getSessionSchedules().stream()
@@ -440,7 +440,7 @@ public class SessionService {
         }
     }
 
-    private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto) {
+    private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto, boolean isCreate) {
         return getValidSessionSchedules(dto).stream()
                 .map(sessionSchedule -> {
                     var event = activity.getEvent();
@@ -480,7 +480,7 @@ public class SessionService {
                         var sessionScheduleWithSpace = sessionScheduleRepository
                                 .findAllBySpaceIdAndExecutionStartGreaterThanEqual(sessionSchedule.getSpace().getId(), LocalDateTime.now());
 
-//                        if(true) {
+//                        if(isCreate) {
 //                            sessionScheduleWithSpace = sessionScheduleWithSpace.stream().filter(s -> {})
 //                        }
                         for(SessionSchedule s: sessionScheduleWithSpace) {

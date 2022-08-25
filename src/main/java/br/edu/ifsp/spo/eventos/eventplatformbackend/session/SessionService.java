@@ -47,7 +47,7 @@ public class SessionService {
         }
 
         if(!activity.isNeedRegistration() && !activity.getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
         List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);
@@ -80,7 +80,7 @@ public class SessionService {
         }
 
         if(!activity.isNeedRegistration() && activity.getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
         }
 
         List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto);

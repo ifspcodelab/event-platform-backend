@@ -103,6 +103,7 @@ public enum BusinessRuleType {
     SESSION_CREATE_WITH_A_SUBEVENT_WITH_CANCELED_STATUS("Não é possível criar uma sessão em um subevento cancelado"),
     SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS("Não é possível criar uma sessão em uma atividade cancelada"),
     SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de inscrição do evento já ocorreu"),
+    SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível criar uma sessão em que o período de execução do evento já ocorreu"),
     SESSION_UPDATE_WITH_CANCELED_STATUS("Não é possível editar uma sessão que está cancelada"),
     SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD("Não é possível atualizar uma sessão em uma atividade com status publicado e após o período de execução do evento"),

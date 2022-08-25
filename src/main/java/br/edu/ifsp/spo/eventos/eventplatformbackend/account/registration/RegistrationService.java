@@ -2,8 +2,10 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +37,7 @@ public class RegistrationService {
     private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
     private final AuditService auditService;
+    private final LogRepository logRepository;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -108,7 +112,7 @@ public class RegistrationService {
     public void deleteVerificationTokenAndAccount() {
         verificationTokenRepository.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
             Account account = token.getAccount();
-            // TODO: apagar os logs do usuario com esse id
+            logRepository.deleteAllByAccount(account);
             verificationTokenRepository.delete(token);
             accountRepository.delete(account);
             log.info("Verification token: token {} - removed by registration scheduler", token.getToken());

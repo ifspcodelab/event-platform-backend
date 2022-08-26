@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -163,6 +164,17 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
+        Event currentEvent = new Event();
+        currentEvent.setTitle(event.getTitle());
+        currentEvent.setSlug(event.getSlug());
+        currentEvent.setSummary(event.getSummary());
+        currentEvent.setPresentation(event.getPresentation());
+        currentEvent.setContact(event.getContact());
+        currentEvent.setRegistrationPeriod(event.getRegistrationPeriod());
+        currentEvent.setExecutionPeriod(event.getExecutionPeriod());
+        currentEvent.setSmallerImage(event.getSmallerImage());
+        currentEvent.setBiggerImage(event.getBiggerImage());
+
         event.setTitle(dto.getTitle());
         event.setSlug(dto.getSlug());
         event.setSummary(dto.getSummary());
@@ -173,7 +185,9 @@ public class EventService {
         event.setSmallerImage(dto.getSmallerImage());
         event.setBiggerImage(dto.getBiggerImage());
 
-        auditService.logAdminUpdate(accountId, ResourceName.EVENT, eventId);
+        DiffResult<?> diffResult = currentEvent.diff(event);
+
+        auditService.logAdminUpdate(accountId, ResourceName.EVENT, diffResult.getDiffs().toString(), eventId);
 
         return eventRepository.save(event);
     }

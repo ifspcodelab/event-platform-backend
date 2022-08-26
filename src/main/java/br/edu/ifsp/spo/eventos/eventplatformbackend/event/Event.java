@@ -19,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Event {
+public class Event implements Diffable<Event> {
     @Id
     private UUID id;
     private String title;
@@ -68,5 +68,24 @@ public class Event {
         this.biggerImage = biggerImage;
         this.status = EventStatus.DRAFT;
         this.cancellationMessage = null;
+    }
+
+    @Override
+    public DiffResult<Event> diff(Event updatedEvent) {
+        return new DiffBuilder<>(this, updatedEvent, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedEvent.title)
+                .append("Slug", this.slug, updatedEvent.slug)
+                .append("Resumo", this.summary, updatedEvent.summary)
+                .append("Apresentação", this.presentation, updatedEvent.presentation)
+                .append("Contato", this.contact, updatedEvent.contact)
+                .append("Período de inscrições",
+                        String.format(this.registrationPeriod.getStartDate() + " - " + this.registrationPeriod.getEndDate()),
+                        String.format(updatedEvent.registrationPeriod.getStartDate() + " - " + updatedEvent.registrationPeriod.getEndDate()))
+                .append("Período de execução",
+                        String.format(this.executionPeriod.getStartDate() + " - " + this.executionPeriod.getEndDate()),
+                        String.format(updatedEvent.executionPeriod.getStartDate() + " - " + updatedEvent.executionPeriod.getEndDate()))
+                .append("Capa menor", this.smallerImage, updatedEvent.smallerImage)
+                .append("Capa maior", this.biggerImage, updatedEvent.biggerImage)
+                .build();
     }
 }

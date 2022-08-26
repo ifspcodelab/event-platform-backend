@@ -56,8 +56,8 @@ public class AuditService {
         log(getAccount(adminId), action, resourceName, resourceId);
     }
 
-    public void logAdminUpdate(UUID adminId, ResourceName resourceName, UUID resourceId) {
-        log(getAccount(adminId), Action.UPDATE, resourceName, resourceId);
+    public void logAdminUpdate(UUID adminId, ResourceName resourceName, String resourceData, UUID resourceId) {
+        log(getAccount(adminId), Action.UPDATE, resourceName, resourceData, resourceId);
     }
 
     public void logAdminDelete(UUID adminId, ResourceName resourceName, UUID resourceId) {

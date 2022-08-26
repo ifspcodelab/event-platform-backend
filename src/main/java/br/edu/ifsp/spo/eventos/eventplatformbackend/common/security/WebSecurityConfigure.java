@@ -43,6 +43,8 @@ public class WebSecurityConfigure {
             "/api/v1/events/{eventId}",
             "/api/v1/events/{eventId}/sub-events",
             "/api/v1/events/{eventId}/sub-events/{subeventId}",
+            "/api/v1/events/{eventId}/organizers/for-site",
+            "/api/v1/events/{eventId}/sub-events/{subeventId}/organizers/for-site",
             "/api/v1/events/{eventId}/activities",
             "/api/v1/events/{eventId}/activities/{activityId}",
             "/api/v1/events/{eventId}/sub-events/{subeventId}/activities",

@@ -43,8 +43,9 @@ public class ActivityController {
     }
 
     @PutMapping("sub-events/{subeventId}/activities/{activityId}")
-    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
-        Activity activity = activityService.update(eventId, subeventId, activityId, activityCreateDto);
+    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Activity activity = activityService.update(eventId, subeventId, activityId, activityCreateDto, jwtUserDetails.getId());
         ActivityDto activityDto = activityMapper.to(activity);
         return ResponseEntity.ok(activityDto);
     }

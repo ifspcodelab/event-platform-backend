@@ -13,6 +13,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -142,7 +143,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto) {
+    public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto, UUID accountId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -177,6 +178,16 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
+        Activity currentActivity = new Activity();
+        currentActivity.setTitle(activity.getTitle());
+        currentActivity.setSlug(activity.getSlug());
+        currentActivity.setDescription(activity.getDescription());
+        currentActivity.setType(activity.getType());
+        currentActivity.setModality(activity.getModality());
+        currentActivity.setNeedRegistration(activity.isNeedRegistration());
+        currentActivity.setDuration(activity.getDuration());
+        currentActivity.setSetupTime(activity.getSetupTime());
+
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
@@ -185,6 +196,10 @@ public class ActivityService {
         activity.setNeedRegistration(dto.isNeedRegistration());
         activity.setDuration(dto.getDuration());
         activity.setSetupTime(dto.getSetupTime());
+
+        DiffResult<?> diffResult = currentActivity.diff(activity);
+
+        auditService.logAdminUpdate(accountId, ResourceName.ACTIVITY, diffResult.getDiffs().toString(), activityId);
 
         return activityRepository.save(activity);
     }

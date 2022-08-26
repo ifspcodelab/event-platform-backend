@@ -2,6 +2,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDeletionDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
@@ -138,5 +140,22 @@ public class AccountService {
         accountRepository.save(account);
 
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
+    }
+
+    public void sendAccountDeletionRequest(String accessToken, AccountDeletionDto accountDeletionDto) {
+        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+
+        if (!recaptchaService.isValid(accountDeletionDto.getUserRecaptcha())) {
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
+        }
+
+        UUID accountId = UUID.fromString(decodedToken.getSubject());
+        Account account = getAccount(accountId);
+
+        if (!passwordEncoder.matches(accountDeletionDto.getPassword(), account.getPassword())) {
+            throw new AccountDeletionException(account.getEmail());
+        }
+
+        log.info("Account deletion request completed for email={}", account.getEmail());
     }
 }

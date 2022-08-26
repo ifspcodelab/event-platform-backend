@@ -1,13 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,6 +72,13 @@ public class AccountController {
     @PatchMapping("my-data/password")
     public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
         accountService.updatePassword(accessToken.replace("Bearer ", ""), myDataUpdatePasswordDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("my-data/account-deletion")
+    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody AccountDeletionDto accountDeletionDto) {
+        accountService.sendAccountDeletionRequest(accessToken.replace("Bearer ", ""), accountDeletionDto);
 
         return ResponseEntity.noContent().build();
     }

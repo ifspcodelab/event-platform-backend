@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
@@ -235,6 +236,15 @@ public class ExceptionHandlerApp {
             );
         }
         log.warn(String.format(ex.getMyDataResetPasswordExceptionType().getMessage(), ex.getEmail()));
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AccountDeletionException.class)
+    public ResponseEntity<ProblemDetail> handlerAccountDeletion(AccountDeletionException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Password invalid",
+                List.of());
+        log.warn("Password incorrect for account deletion attempt for email={}: ", ex.getEmail());
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

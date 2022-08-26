@@ -37,4 +37,12 @@ public class EventCreateDto {
     String smallerImage;
     @URL
     String biggerImage;
+
+    public String getPresentation() {
+        return presentation.strip();
+    }
+
+    public String getContact() {
+        return contact.strip();
+    }
 }

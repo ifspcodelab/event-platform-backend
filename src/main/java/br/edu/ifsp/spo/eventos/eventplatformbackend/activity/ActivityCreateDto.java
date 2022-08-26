@@ -34,4 +34,8 @@ public class ActivityCreateDto {
     @NotNull
     @Min(value = 5)
     Integer setupTime;
+
+    public String getDescription() {
+        return description.strip();
+    }
 }

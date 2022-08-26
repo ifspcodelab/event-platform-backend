@@ -19,4 +19,8 @@ public class SessionCreateDto {
     @Valid
     @Size(min = 1)
     List<SessionScheduleCreateDto> sessionSchedules;
+
+    public String getTitle() {
+        return title.strip();
+    }
 }

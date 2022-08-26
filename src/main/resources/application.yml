@@ -9,7 +9,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false

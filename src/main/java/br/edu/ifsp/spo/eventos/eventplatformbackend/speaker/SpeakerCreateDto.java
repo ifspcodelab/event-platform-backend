@@ -37,6 +37,14 @@ public class SpeakerCreateDto {
     @Size(min = 8)
     String phoneNumber;
 
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getCurriculum() {
+        return curriculum.strip();
+    }
+
     public String getCpf() {
         return cpf.replace(".", "").replace("-", "");
     }

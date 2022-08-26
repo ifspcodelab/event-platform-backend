@@ -8,8 +8,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -415,6 +413,13 @@ public class ActivityService {
     public List<Activity> findAll(UUID eventId) {
         checksEventExists(eventId);
         return activityRepository.findAllByEventIdAndSubeventNull(eventId);
+    }
+    public List<ActivitySiteDto> findAllForSite(UUID eventId) {
+        return activityRepository.findAllForSiteByEventId(eventId);
+    }
+
+    public List<ActivitySiteDto> findAllForSite(UUID eventId, UUID subEventId) {
+        return activityRepository.findAllForSiteByEventIdAndSubeventId(eventId, subEventId);
     }
 
     public List<Activity> findAll(UUID eventId, UUID subeventId) {

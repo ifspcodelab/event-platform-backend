@@ -83,13 +83,22 @@ public class ActivityController {
     }
 
     @GetMapping("activities")
-    public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId) {
+    public ResponseEntity<List<?>> index(@PathVariable UUID eventId, @RequestParam(defaultValue = "false") boolean forSite) {
+        if(forSite) {
+            List<ActivitySiteDto> activities = activityService.findAllForSite(eventId);
+            return ResponseEntity.ok(activities);
+        }
         List<Activity> activities = activityService.findAll(eventId);
         return ResponseEntity.ok(activityMapper.to(activities));
     }
 
     @GetMapping("sub-events/{subeventId}/activities")
-    public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+    public ResponseEntity<List<?>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId, @RequestParam(defaultValue = "false") boolean forSite) {
+        if(forSite) {
+            List<ActivitySiteDto> activities = activityService.findAllForSite(eventId, subeventId);
+            return ResponseEntity.ok(activities);
+        }
+
         List<Activity> activities = activityService.findAll(eventId, subeventId);
         return ResponseEntity.ok(activityMapper.to(activities));
     }

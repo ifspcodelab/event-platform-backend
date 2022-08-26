@@ -24,4 +24,8 @@ public class MyDataUpdateDto {
     String userRecaptcha;
     @NotNull
     Boolean allowEmail;
+
+    public String getName() {
+        return name.strip();
+    }
 }

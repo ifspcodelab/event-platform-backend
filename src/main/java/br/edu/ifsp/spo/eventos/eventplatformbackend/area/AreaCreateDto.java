@@ -13,4 +13,12 @@ public class AreaCreateDto {
 
     @Size(min = 4, max = 150)
     String reference;
+
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getReference() {
+        return reference.strip();
+    }
 }

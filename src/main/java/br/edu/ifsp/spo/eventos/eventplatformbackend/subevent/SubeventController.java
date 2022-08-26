@@ -1,9 +1,11 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -69,15 +71,17 @@ public class SubeventController {
     }
 
     @PatchMapping("{subeventId}/publish")
-    public ResponseEntity<SubeventDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
-        Subevent subevent = subeventService.publish(eventId, subeventId);
+    public ResponseEntity<SubeventDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Subevent subevent = subeventService.publish(eventId, subeventId, jwtUserDetails.getId());
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }
 
     @PatchMapping("{subeventId}/unpublish")
-    public ResponseEntity<SubeventDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
-        Subevent subevent = subeventService.unpublish(eventId, subeventId);
+    public ResponseEntity<SubeventDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Subevent subevent = subeventService.unpublish(eventId, subeventId, jwtUserDetails.getId());
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }

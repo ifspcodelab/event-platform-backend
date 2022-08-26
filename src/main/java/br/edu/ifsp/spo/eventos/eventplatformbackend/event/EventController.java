@@ -58,7 +58,6 @@ public class EventController {
     @PutMapping("{eventId}")
     public ResponseEntity<EventDto> update(@PathVariable UUID eventId, @Valid @RequestBody EventCreateDto eventCreateDto, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-
         Event event = eventService.update(eventId, eventCreateDto, jwtUserDetails.getId());
 
         return ResponseEntity.ok(eventMapper.to(event));

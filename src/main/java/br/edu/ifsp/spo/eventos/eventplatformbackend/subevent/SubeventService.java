@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class SubeventService {
     private final SubeventRepository subeventRepository;
     private final EventRepository eventRepository;
+    private final AuditService auditService;
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
@@ -201,7 +204,7 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
-    public Subevent publish(UUID eventId, UUID subeventId) {
+    public Subevent publish(UUID eventId, UUID subeventId, UUID accountId) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -230,10 +233,11 @@ public class SubeventService {
         subevent.setStatus(EventStatus.PUBLISHED);
 
         log.info("Subevent published: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdmin(accountId, Action.PUBLISH, ResourceName.SUBEVENT, subeventId);
         return subeventRepository.save(subevent);
     }
 
-    public Subevent unpublish(UUID eventId, UUID subeventId) {
+    public Subevent unpublish(UUID eventId, UUID subeventId, UUID accountId) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -256,6 +260,7 @@ public class SubeventService {
         subevent.setStatus(EventStatus.DRAFT);
 
         log.info("Subevent unpublished: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdmin(accountId, Action.UNPUBLISH, ResourceName.SUBEVENT, subeventId);
         return subeventRepository.save(subevent);
     }
 

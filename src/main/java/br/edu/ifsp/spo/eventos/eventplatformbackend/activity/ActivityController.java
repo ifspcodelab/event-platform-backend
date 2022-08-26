@@ -1,9 +1,12 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.webresources.JarWarResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -53,8 +56,9 @@ public class ActivityController {
     }
 
     @PatchMapping("sub-events/{subeventId}/activities/{activityId}/publish")
-    public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
-        Activity activity = activityService.publish(eventId, subeventId, activityId);
+    public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Activity activity = activityService.publish(eventId, subeventId, activityId, jwtUserDetails.getId());
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
@@ -65,8 +69,9 @@ public class ActivityController {
     }
 
     @PatchMapping("sub-events/{subeventId}/activities/{activityId}/unpublish")
-    public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
-        Activity activity = activityService.unpublish(eventId, subeventId, activityId);
+    public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Activity activity = activityService.unpublish(eventId, subeventId, activityId, jwtUserDetails.getId());
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 

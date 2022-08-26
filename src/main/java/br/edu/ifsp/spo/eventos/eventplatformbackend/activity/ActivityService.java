@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -26,6 +28,7 @@ public class ActivityService {
     private final SubeventRepository subeventRepository;
     private final ActivitySpeakerRepository activitySpeakerRepository;
     private final SpeakerRepository speakerRepository;
+    private final AuditService auditService;
 
     public Activity create(UUID eventId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
@@ -212,7 +215,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public Activity publish(UUID eventId, UUID subeventId, UUID activityId) {
+    public Activity publish(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -245,6 +248,7 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.PUBLISHED);
         log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdmin(accountId, Action.PUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -276,7 +280,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public Activity unpublish(UUID eventId, UUID subeventId, UUID activityId) {
+    public Activity unpublish(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -311,6 +315,7 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.DRAFT);
         log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdmin(accountId, Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 

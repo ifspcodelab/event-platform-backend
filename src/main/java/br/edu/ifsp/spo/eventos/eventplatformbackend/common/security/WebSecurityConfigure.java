@@ -26,6 +26,7 @@ public class WebSecurityConfigure {
         var accountOpenPaths = List.of(
             "/api/v1/accounts/registration",
             "/api/v1/accounts/registration/verification/{token}",
+            "/api/v1/accounts/registration/resend-email",
             "/api/v1/accounts/login",
             "/api/v1/accounts/refresh-token-rotation",
             "/api/v1/accounts/password/forgot",

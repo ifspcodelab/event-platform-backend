@@ -37,6 +37,11 @@ public class RegistrationController {
         return ResponseEntity.ok(accountMapper.to(account));
     }
 
+    @PostMapping("registration/resend-email")
+    public ResponseEntity<String> resendEmail(@RequestBody String resendEmail) {
+        return  ResponseEntity.ok(registrationService.resendEmailRegistration(resendEmail));
+    }
+
     @GetMapping("searchName/{name}")
     public ResponseEntity<List<AccountDto>> findByName(@PathVariable String name) {
         List<Account> results = registrationService.search(name, true);

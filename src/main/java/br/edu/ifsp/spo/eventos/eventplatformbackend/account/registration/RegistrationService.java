@@ -2,12 +2,12 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,5 +117,40 @@ public class RegistrationService {
             log.info("Verification token: token {} - removed by registration scheduler", token.getToken());
             log.info("Account: id {}, email {} - removed by registration scheduler", account.getId(), account.getEmail());
         });
+    }
+
+    public String resendEmailRegistration(String resendEmail) {
+        if (!accountRepository.existsByEmail(resendEmail)) {
+            throw new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail);
+        }
+
+        Optional<Account> account = accountRepository.findByEmail(resendEmail);
+
+        if (account.isPresent()) {
+            if (!verificationTokenRepository.existsByAccount(account.get())) {
+                throw new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN, resendEmail);
+            }
+        }
+
+        if (account.isPresent()) {
+            if (!verificationTokenRepository.existsByExpiresInAfter(Instant.now())) {
+                throw new RegistrationException(RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
+            }
+        }
+
+        try {
+
+            if (account.isPresent()) {
+                VerificationToken verificationToken = verificationTokenRepository.findByAccount(account.get());
+                emailService.sendVerificationEmail(account.get(), verificationToken);
+                log.info("Verification email was resent to {}", account.get().getEmail());
+                auditService.log(account.get(), Action.SIGN_UP, ResourceName.ACCOUNT);
+                return resendEmail;
+            }
+        } catch (MessagingException ex) {
+            log.error("Error when trying to resend confirmation e-mail to {}",account.get().getEmail(), ex);
+            throw new BusinessRuleException(BusinessRuleType.MAIL_SERVER_PROBLEM);
+        }
+        return resendEmail;
     }
 }

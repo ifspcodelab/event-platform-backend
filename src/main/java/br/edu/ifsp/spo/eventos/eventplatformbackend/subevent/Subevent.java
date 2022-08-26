@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -17,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Subevent {
+public class Subevent implements Diffable<Subevent> {
     @Id
     private UUID id;
     private String title;
@@ -62,5 +66,21 @@ public class Subevent {
         this.status = EventStatus.DRAFT;
         this.event = event;
         this.cancellationMessage = null;
+    }
+
+    @Override
+    public DiffResult<Subevent> diff(Subevent updatedSubevent) {
+        return new DiffBuilder<>(this, updatedSubevent, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedSubevent.title)
+                .append("Slug", this.slug, updatedSubevent.slug)
+                .append("Resumo", this.summary, updatedSubevent.summary)
+                .append("Apresentação", this.presentation, updatedSubevent.presentation)
+                .append("Contato", this.contact, updatedSubevent.contact)
+                .append("Período de execução",
+                        String.format(this.executionPeriod.getStartDate() + " - " + this.executionPeriod.getEndDate()),
+                        String.format(updatedSubevent.executionPeriod.getStartDate() + " - " + updatedSubevent.executionPeriod.getEndDate()))
+                .append("Capa menor", this.smallerImage, updatedSubevent.smallerImage)
+                .append("Capa maior", this.biggerImage, updatedSubevent.biggerImage)
+                .build();
     }
 }

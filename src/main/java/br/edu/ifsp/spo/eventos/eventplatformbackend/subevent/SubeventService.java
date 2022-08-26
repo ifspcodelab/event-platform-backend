@@ -9,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -112,7 +113,7 @@ public class SubeventService {
         auditService.logAdminDelete(accountId, ResourceName.SUBEVENT, subeventId);
     }
 
-    public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto) {
+    public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto, UUID accountId) {
         Subevent subevent = getSubevent(subeventId);
         Event event = getEvent(eventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
@@ -163,6 +164,16 @@ public class SubeventService {
             }
         }
 
+        Subevent currentSubevent = new Subevent();
+        currentSubevent.setTitle(subevent.getTitle());
+        currentSubevent.setSlug(subevent.getSlug());
+        currentSubevent.setSummary(subevent.getSummary());
+        currentSubevent.setPresentation(subevent.getPresentation());
+        currentSubevent.setContact(subevent.getContact());
+        currentSubevent.setExecutionPeriod(subevent.getExecutionPeriod());
+        currentSubevent.setSmallerImage(subevent.getSmallerImage());
+        currentSubevent.setBiggerImage(subevent.getBiggerImage());
+
         subevent.setTitle(dto.getTitle());
         subevent.setSlug(dto.getSlug());
         subevent.setSummary(dto.getSummary());
@@ -171,6 +182,10 @@ public class SubeventService {
         subevent.setExecutionPeriod(dto.getExecutionPeriod());
         subevent.setSmallerImage(dto.getSmallerImage());
         subevent.setBiggerImage(dto.getBiggerImage());
+
+        DiffResult<?> diffResult = currentSubevent.diff(subevent);
+
+        auditService.logAdminUpdate(accountId, ResourceName.SUBEVENT, diffResult.getDiffs().toString(), subeventId);
 
         return subeventRepository.save(subevent);
     }

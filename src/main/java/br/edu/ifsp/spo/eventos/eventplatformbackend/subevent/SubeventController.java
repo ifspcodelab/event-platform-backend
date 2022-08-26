@@ -58,8 +58,9 @@ public class SubeventController {
     }
 
     @PutMapping("{subeventId}")
-    public ResponseEntity<SubeventDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody SubeventCreateDto subeventCreateDto) {
-        Subevent subevent = subeventService.update(eventId, subeventId, subeventCreateDto);
+    public ResponseEntity<SubeventDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody SubeventCreateDto subeventCreateDto, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Subevent subevent = subeventService.update(eventId, subeventId, subeventCreateDto, jwtUserDetails.getId());
 
        return ResponseEntity.ok(subeventMapper.to(subevent));
     }

@@ -350,7 +350,7 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto, UUID accountId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -388,6 +388,7 @@ public class ActivityService {
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdmin(accountId, Action.CANCEL, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -442,7 +443,7 @@ public class ActivityService {
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
     }
 
-    public void delete(UUID eventId, UUID subeventId, UUID activityId) {
+    public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -475,6 +476,7 @@ public class ActivityService {
 
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdmin(accountId, Action.DELETE, ResourceName.ACTIVITY, activityId);
     }
 
     public ActivitySpeaker addActivityEventSpeaker(UUID eventId, UUID activityId, ActivitySpeakerCreateDto dto) {

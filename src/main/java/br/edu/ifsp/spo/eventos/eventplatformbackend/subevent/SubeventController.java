@@ -50,8 +50,9 @@ public class SubeventController {
     }
 
     @DeleteMapping("{subeventId}")
-    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
-        subeventService.delete(eventId, subeventId);
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        subeventService.delete(eventId, subeventId, jwtUserDetails.getId());
 
         return ResponseEntity.noContent().build();
     }
@@ -64,8 +65,9 @@ public class SubeventController {
     }
 
     @PatchMapping("{subeventId}/cancel")
-    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Subevent subevent = subeventService.cancel(eventId, subeventId, cancellationMessageCreateDto);
+    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto, Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        Subevent subevent = subeventService.cancel(eventId, subeventId, cancellationMessageCreateDto, jwtUserDetails.getId());
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }

@@ -89,7 +89,7 @@ public class SubeventService {
         return subeventRepository.findAllByEventId(eventId);
     }
 
-    public void delete(UUID eventId, UUID subeventId) {
+    public void delete(UUID eventId, UUID subeventId, UUID accountId) {
         Subevent subevent = getSubevent(subeventId);
         Event event = getEvent(eventId);
 
@@ -109,6 +109,7 @@ public class SubeventService {
 
         subeventRepository.deleteById(subeventId);
         log.info("Subevent deleted: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdminDelete(accountId, ResourceName.SUBEVENT, subeventId);
     }
 
     public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto) {
@@ -174,7 +175,7 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
-    public Subevent cancel(UUID eventId, UUID subeventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+    public Subevent cancel(UUID eventId, UUID subeventId, CancellationMessageCreateDto cancellationMessageCreateDto, UUID accountId) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -200,6 +201,7 @@ public class SubeventService {
         subevent.setStatus(EventStatus.CANCELED);
         subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdmin(accountId, Action.CANCEL, ResourceName.SUBEVENT, subeventId);
 
         return subeventRepository.save(subevent);
     }

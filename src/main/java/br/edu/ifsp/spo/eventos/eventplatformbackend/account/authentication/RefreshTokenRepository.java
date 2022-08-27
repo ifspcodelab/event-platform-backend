@@ -11,7 +11,6 @@ import java.util.UUID;
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
     void deleteAllByAccountId(UUID accountId);
-    void deleteById(UUID id);
     @Modifying
     @Query("update RefreshToken t set t.id = :id, t.token = :token where t.account = :account")
     void updateTokenByAccountId(UUID id, String token, Account account);

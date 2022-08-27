@@ -33,22 +33,14 @@ public class WebSecurityConfigure {
         );
 
         var siteOpenPaths = List.of(
-            "/api/v1/locations",
-            "/api/v1/locations/{locationId}",
-            "/api/v1/locations/{locationId}/areas",
-            "/api/v1/locations/{locationId}/areas/{areaId}",
-            "/api/v1/locations/{locationId}/areas/{areaId}/spaces",
-            "/api/v1/locations/{locationId}/areas/{areaId}/spaces/{spaceId}",
             "/api/v1/events",
             "/api/v1/events/{eventId}",
             "/api/v1/events/{eventId}/sub-events",
             "/api/v1/events/{eventId}/sub-events/{subeventId}",
             "/api/v1/events/{eventId}/organizers/for-site",
             "/api/v1/events/{eventId}/sub-events/{subeventId}/organizers/for-site",
-            "/api/v1/events/{eventId}/activities",
-            "/api/v1/events/{eventId}/activities/{activityId}",
-            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities",
-            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities/{activityId}"
+            "/api/v1/events/{eventId}/activities/for-site",
+            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities/for-site"
         );
 
         http

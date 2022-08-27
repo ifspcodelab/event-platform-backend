@@ -130,11 +130,13 @@ public class RegistrationService {
             if (!verificationTokenRepository.existsByAccount(account.get())) {
                 throw new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN, resendEmail);
             }
-        }
 
-        if (account.isPresent()) {
             if (!verificationTokenRepository.existsByExpiresInAfter(Instant.now())) {
                 throw new RegistrationException(RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
+            }
+
+            if (!account.get().getRegistrationTimestamp().plusSeconds(60).isBefore(Instant.now())) {
+                throw new BusinessRuleException(BusinessRuleType.RESEND_EMAIL_DELAY);
             }
         }
 

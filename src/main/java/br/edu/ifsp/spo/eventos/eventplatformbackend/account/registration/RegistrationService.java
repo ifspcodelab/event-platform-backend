@@ -124,35 +124,30 @@ public class RegistrationService {
             throw new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail);
         }
 
-        Optional<Account> account = accountRepository.findByEmail(resendEmail);
+        Account account = accountRepository.findByEmail(resendEmail)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail));
 
-        if (account.isPresent()) {
-            if (!verificationTokenRepository.existsByAccount(account.get())) {
-                throw new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN, resendEmail);
-            }
+        if (!verificationTokenRepository.existsByAccount(account)) {
+            throw new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN, resendEmail);
+        }
 
-            if (!verificationTokenRepository.existsByExpiresInAfter(Instant.now())) {
-                throw new RegistrationException(RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
-            }
+        if (!verificationTokenRepository.existsByExpiresInAfter(Instant.now())) {
+            throw new RegistrationException(RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
+        }
 
-            if (!account.get().getRegistrationTimestamp().plusSeconds(60).isBefore(Instant.now())) {
-                throw new BusinessRuleException(BusinessRuleType.RESEND_EMAIL_DELAY);
-            }
+        if (!account.getRegistrationTimestamp().plusSeconds(60).isBefore(Instant.now())) {
+            throw new BusinessRuleException(BusinessRuleType.RESEND_EMAIL_DELAY);
         }
 
         try {
-
-            if (account.isPresent()) {
-                VerificationToken verificationToken = verificationTokenRepository.findByAccount(account.get());
-                emailService.sendVerificationEmail(account.get(), verificationToken);
-                log.info("Verification email was resent to {}", account.get().getEmail());
-                auditService.log(account.get(), Action.SIGN_UP, ResourceName.ACCOUNT);
-                return account.get();
-            }
+            VerificationToken verificationToken = verificationTokenRepository.findByAccount(account);
+            emailService.sendVerificationEmail(account, verificationToken);
+            log.info("Verification email was resent to {}", account.getEmail());
+            auditService.log(account, Action.SIGN_UP, ResourceName.ACCOUNT);
+            return account;
         } catch (MessagingException ex) {
-            log.error("Error when trying to resend confirmation e-mail to {}",account.get().getEmail(), ex);
+            log.error("Error when trying to resend confirmation e-mail to {}",account.getEmail(), ex);
             throw new BusinessRuleException(BusinessRuleType.MAIL_SERVER_PROBLEM);
         }
-        return account.get();
     }
 }

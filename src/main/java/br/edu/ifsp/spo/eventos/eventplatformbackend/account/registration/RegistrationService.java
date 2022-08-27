@@ -119,7 +119,7 @@ public class RegistrationService {
         });
     }
 
-    public String resendEmailRegistration(String resendEmail) {
+    public Account resendEmailRegistration(String resendEmail) {
         if (!accountRepository.existsByEmail(resendEmail)) {
             throw new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail);
         }
@@ -145,12 +145,12 @@ public class RegistrationService {
                 emailService.sendVerificationEmail(account.get(), verificationToken);
                 log.info("Verification email was resent to {}", account.get().getEmail());
                 auditService.log(account.get(), Action.SIGN_UP, ResourceName.ACCOUNT);
-                return resendEmail;
+                return account.get();
             }
         } catch (MessagingException ex) {
             log.error("Error when trying to resend confirmation e-mail to {}",account.get().getEmail(), ex);
             throw new BusinessRuleException(BusinessRuleType.MAIL_SERVER_PROBLEM);
         }
-        return resendEmail;
+        return account.get();
     }
 }

@@ -38,8 +38,9 @@ public class RegistrationController {
     }
 
     @PostMapping("registration/resend-email")
-    public ResponseEntity<String> resendEmail(@RequestBody String resendEmail) {
-        return  ResponseEntity.ok(registrationService.resendEmailRegistration(resendEmail));
+    public ResponseEntity<AccountDto> resendEmail(@RequestBody String resendEmail) {
+        Account account = registrationService.resendEmailRegistration(resendEmail);
+        return  ResponseEntity.ok(accountMapper.to(account));
     }
 
     @GetMapping("searchName/{name}")

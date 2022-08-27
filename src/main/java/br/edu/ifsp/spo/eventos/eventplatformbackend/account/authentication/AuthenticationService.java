@@ -92,15 +92,11 @@ public class AuthenticationService {
             throw new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_TOKEN, account.getEmail());
         }
 
-        refreshTokenRepository.deleteAllByAccountId(accountId);
-
         UUID refreshTokenId = UUID.randomUUID();
         String newAccessTokenString = jwtService.generateAccessToken(account);
         String newRefreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
 
-        RefreshToken refreshToken = new RefreshToken(refreshTokenId, newRefreshTokenString, account);
-
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.updateTokenByAccountId(refreshTokenId, newRefreshTokenString, account);
 
         TokensDto tokensDto = new TokensDto(newAccessTokenString, newRefreshTokenString);
 

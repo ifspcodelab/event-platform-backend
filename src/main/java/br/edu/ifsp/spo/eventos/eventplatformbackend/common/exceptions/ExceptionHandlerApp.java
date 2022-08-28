@@ -222,6 +222,11 @@ public class ExceptionHandlerApp {
                     List.of()
             );
         }
+
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.NONEXISTENT_TOKEN)) {
+            problemDetail = new ProblemDetail("Invalid Refresh Token", List.of());
+        }
+
         log.warn(String.format(ex.getAuthenticationExceptionType().getMessage(), ex.getEmail()));
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }

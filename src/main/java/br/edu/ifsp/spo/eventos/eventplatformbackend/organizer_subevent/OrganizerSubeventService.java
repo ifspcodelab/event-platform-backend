@@ -2,7 +2,10 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -53,6 +56,11 @@ public class OrganizerSubeventService {
         checkEventExists(eventId);
         checkSubeventExists(subeventId);
         return organizerSubeventRepository.findAllBySubeventId(subeventId);
+    }
+
+    public List<OrganizerSubEventSiteDto> findAllForSite(UUID subeventId) {
+        checkSubeventExists(subeventId);
+        return organizerSubeventRepository.findAllOrganizerBySubEventId(subeventId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID organizerSubeventId) {

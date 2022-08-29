@@ -16,4 +16,8 @@ public class LocationCreateDto {
     @NotBlank
     @Size(min = 20, max = 300)
     String address;
+
+    public String getName() {
+        return name.strip();
+    }
 }

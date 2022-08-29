@@ -94,6 +94,26 @@ public class Activity implements Diffable<Activity> {
         this.subevent = subevent;
     }
 
+    public boolean isEventCanceled() {
+        return this.getEvent().getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isEventDraft() {
+        return this.getEvent().getStatus().equals(EventStatus.DRAFT);
+    }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isDraft() {
+        return this.getStatus().equals(EventStatus.DRAFT);
+    }
+
+    public boolean isPublished() {
+        return this.getStatus().equals(EventStatus.PUBLISHED);
+    }
+
     @Override
     public DiffResult<Activity> diff(Activity updatedActivity) {
         return new DiffBuilder<>(this, updatedActivity, ToStringStyle.SHORT_PREFIX_STYLE)

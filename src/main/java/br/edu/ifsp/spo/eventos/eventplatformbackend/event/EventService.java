@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
@@ -21,6 +22,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
     private final SubeventService subeventService;
+    private final ActivityService activityService;
     private final AuditService auditService;
 
     public Event create(EventCreateDto dto) {
@@ -219,6 +221,7 @@ public class EventService {
 
         event.setStatus(EventStatus.CANCELED);
         event.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        activityService.cancelAllByEventId(eventId);
         subeventService.cancelAllByEventId(eventId);
 
         log.info("Event canceled: id={}, title={}", eventId, event.getTitle());

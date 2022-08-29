@@ -11,6 +11,7 @@ import org.apache.commons.lang3.builder.Diffable;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -68,6 +69,22 @@ public class Event implements Diffable<Event> {
         this.biggerImage = biggerImage;
         this.status = EventStatus.DRAFT;
         this.cancellationMessage = null;
+    }
+
+    public boolean isRegistrationPeriodEnded() {
+        return this.registrationPeriod.ended();
+    }
+
+    public boolean isRegistrationPeriodStarted() {
+        return this.registrationPeriod.started();
+    }
+
+    public boolean isRegistrationPeriodNotStart(){
+        return !this.registrationPeriod.started();
+    }
+
+    public boolean isExecutionPeriodEnded() {
+        return this.executionPeriod.ended();
     }
 
     @Override

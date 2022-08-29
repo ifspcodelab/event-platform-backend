@@ -1,8 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,6 +29,11 @@ public class OrganizerController {
     public ResponseEntity<List<OrganizerDto>> index(@PathVariable UUID eventId) {
         List<Organizer> organizers = organizerService.findAll(eventId);
         return ResponseEntity.ok(organizerMapper.to(organizers));
+    }
+
+    @GetMapping("for-site")
+    public ResponseEntity<List<OrganizerSiteDto>> indexForSite(@PathVariable UUID eventId) {
+        return ResponseEntity.ok(organizerService.findAllForSite(eventId));
     }
 
     @DeleteMapping("{organizerId}")

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.Diffable;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -66,6 +67,10 @@ public class Subevent implements Diffable<Subevent> {
         this.status = EventStatus.DRAFT;
         this.event = event;
         this.cancellationMessage = null;
+    }
+
+    public boolean isExecutionPeriodEnded() {
+        return this.getExecutionPeriod().getEndDate().isBefore(LocalDate.now());
     }
 
     @Override

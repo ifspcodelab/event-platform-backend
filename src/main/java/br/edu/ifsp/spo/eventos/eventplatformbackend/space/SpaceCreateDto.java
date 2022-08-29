@@ -15,8 +15,11 @@ public class SpaceCreateDto {
     @Min(value = 2)
     @Max(value = 9999)
     Integer capacity;
-    //TODO: Validar tipos que não existem
     @Valid
     @NotNull
     SpaceType type;
+
+    public String getName() {
+        return name.strip();
+    }
 }

@@ -9,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +32,7 @@ public class ActivityService {
     private final SubeventRepository subeventRepository;
     private final ActivitySpeakerRepository activitySpeakerRepository;
     private final SpeakerRepository speakerRepository;
+    private final SessionService sessionService;
     private final AuditService auditService;
 
     public Activity create(UUID eventId, ActivityCreateDto dto) {
@@ -176,6 +180,16 @@ public class ActivityService {
 
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        }
+
+        if (event.getStatus().equals(EventStatus.PUBLISHED)) {
+            if (event.getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    event.getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())
+            ) {
+                if (!dto.getSlug().equals(activity.getSlug())) {
+                    throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START);
+                }
+            }
         }
 
         Activity currentActivity = new Activity();
@@ -359,6 +373,11 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
+        if(activity.isPublished() && activity.getEvent().isRegistrationPeriodNotStart()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
+        }
+
+        sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -400,6 +419,11 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
         }
 
+        if(activity.isPublished() && activity.getEvent().isRegistrationPeriodNotStart()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
+        }
+
+        sessionService.cancelAllByActivityId(eventId, subeventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -407,9 +431,16 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public List<Activity> findALl(UUID eventId) {
+    public List<Activity> findAll(UUID eventId) {
         checksEventExists(eventId);
         return activityRepository.findAllByEventIdAndSubeventNull(eventId);
+    }
+    public List<ActivitySiteDto> findAllForSite(UUID eventId) {
+        return activityRepository.findAllForSiteByEventId(eventId);
+    }
+
+    public List<ActivitySiteDto> findAllForSite(UUID eventId, UUID subEventId) {
+        return activityRepository.findAllForSiteByEventIdAndSubeventId(eventId, subEventId);
     }
 
     public List<Activity> findAll(UUID eventId, UUID subeventId) {
@@ -620,5 +651,48 @@ public class ActivityService {
         if(!subeventRepository.existsById(subeventId)) {
             throw new ResourceNotFoundException(ResourceName.EVENT, subeventId);
         }
+    }
+
+    @Transactional
+    public void cancelAllByEventId(UUID eventId) {
+
+        List<Activity> activities = new ArrayList<>();
+        for (Activity activity : this.findAll(eventId)) {
+
+            if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
+                (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now()))
+            ) {
+                activity.setStatus(EventStatus.CANCELED);
+                activities.add(activity);
+            }
+
+            sessionService.cancelAllByActivityId(eventId, activity.getId());
+
+        }
+
+        activityRepository.saveAll(activities);
+    }
+
+    @Transactional
+    public void cancelAllBySubeventId(UUID eventId, UUID subeventId) {
+
+        List<Activity> activities = new ArrayList<>();
+        for (Activity activity : this.findAll(eventId, subeventId)) {
+
+            if(activity.getStatus().equals(EventStatus.PUBLISHED) &&
+                (activity.getEvent().getRegistrationPeriod().getStartDate().isBefore(LocalDate.now()) ||
+                    activity.getEvent().getRegistrationPeriod().getStartDate().isEqual(LocalDate.now())) &&
+                (activity.getSubevent().getExecutionPeriod().getEndDate().isAfter(LocalDate.now()) ||
+                    activity.getSubevent().getExecutionPeriod().getEndDate().isEqual(LocalDate.now()))
+            ) {
+                activity.setStatus(EventStatus.CANCELED);
+                activities.add(activity);
+            }
+
+            sessionService.cancelAllByActivityId(eventId, subeventId, activity.getId());
+        }
+
+        activityRepository.saveAll(activities);
     }
 }

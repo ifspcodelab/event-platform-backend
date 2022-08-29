@@ -16,6 +16,7 @@ public enum ResourceName {
     ORGANIZER("Organizer"),
     ORGANIZERSUBEVENT("Organizer Subevent"),
     ACTIVITY("Activity"),
+    SESSION("Session"),
     PASSWORD_RESET_TOKEN("Password reset token"),
     REFRESH_TOKEN("Refresh token");
 

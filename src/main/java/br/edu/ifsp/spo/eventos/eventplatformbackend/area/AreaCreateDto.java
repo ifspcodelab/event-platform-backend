@@ -19,6 +19,6 @@ public class AreaCreateDto {
     }
 
     public String getReference() {
-        return reference.strip();
+        return reference != null ? reference.strip() : null;
     }
 }

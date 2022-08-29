@@ -384,11 +384,13 @@ public class ActivityService {
         if(activity.isPublished() && activity.getEvent().isRegistrationPeriodNotStart()) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
         }
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdmin(jwtUserDetails.getId(), Action.CANCEL, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -492,9 +494,11 @@ public class ActivityService {
                 throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
             }
         }
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.ACTIVITY, activityId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {

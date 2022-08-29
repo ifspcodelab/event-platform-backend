@@ -143,7 +143,7 @@ public class RegistrationService {
             VerificationToken verificationToken = verificationTokenRepository.findByAccount(account);
             emailService.sendVerificationEmail(account, verificationToken);
             log.info("Verification email was resent to {}", account.getEmail());
-            auditService.log(account, Action.SIGN_UP, ResourceName.ACCOUNT);
+            auditService.log(account, Action.VERIFICATION_TOKEN, ResourceName.ACCOUNT);
             return account;
         } catch (MessagingException ex) {
             log.error("Error when trying to resend confirmation e-mail to {}",account.getEmail(), ex);

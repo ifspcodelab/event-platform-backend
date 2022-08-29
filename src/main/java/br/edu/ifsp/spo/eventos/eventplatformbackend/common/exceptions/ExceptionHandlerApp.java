@@ -147,15 +147,12 @@ public class ExceptionHandlerApp {
 
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
-        String message = String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail());
-        log.warn(message);
-        ProblemDetail genericProblemDetail = new ProblemDetail(ex.getPasswordResetExceptionType().name(), List.of());
+        log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
         if (ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
-
-        return new ResponseEntity(genericProblemDetail, HttpStatus.CONFLICT);
+        return ResponseEntity.accepted().build();
     }
     
     @ExceptionHandler(RegistrationException.class)

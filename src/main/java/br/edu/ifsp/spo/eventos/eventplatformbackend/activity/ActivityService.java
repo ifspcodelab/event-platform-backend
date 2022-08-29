@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -15,6 +16,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -65,6 +67,8 @@ public class ActivityService {
             dto.getSetupTime(),
             event
         );
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(jwtUserDetails);
 
         return activityRepository.save(activity);
     }
@@ -238,8 +242,10 @@ public class ActivityService {
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         activity.setStatus(EventStatus.PUBLISHED);
+        auditService.logAdmin(jwtUserDetails.getId(), Action.PUBLISH, ResourceName.ACTIVITY, activityId);
         log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
         return activityRepository.save(activity);
     }
@@ -303,9 +309,11 @@ public class ActivityService {
                 throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START);
             }
         }
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         activity.setStatus(EventStatus.DRAFT);
         log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
+        auditService.logAdmin(jwtUserDetails.getId(), Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 

@@ -67,8 +67,6 @@ public class ActivityService {
             dto.getSetupTime(),
             event
         );
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(jwtUserDetails);
 
         return activityRepository.save(activity);
     }
@@ -139,6 +137,16 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
 
+        Activity currentActivity = new Activity();
+        currentActivity.setTitle(activity.getTitle());
+        currentActivity.setSlug(activity.getSlug());
+        currentActivity.setDescription(activity.getDescription());
+        currentActivity.setType(activity.getType());
+        currentActivity.setModality(activity.getModality());
+        currentActivity.setNeedRegistration(activity.isNeedRegistration());
+        currentActivity.setDuration(activity.getDuration());
+        currentActivity.setSetupTime(activity.getSetupTime());
+
         activity.setTitle(dto.getTitle());
         activity.setSlug(dto.getSlug());
         activity.setDescription(dto.getDescription());
@@ -147,6 +155,11 @@ public class ActivityService {
         activity.setNeedRegistration(dto.isNeedRegistration());
         activity.setDuration(dto.getDuration());
         activity.setSetupTime(dto.getSetupTime());
+
+        DiffResult<?> diffResult = currentActivity.diff(activity);
+
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, diffResult.getDiffs().toString(), activityId);
 
         return activityRepository.save(activity);
     }
@@ -242,11 +255,11 @@ public class ActivityService {
         if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_PUBLISH_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
         }
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         activity.setStatus(EventStatus.PUBLISHED);
-        auditService.logAdmin(jwtUserDetails.getId(), Action.PUBLISH, ResourceName.ACTIVITY, activityId);
         log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdmin(jwtUserDetails.getId(), Action.PUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -309,10 +322,10 @@ public class ActivityService {
                 throw new BusinessRuleException(BusinessRuleType.ACTIVITY_UNPUBLISH_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_START);
             }
         }
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         activity.setStatus(EventStatus.DRAFT);
         log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(jwtUserDetails.getId(), Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
@@ -384,12 +397,12 @@ public class ActivityService {
         if(activity.isPublished() && activity.getEvent().isRegistrationPeriodNotStart()) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
         }
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         sessionService.cancelAllByActivityId(eventId, activityId);
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(jwtUserDetails.getId(), Action.CANCEL, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
@@ -494,10 +507,10 @@ public class ActivityService {
                 throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
             }
         }
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.ACTIVITY, activityId);
     }
 

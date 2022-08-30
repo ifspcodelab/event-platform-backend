@@ -2,13 +2,17 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class SpeakerService {
     private final SpeakerRepository speakerRepository;
     private final AccountRepository accountRepository;
+    private final AuditService auditService;
 
     public Speaker create(SpeakerCreateDto dto) {
         if(speakerRepository.existsByCpf(dto.getCpf())) {
@@ -77,6 +82,15 @@ public class SpeakerService {
             throw new ResourceAlreadyExistsException(ResourceName.SPEAKER, "email", dto.getEmail());
         }
 
+        Speaker currentSpeaker = new Speaker();
+        currentSpeaker.setName(speaker.getName());
+        currentSpeaker.setEmail(speaker.getEmail());
+        currentSpeaker.setCpf(speaker.getCpf());
+        currentSpeaker.setCurriculum(speaker.getCurriculum());
+        currentSpeaker.setLattes(speaker.getLattes());
+        currentSpeaker.setLinkedin(speaker.getLinkedin());
+        currentSpeaker.setPhoneNumber(speaker.getPhoneNumber());
+
         speaker.setName(dto.getName());
         speaker.setEmail(dto.getEmail());
         speaker.setCpf(dto.getCpf());
@@ -84,6 +98,8 @@ public class SpeakerService {
         speaker.setLattes(dto.getLattes());
         speaker.setLinkedin(dto.getLinkedin());
         speaker.setPhoneNumber(dto.getPhoneNumber());
+
+        DiffResult<?> diffResult = currentSpeaker.diff(speaker);
 
         Optional<Account> optionalAccount = accountRepository.findByCpf(dto.getCpf());
         if(optionalAccount.isPresent()) {
@@ -93,6 +109,8 @@ public class SpeakerService {
 
         speaker = speakerRepository.save(speaker);
         log.info("Speaker with name={} and email={} was updated", speaker.getName(), speaker.getEmail());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, diffResult.getDiffs().toString(), speakerId);
 
         return speaker;
     }
@@ -101,6 +119,8 @@ public class SpeakerService {
         Speaker speaker = getSpeaker(speakerId);
         speakerRepository.deleteById(speakerId);
         log.info("Delete speaker id={}, name={}, email={}", speaker.getId(), speaker.getName(), speaker.getEmail());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SPEAKER, speakerId);
     }
 
     private Speaker getSpeaker(UUID speakerId) {

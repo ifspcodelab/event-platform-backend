@@ -599,8 +599,12 @@ public class ActivityService {
         Speaker speaker = getSpeaker(dto.getSpeakerId());
 
         ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
+        activitySpeakerRepository.save(activitySpeaker);
 
-        return activitySpeakerRepository.save(activitySpeaker);
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Activity Speaker of id %s added", activitySpeaker.getId()), activityId);
+
+        return activitySpeaker;
     }
 
     public void deleteActivityEventSpeaker(UUID eventId, UUID activityId, UUID activitySpeakerId) {
@@ -621,6 +625,8 @@ public class ActivityService {
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         activitySpeakerRepository.deleteById(activitySpeakerId);
         log.info("Activity Speaker deleted: id={}, title={}", activityId, activity.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Activity Speaker of id %s removed", activitySpeakerId), activityId);
     }
 
     public List<ActivitySpeaker> findAllActivityEventSpeaker(UUID eventId, UUID activityId) {

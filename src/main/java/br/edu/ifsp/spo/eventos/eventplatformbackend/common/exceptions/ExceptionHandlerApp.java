@@ -7,7 +7,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +19,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND;
+import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.*;
 
 @ControllerAdvice
 @Slf4j
@@ -146,12 +146,19 @@ public class ExceptionHandlerApp {
     }
 
     @ExceptionHandler(PasswordResetException.class)
-    public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
+    public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex) throws InterruptedException {
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
         if (ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
+        if (ex.getPasswordResetExceptionType().equals(NONEXISTENT_ACCOUNT)){
+            Random random = new Random();
+            int randomNumber = random.ints(3000,7000).findAny().getAsInt();
+            Thread.sleep(randomNumber);
+            return ResponseEntity.accepted().build();
+        }
+
         return ResponseEntity.accepted().build();
     }
     

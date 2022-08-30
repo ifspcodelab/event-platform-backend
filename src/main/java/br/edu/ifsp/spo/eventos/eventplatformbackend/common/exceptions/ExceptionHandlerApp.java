@@ -5,6 +5,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
@@ -241,10 +242,20 @@ public class ExceptionHandlerApp {
 
     @ExceptionHandler(AccountDeletionException.class)
     public ResponseEntity<ProblemDetail> handlerAccountDeletion(AccountDeletionException ex) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "Password invalid",
-                List.of());
-        log.warn("Password incorrect for account deletion attempt for email={}: ", ex.getEmail());
+        ProblemDetail problemDetail = new ProblemDetail("", List.of());
+        if(ex.getType().equals(AccountDeletionExceptionType.INCORRECT_PASSWORD)) {
+            problemDetail = new ProblemDetail(
+                    "Password invalid",
+                    List.of());
+            log.warn("Password incorrect for account deletion attempt for email={}: ", ex.getEmail());
+        }
+        if (ex.getType().equals(AccountDeletionExceptionType.ACCOUNT_DELETION_TOKEN_EXPIRED)){
+            problemDetail = new ProblemDetail(
+                    "Account deletion token expired",
+                    List.of());
+            log.warn("Account deletion token expired on account deletion attempt for email={}: ", ex.getEmail());
+
+        }
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

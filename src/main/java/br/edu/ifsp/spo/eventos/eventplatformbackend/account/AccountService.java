@@ -3,16 +3,15 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDeletionDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionTokenRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.UUID;
 
 @Service
@@ -28,9 +28,12 @@ import java.util.UUID;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final AccountDeletionTokenRepository accountDeletionTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final EmailService emailService;
+    private final AccountConfig accountConfig;
 
     public Page<Account> findAll(Pageable pageable) {
         return accountRepository.findAll(pageable);
@@ -142,20 +145,50 @@ public class AccountService {
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
     }
 
-    public void sendAccountDeletionRequest(String accessToken, AccountDeletionDto accountDeletionDto) {
+    public void sendAccountDeletionEmail(String accessToken, AccountDeletionRequestDto accountDeletionRequestDto) {
         DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
 
-        if (!recaptchaService.isValid(accountDeletionDto.getUserRecaptcha())) {
+        if (!recaptchaService.isValid(accountDeletionRequestDto.getUserRecaptcha())) {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
         }
 
         UUID accountId = UUID.fromString(decodedToken.getSubject());
         Account account = getAccount(accountId);
 
-        if (!passwordEncoder.matches(accountDeletionDto.getPassword(), account.getPassword())) {
-            throw new AccountDeletionException(account.getEmail());
+        if (!passwordEncoder.matches(accountDeletionRequestDto.getPassword(), account.getPassword())) {
+            throw new AccountDeletionException(AccountDeletionExceptionType.INCORRECT_PASSWORD ,account.getEmail());
         }
 
-        log.info("Account deletion request completed for email={}", account.getEmail());
+        AccountDeletionToken accountDeletionToken =
+                new AccountDeletionToken(account, accountConfig.getAccountDeletionTokenExpiresIn());
+        this.accountDeletionTokenRepository.save(accountDeletionToken);
+
+        try {
+            emailService.sendAccountDeletionEmail(account, accountDeletionToken);
+            log.info("Account deletion email send to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to send account deletion e-mail to {}",account.getEmail(), ex);
+        }
+    }
+
+    public void sendAccountDeletionRequest(UUID token){
+
+        AccountDeletionToken accountDeletionToken = this.accountDeletionTokenRepository.findByToken(token).orElseThrow(
+                () -> new ResourceNotFoundException(ResourceName.DELETION_TOKEN, token)
+        );
+
+        if(accountDeletionToken.isExpired()){
+            throw new AccountDeletionException(
+                    AccountDeletionExceptionType.ACCOUNT_DELETION_TOKEN_EXPIRED,
+                    accountDeletionToken.getAccount().getEmail());
+        }
+
+        try {
+            emailService.sendAccountDeletionEmailToAdmin(accountDeletionToken.getAccount());
+            log.info("Account deletion email send to admin for email= {}", accountDeletionToken.getAccount().getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to send account deletion e-mail to admin for {}",accountDeletionToken.getAccount().getEmail(), ex);
+        }
+
     }
 }

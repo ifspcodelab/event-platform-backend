@@ -39,6 +39,7 @@ frontend:
 account:
   verification-token-expires-in: 900
   password-reset-token-expires-in: 900
+  account-deletion-token-expires-in: 900
 
 jwt:
   issuer: event-platform

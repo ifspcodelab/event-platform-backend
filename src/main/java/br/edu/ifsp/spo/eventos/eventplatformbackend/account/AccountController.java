@@ -77,8 +77,15 @@ public class AccountController {
     }
 
     @PostMapping("my-data/account-deletion")
-    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody AccountDeletionDto accountDeletionDto) {
-        accountService.sendAccountDeletionRequest(accessToken.replace("Bearer ", ""), accountDeletionDto);
+    public ResponseEntity<Void> deleteAccountRequest(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody AccountDeletionRequestDto accountDeletionRequestDto) {
+        accountService.sendAccountDeletionEmail(accessToken.replace("Bearer ", ""), accountDeletionRequestDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("account-deletion-confirmation/{token}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable UUID token) {
+        accountService.sendAccountDeletionRequest(token);
 
         return ResponseEntity.noContent().build();
     }

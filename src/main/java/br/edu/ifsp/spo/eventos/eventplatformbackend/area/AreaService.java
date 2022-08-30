@@ -1,11 +1,15 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +22,7 @@ public class AreaService {
     private final AreaRepository areaRepository;
     private final LocationRepository locationRepository;
     private final SpaceRepository spaceRepository;
+    private final AuditService auditService;
 
     public Area create(UUID locationId, AreaCreateDto dto) {
         Location location = getLocation(locationId);
@@ -38,9 +43,20 @@ public class AreaService {
             throw new ResourceAlreadyExistsException(ResourceName.AREA, "name", dto.getName());
         }
 
+        Area currentArea = new Area();
+        currentArea.setName(area.getName());
+        currentArea.setReference(area.getReference());
+
         area.setName(dto.getName());
         area.setReference(dto.getReference());
-        return areaRepository.save(area);
+
+        areaRepository.save(area);
+
+        DiffResult<?> diffResult = currentArea.diff(area);
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.AREA, diffResult.getDiffs().toString(), areaId);
+
+        return area;
     }
 
     public List<Area> findAll(UUID locationId) {
@@ -60,6 +76,8 @@ public class AreaService {
         checkSpaceExistsByAreaId(areaId);
         areaRepository.deleteById(areaId);
         log.info("Delete area id={}, name={}", areaId, area.getName());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.AREA, areaId);
     }
 
     private Location getLocation(UUID locationId) {

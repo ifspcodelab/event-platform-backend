@@ -94,4 +94,37 @@ public class PasswordResetService {
             log.info("Password Reset token: token {}, account id {}, email {} - removed by password reset scheduler", token.getToken(), account.getId(),account.getEmail());
         });
     }
+
+    public void resendEmailForgotPassword(String resendEmail) {
+        Account account = accountRepository.findByEmail(resendEmail)
+                .orElseThrow(()->
+                        new PasswordResetException(PasswordResetExceptionType.NONEXISTENT_ACCOUNT, resendEmail)
+                );
+
+        if (!account.getVerified()){
+            throw new PasswordResetException(PasswordResetExceptionType.UNVERIFIED_ACCOUNT, resendEmail);
+        }
+
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByAccount(account)
+                .orElseThrow(() ->
+                        new PasswordResetException(PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND)
+                );
+
+        if(passwordResetToken.isExpired()){
+            throw new PasswordResetException(
+                    PasswordResetExceptionType.RESET_TOKEN_EXPIRED, passwordResetToken.getAccount().getEmail());
+        }
+
+        if (!passwordResetToken.getExpiresIn().minusSeconds(accountConfig.getPasswordResetTokenExpiresIn()).plusSeconds(60).isBefore(Instant.now())) {
+            throw new BusinessRuleException(BusinessRuleType.RESEND_EMAIL_DELAY);
+        }
+
+        try {
+            emailService.sendPasswordResetEmail(account, passwordResetToken);
+            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de reenvio de email em 'Esqueci minha senha'");
+            log.info("Password Reset email was resent to {}", account.getEmail());
+        } catch (MessagingException ex) {
+            log.error("Error when trying to resend password reset email to {}",account.getEmail(), ex);
+        }
+    }
 }

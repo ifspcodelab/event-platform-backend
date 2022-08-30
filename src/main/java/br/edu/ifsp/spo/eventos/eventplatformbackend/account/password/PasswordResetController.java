@@ -22,6 +22,12 @@ public class PasswordResetController {
         return ResponseEntity.accepted().build();
     }
 
+    @PostMapping("forgot/resend-email")
+    public ResponseEntity<Void> resendEmail(@RequestBody String resendEmail) {
+        passwordResetService.resendEmailForgotPassword(resendEmail);
+        return  ResponseEntity.accepted().build();
+    }
+
     @PostMapping("reset")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetDto dto){
         passwordResetService.resetPassword(dto);

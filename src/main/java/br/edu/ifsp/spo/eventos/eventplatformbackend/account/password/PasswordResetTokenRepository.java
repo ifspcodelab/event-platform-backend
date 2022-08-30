@@ -11,4 +11,5 @@ public interface PasswordResetTokenRepository extends JpaRepository<PasswordRese
     boolean existsByAccountAndExpiresInAfter(Account account, Instant now);
     Optional<PasswordResetToken> findByToken(UUID token);
     Iterable<PasswordResetToken> findAllByExpiresInBefore(Instant now);
+    Optional<PasswordResetToken> findByAccount(Account account);
 }

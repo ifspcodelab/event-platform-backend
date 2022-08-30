@@ -79,7 +79,7 @@ public class EmailService {
         var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Pedido de exclus&atilde;o de conta</h1>\n" +
                 "<p>Ol&aacute;, "+ name + ".</p>\n" +
                 "<p>Utilize o bot&atilde;o abaixo para solicitar a exclus&atilde;o da sua conta.</p>\n" +
-                "<a href=\"" + accountDeletionUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">" +
+                "<a href=\"" + accountDeletionUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #ff0000; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">" +
                 "  Solicitar exclus&atilde;o de conta" +
                 "</a>" +
                 "<p>Caso n&atilde;o consiga utilizar o bot&atilde;o, copie e cole o seguinte link no seu navegador:</p>\n" +
@@ -100,6 +100,7 @@ public class EmailService {
 
         var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Pedido de exclus&atilde;o de conta</h1>\n" +
                 "<p>O(A) usu&aacute;rio(a) , "+ name + " cumpriu todos os passos para solicitar a exclusão de sua conta.</p>\n" +
+                "<p>Entre em contato com o(a) mesmo(a) para prosseguir com a exclusão da conta:</p>\n" +
                 "<p>Informações do usuário:</p>\n" +
                 "<p>Email: "+ email + ".</p>\n" +
                 "<p>Id: "+ id + ".</p>\n" +
@@ -108,6 +109,19 @@ public class EmailService {
                 "<p>Atenciosamente,</p>\n" +
                 "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
 
-        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", supportMail, content);
+        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", "diegocdsantos@gmail.com", content);
+    }
+
+    public void sendAccountDeletionConfirmationEmail(Account account) throws MessagingException {
+        var name = account.getName().split(" ")[0];
+
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Pedido de exclus&atilde;o de conta confirmado</h1>\n" +
+                "<p>Ol&aacute;, "+ name + ".</p>\n" +
+                "<p>Agora basta aguardar o contato do administrador do sistema.:</p>\n" +
+                "<p>Caso queira voltar atr&aacute;s basta informar a desistencia ao administrador no momento do contato.</p>\n" +
+                "<p>Atenciosamente,</p>\n" +
+                "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
+
+        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", account.getEmail(), content);
     }
 }

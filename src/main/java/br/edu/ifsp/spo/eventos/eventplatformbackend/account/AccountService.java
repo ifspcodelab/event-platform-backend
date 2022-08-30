@@ -171,7 +171,7 @@ public class AccountService {
         }
     }
 
-    public void sendAccountDeletionRequest(UUID token){
+    public void sendAccountDeletionRequestToAdmin(UUID token){
 
         AccountDeletionToken accountDeletionToken = this.accountDeletionTokenRepository.findByToken(token).orElseThrow(
                 () -> new ResourceNotFoundException(ResourceName.DELETION_TOKEN, token)
@@ -185,10 +185,11 @@ public class AccountService {
 
         try {
             emailService.sendAccountDeletionEmailToAdmin(accountDeletionToken.getAccount());
+            emailService.sendAccountDeletionConfirmationEmail(accountDeletionToken.getAccount());
             log.info("Account deletion email send to admin for email= {}", accountDeletionToken.getAccount().getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send account deletion e-mail to admin for {}",accountDeletionToken.getAccount().getEmail(), ex);
         }
-
+        accountDeletionTokenRepository.delete(accountDeletionToken);
     }
 }

@@ -85,7 +85,7 @@ public class AccountController {
 
     @GetMapping("account-deletion-confirmation/{token}")
     public ResponseEntity<Void> deleteAccount(@PathVariable UUID token) {
-        accountService.sendAccountDeletionRequest(token);
+        accountService.sendAccountDeletionRequestToAdmin(token);
 
         return ResponseEntity.noContent().build();
     }

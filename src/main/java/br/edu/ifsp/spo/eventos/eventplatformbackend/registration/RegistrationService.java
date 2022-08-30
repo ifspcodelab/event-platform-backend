@@ -53,7 +53,7 @@ public class RegistrationService {
 
         checkIfSessionLockIsFull(sessionLock);
 
-        Registration registration = registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock));
+        Registration registration = registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock, event));
 
         sessionLock.incrementNumberOfConfirmedSeats();
         sessionRepository.save(sessionLock);
@@ -88,7 +88,7 @@ public class RegistrationService {
 
         checkIfSessionLockIsFull(sessionLock);
 
-        Registration registration = registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock));
+        Registration registration = registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock, event));
 
         sessionLock.incrementNumberOfConfirmedSeats();
         sessionRepository.save(sessionLock);
@@ -123,7 +123,7 @@ public class RegistrationService {
 
         cancellAllRegistrationsInWaitListWithConflict(accountLock, sessionLock);
 
-        return registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock));
+        return registrationRepository.save(Registration.createWithConfirmedStatus(accountLock, sessionLock, event));
     }
 
     @Transactional
@@ -148,7 +148,7 @@ public class RegistrationService {
 
         checkIfSessionIsNotFull(sessionLock);
 
-        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock));
+        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock, event));
     }
 
     @Transactional
@@ -176,7 +176,7 @@ public class RegistrationService {
 
         checkIfSessionIsNotFull(sessionLock);
 
-        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock));
+        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock, event));
     }
 
     @Transactional
@@ -199,7 +199,7 @@ public class RegistrationService {
 
         checkIfSessionIsNotFull(sessionLock);
 
-        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock));
+        return registrationRepository.save(Registration.createWithWaitingListdStatus(accountLock, sessionLock, event));
     }
 
     @Transactional
@@ -266,9 +266,10 @@ public class RegistrationService {
     }
 
     @Transactional
-    public Registration cancel(UUID accountId, UUID registrationId) {
+    public Registration cancel(UUID accountId, UUID eventId, UUID registrationId) {
         var registration = getRegistration(registrationId);
         var session = registration.getSession();
+        checksIfEventIsAssociateToRegistration(eventId, registration);
         checksIfAccountIsAssociateToRegistration(accountId, registration);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(session.getId()).get();
@@ -312,7 +313,7 @@ public class RegistrationService {
         return registrationRepository.findAllBySessionId(sessionId);
     }
 
-    public List<Registration> findAll(UUID accountId) {
+    public List<Registration> findAll(UUID eventId, UUID accountId) {
         return registrationRepository.findAllByAccountIdAndRegistrationStatusIn(
             accountId,
             List.of(
@@ -324,10 +325,11 @@ public class RegistrationService {
     }
 
     @Transactional
-    public Registration acceptSessionSeat(UUID accountId, UUID registrationId) {
+    public Registration acceptSessionSeat(UUID accountId, UUID eventId, UUID registrationId) {
         var registration = getRegistration(registrationId);
         var account = registration.getAccount();
         var session = registration.getSession();
+        checksIfEventIsAssociateToRegistration(eventId, registration);
         checksIfAccountIsAssociateToRegistration(accountId, registration);
 
         if(registration.getTimeEmailWasSent().plusHours(12).isBefore(LocalDateTime.now())) {
@@ -344,9 +346,10 @@ public class RegistrationService {
     }
 
     @Transactional
-    public Registration denySessionSeat(UUID accountId, UUID registrationId) {
+    public Registration denySessionSeat(UUID accountId, UUID eventId, UUID registrationId) {
         var registration = getRegistration(registrationId);
         var session = registration.getSession();
+        checksIfEventIsAssociateToRegistration(eventId, registration);
         checksIfAccountIsAssociateToRegistration(accountId, registration);
 
         if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
@@ -520,6 +523,12 @@ public class RegistrationService {
     private void checksIfAccountIsAssociateToRegistration(UUID accountId, Registration registration) {
         if (!registration.getAccount().getId().equals(accountId)) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT);
+        }
+    }
+
+    private void checksIfEventIsAssociateToRegistration(UUID eventId, Registration registration) {
+        if (!registration.getSession().getActivity().getEvent().getId().equals(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_EVENT);
         }
     }
 

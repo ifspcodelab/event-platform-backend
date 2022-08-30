@@ -109,6 +109,7 @@ public enum BusinessRuleType {
     SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível cancelar uma sessão em uma atividade com status publicado e após o período de execução do subevento"),
     REGISTRATION_IS_NOT_ASSOCIATED_TO_SESSION("Inscrição não está associada à sessão"),
     REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT("Inscrição não está associada à conta"),
+    REGISTRATION_IS_NOT_ASSOCIATED_TO_EVENT("Inscrição não está associada ao evento"),
     REGISTRATION_CREATE_ALREADY_EXISTS("Não é possível criar uma inscrição novamente em uma mesma sessão"),
     REGISTRATION_CREATE_WITH_CANCELED_SESSION("Não é possível criar uma inscrição em uma sessão cancelada"),
     REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED("Não é possível criar uma inscrição em uma sessão com atividade em rascunho ou cancelada"),

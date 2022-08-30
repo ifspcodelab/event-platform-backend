@@ -87,10 +87,10 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationMapper.to(registrations));
     }
 
-    @GetMapping("accounts/registrations")
-    public ResponseEntity<List<RegistrationDto>> index(Authentication authentication) {
+    @GetMapping("accounts/events/{eventId}/registrations")
+    public ResponseEntity<List<RegistrationDto>> index(@PathVariable UUID eventId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        List<Registration> registrations = registrationService.findAll(jwtUserDetails.getId());
+        List<Registration> registrations = registrationService.findAll(eventId, jwtUserDetails.getId());
 
         return ResponseEntity.ok(registrationMapper.to(registrations));
     }
@@ -107,27 +107,27 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
 
-    @PatchMapping("accounts/registrations/{registrationId}/cancel")
-    public ResponseEntity<RegistrationDto> cancel(@PathVariable UUID registrationId, Authentication authentication) {
+    @PatchMapping("accounts/events/{eventId}/registrations/{registrationId}/cancel")
+    public ResponseEntity<RegistrationDto> cancel(@PathVariable UUID eventId, @PathVariable UUID registrationId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
 
-        Registration registration = registrationService.cancel(jwtUserDetails.getId(), registrationId);
+        Registration registration = registrationService.cancel(jwtUserDetails.getId(), eventId, registrationId);
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
 
-    @PatchMapping("accounts/registrations/{registrationId}/accept-session-seat")
-    public ResponseEntity<RegistrationDto> acceptSessionSeat(@PathVariable UUID registrationId, Authentication authentication) {
+    @PatchMapping("accounts/events/{eventId}/registrations/{registrationId}/accept")
+    public ResponseEntity<RegistrationDto> acceptSessionSeat(@PathVariable UUID eventId, @PathVariable UUID registrationId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
 
-        Registration registration = registrationService.acceptSessionSeat(jwtUserDetails.getId(), registrationId);
+        Registration registration = registrationService.acceptSessionSeat(jwtUserDetails.getId(), eventId, registrationId);
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
 
-    @PatchMapping("accounts/registrations/{registrationId}/deny-session-seat")
-    public ResponseEntity<RegistrationDto> denySessionSeat(@PathVariable UUID registrationId, Authentication authentication) {
+    @PatchMapping("accounts/events/{eventId}/registrations/{registrationId}/deny")
+    public ResponseEntity<RegistrationDto> denySessionSeat(@PathVariable UUID eventId, @PathVariable UUID registrationId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
 
-        Registration registration = registrationService.denySessionSeat(jwtUserDetails.getId(), registrationId);
+        Registration registration = registrationService.denySessionSeat(jwtUserDetails.getId(), eventId, registrationId);
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
 }

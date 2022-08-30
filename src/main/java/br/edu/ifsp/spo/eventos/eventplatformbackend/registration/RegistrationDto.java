@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class RegistrationDto {
     LocalDateTime date;
     Account account;
     Session session;
+    Event event;
     RegistrationStatus registrationStatus;
     LocalDateTime timeEmailWasSent;
 }

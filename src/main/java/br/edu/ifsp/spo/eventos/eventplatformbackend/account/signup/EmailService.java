@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -61,16 +60,16 @@ public class EmailService {
     }
 
     public void sendEmailToConfirmRegistration(Account account, Registration registration) throws MessagingException {
-        var aceptRegistrationUrl = "localhost:8080/api/v1/accounts/registrations/"+ registration.getId() +"/acept-session-seat";
-        var denyRegistrationUrl = "localhost:8080/api/v1/accounts/registrations/"+ registration.getId() +"/deny-session-seat";
+        var acceptRegistrationUrl = url +"minhas-inscricoes/"+ registration.getEvent() +"/aceitar";
+        var denyRegistrationUrl = url +"minhas-inscricoes/"+ registration.getId() +"/recusar";
 
         var name = account.getName().split(" ")[0];
 
-        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Confirme seu cadastro na sess&atilde;o " + registration.getSession().getTitle() + "</h1>\n" +
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Confirme seu cadastro na " + registration.getSession().getTitle() + "</h1>\n" +
                 "<p>Ol&aacute;, "+ name + ".</p>\n" +
                 "<p>Voc&ecirc; saiu da lista de espera e conseguiu uma vaga.</p>\n" +
                 "<p>Utilize o bot&atilde;o abaixo para confirmar sua presen&ccedil;a.</p>\n" +
-                "<a href=\"" + aceptRegistrationUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">"  +
+                "<a href=\"" + acceptRegistrationUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">"  +
                 "Confirmar" +
                 "</a>" +
                 "<p>Caso n&atilde;o consiga participar, cancele sua inscri&ccedil;&atilde;o acessando o bot&atilde;o abaixo:</p>\n" +

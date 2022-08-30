@@ -2,12 +2,16 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +24,7 @@ public class OrganizerService {
     private OrganizerRepository organizerRepository;
     private AccountRepository accountRepository;
     private EventRepository eventRepository;
+    private final AuditService auditService;
 
     public Organizer create(UUID eventId, OrganizerCreateDto organizerDto) {
         Account account = getAccount(organizerDto.getAccountId());
@@ -38,7 +43,13 @@ public class OrganizerService {
         }
 
         Organizer organizer = new Organizer(organizerDto.getType(), account, event);
-        return organizerRepository.save(organizer);
+        organizerRepository.save(organizer);
+
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.EVENT, String.format("Conta de email %s associada à organização do evento", account.getEmail()), eventId);
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta associada à organização do evento %s", event.getTitle()), account.getId());
+
+        return organizer;
     }
 
     public List<Organizer> findAll(UUID eventId) {

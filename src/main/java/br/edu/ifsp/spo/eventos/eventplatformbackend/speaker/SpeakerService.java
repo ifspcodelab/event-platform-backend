@@ -120,8 +120,7 @@ public class SpeakerService {
         Speaker speaker = getSpeaker(speakerId);
         speakerRepository.deleteById(speakerId);
         log.info("Delete speaker id={}, name={}, email={}", speaker.getId(), speaker.getName(), speaker.getEmail());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SPEAKER, speakerId);
+        auditService.logAdminDelete(ResourceName.SPEAKER, speakerId);
     }
 
     private Speaker getSpeaker(UUID speakerId) {

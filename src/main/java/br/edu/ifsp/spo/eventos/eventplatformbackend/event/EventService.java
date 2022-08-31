@@ -82,7 +82,7 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public void delete(UUID eventId, UUID accountId) {
+    public void delete(UUID eventId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.CANCELED)) {
@@ -103,7 +103,7 @@ public class EventService {
 
         eventRepository.deleteById(eventId);
 
-        auditService.logAdminDelete(accountId, ResourceName.EVENT, eventId);
+        auditService.logAdminDelete(ResourceName.EVENT, eventId);
 
         log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }

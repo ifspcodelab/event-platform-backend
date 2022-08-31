@@ -75,7 +75,7 @@ public class OrganizerService {
         log.info("Organizer event deleted: organizer id={}, event id={}", organizerId, eventId);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.ORGANIZER, organizerId);
+        auditService.logAdminDelete(ResourceName.ORGANIZER, organizerId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.EVENT, String.format("Account of email %s removed from the event's organization", organizer.getAccount().getEmail()), eventId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta removida da organização do evento %s", organizer.getEvent().getTitle()), organizer.getAccount().getId());
     }

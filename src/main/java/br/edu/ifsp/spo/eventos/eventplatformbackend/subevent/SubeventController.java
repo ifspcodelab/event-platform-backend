@@ -50,9 +50,8 @@ public class SubeventController {
     }
 
     @DeleteMapping("{subeventId}")
-    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        subeventService.delete(eventId, subeventId, jwtUserDetails.getId());
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        subeventService.delete(eventId, subeventId);
 
         return ResponseEntity.noContent().build();
     }

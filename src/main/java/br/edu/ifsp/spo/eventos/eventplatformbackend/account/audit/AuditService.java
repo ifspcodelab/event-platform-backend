@@ -64,7 +64,9 @@ public class AuditService {
         log(getAccount(adminId), Action.UPDATE, resourceName, resourceData, resourceId);
     }
 
-    public void logAdminDelete(UUID adminId, ResourceName resourceName, UUID resourceId) {
+    public void logAdminDelete(ResourceName resourceName, UUID resourceId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var adminId = jwtUserDetails.getId();
         log(getAccount(adminId), Action.DELETE, resourceName, resourceId);
     }
 

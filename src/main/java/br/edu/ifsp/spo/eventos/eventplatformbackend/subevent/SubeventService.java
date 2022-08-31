@@ -92,7 +92,7 @@ public class SubeventService {
         return subeventRepository.findAllByEventId(eventId);
     }
 
-    public void delete(UUID eventId, UUID subeventId, UUID accountId) {
+    public void delete(UUID eventId, UUID subeventId) {
         Subevent subevent = getSubevent(subeventId);
         Event event = getEvent(eventId);
 
@@ -112,7 +112,7 @@ public class SubeventService {
 
         subeventRepository.deleteById(subeventId);
         log.info("Subevent deleted: id={}, title={}", subeventId, subevent.getTitle());
-        auditService.logAdminDelete(accountId, ResourceName.SUBEVENT, subeventId);
+        auditService.logAdminDelete(ResourceName.SUBEVENT, subeventId);
     }
 
     public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto, UUID accountId) {

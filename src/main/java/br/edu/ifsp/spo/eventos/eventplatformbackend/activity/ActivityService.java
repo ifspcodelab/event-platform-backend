@@ -508,8 +508,7 @@ public class ActivityService {
 
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.ACTIVITY, activityId);
+        auditService.logAdminDelete(ResourceName.ACTIVITY, activityId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId) {

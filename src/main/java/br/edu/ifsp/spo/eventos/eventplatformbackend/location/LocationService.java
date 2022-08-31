@@ -69,8 +69,7 @@ public class LocationService {
         checkAreaExistsByLocationId(locationId);
         locationRepository.deleteById(locationId);
         log.info("Delete location id={}, name={}", locationId, location.getName());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.LOCATION, locationId);
+        auditService.logAdminDelete(ResourceName.LOCATION, locationId);
     }
 
     private Location getLocation(UUID locationId) {

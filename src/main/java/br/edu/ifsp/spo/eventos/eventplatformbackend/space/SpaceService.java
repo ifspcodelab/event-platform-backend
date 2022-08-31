@@ -83,8 +83,7 @@ public class SpaceService {
         checkIfSpaceIsAssociateToArea(space, areaId);
         spaceRepository.deleteById(spaceId);
         log.info("Delete space id={}, name={}", spaceId, space.getName());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SPACE, spaceId);
+        auditService.logAdminDelete(ResourceName.SPACE, spaceId);
     }
 
     private Area getArea(UUID areaId) {

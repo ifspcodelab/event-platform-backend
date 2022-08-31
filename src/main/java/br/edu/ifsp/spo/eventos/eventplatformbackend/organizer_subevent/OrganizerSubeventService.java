@@ -92,7 +92,7 @@ public class OrganizerSubeventService {
         log.info("Organizer subevent deleted: organizer id={}, subevent id={}", organizerSubeventId, subeventId);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.ORGANIZERSUBEVENT, organizerSubeventId);
+        auditService.logAdminDelete(ResourceName.ORGANIZERSUBEVENT, organizerSubeventId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SUBEVENT, String.format("Account of email %s removed from the subevent's organization", organizerSubevent.getAccount().getEmail()), subeventId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta removida da organização do subevento %s", organizerSubevent.getSubevent().getTitle()), organizerSubevent.getAccount().getId());
     }

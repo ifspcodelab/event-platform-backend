@@ -344,8 +344,7 @@ public class SessionService {
 
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SESSION, sessionId);
+        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
@@ -370,8 +369,7 @@ public class SessionService {
 
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SESSION, sessionId);
+        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
     }
 
     @Transactional

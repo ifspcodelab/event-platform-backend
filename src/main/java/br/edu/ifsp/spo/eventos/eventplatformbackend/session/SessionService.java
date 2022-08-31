@@ -205,11 +205,22 @@ public class SessionService {
             }
         }
 
+        Session currentSession = new Session();
+        currentSession.setTitle(session.getTitle());
+        currentSession.setSeats(session.getSeats());
+        currentSession.setSessionSchedules(session.getSessionSchedules());
+
         session.setTitle(dto.getTitle());
         session.setSeats(dto.getSeats());
         session.setSessionSchedules(sessionSchedule);
 
-        return sessionRepository.save(session);
+        sessionRepository.save(session);
+
+        DiffResult<?> diffResult = currentSession.diff(session);
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SESSION, diffResult.getDiffs().toString(), sessionId);
+
+        return session;
     }
 
     public List<Session> findAll(UUID eventId, UUID activityId) {

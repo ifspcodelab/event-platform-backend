@@ -1,17 +1,16 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Log;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -22,6 +21,7 @@ import java.util.UUID;
 public class AccountController {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
+    private final LogMapper logMapper;
 
     @GetMapping()
     public ResponseEntity<Page<AccountDto>> index(
@@ -57,7 +57,6 @@ public class AccountController {
     public ResponseEntity<AccountDto> show(@RequestHeader("Authorization") String accessToken) {
         Account account = accountService.getUserByAccessToken(accessToken.replace("Bearer ", ""));
         AccountDto accountDto = accountMapper.to(account);
-
         return ResponseEntity.ok(accountDto);
     }
 
@@ -66,6 +65,13 @@ public class AccountController {
         Account account = accountService.update(accessToken.replace("Bearer ", ""), myDataUpdateDto);
 
         return ResponseEntity.ok(accountMapper.to(account));
+    }
+
+    @GetMapping("my-data/logs")
+    public ResponseEntity<List<LogDto>> showLogs(@RequestHeader("Authorization") String accessToken) {
+        Account account = accountService.getUserByAccessToken(accessToken.replace("Bearer ", ""));
+        List<Log> logs = accountService.findAllLogs(account);
+        return ResponseEntity.ok(logMapper.to(logs));
     }
 
     @PatchMapping("my-data/password")

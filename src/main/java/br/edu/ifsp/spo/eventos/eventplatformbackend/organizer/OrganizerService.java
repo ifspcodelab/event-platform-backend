@@ -4,14 +4,15 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,10 +46,9 @@ public class OrganizerService {
         Organizer organizer = new Organizer(organizerDto.getType(), account, event);
         organizerRepository.save(organizer);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(Action.CREATE, ResourceName.ORGANIZER, organizer.getId());
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.EVENT, String.format("Account of email %s associated to the event's organization", account.getEmail()), eventId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta associada à organização do evento %s", event.getTitle()), account.getId());
+        auditService.logAdminUpdate(ResourceName.EVENT, String.format("Account of email %s associated to the event's organization", account.getEmail()), eventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta associada à organização do evento %s", event.getTitle()), account.getId());
 
         return organizer;
     }
@@ -74,10 +74,9 @@ public class OrganizerService {
         organizerRepository.delete(organizer);
         log.info("Organizer event deleted: organizer id={}, event id={}", organizerId, eventId);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdminDelete(ResourceName.ORGANIZER, organizerId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.EVENT, String.format("Account of email %s removed from the event's organization", organizer.getAccount().getEmail()), eventId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta removida da organização do evento %s", organizer.getEvent().getTitle()), organizer.getAccount().getId());
+        auditService.logAdminUpdate(ResourceName.EVENT, String.format("Account of email %s removed from the event's organization", organizer.getAccount().getEmail()), eventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta removida da organização do evento %s", organizer.getEvent().getTitle()), organizer.getAccount().getId());
     }
 
     private Organizer getOrganizer(UUID organizerId) {

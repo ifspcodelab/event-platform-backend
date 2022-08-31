@@ -115,7 +115,7 @@ public class SubeventService {
         auditService.logAdminDelete(ResourceName.SUBEVENT, subeventId);
     }
 
-    public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto, UUID accountId) {
+    public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto) {
         Subevent subevent = getSubevent(subeventId);
         Event event = getEvent(eventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
@@ -187,7 +187,7 @@ public class SubeventService {
 
         DiffResult<?> diffResult = currentSubevent.diff(subevent);
 
-        auditService.logAdminUpdate(accountId, ResourceName.SUBEVENT, diffResult.getDiffs().toString(), subeventId);
+        auditService.logAdminUpdate(ResourceName.SUBEVENT, diffResult.getDiffs().toString(), subeventId);
 
         return subeventRepository.save(subevent);
     }

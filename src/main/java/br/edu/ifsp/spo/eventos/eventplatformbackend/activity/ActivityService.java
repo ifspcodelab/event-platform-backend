@@ -4,19 +4,17 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -158,13 +156,12 @@ public class ActivityService {
 
         DiffResult<?> diffResult = currentActivity.diff(activity);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, diffResult.getDiffs().toString(), activityId);
+        auditService.logAdminUpdate(ResourceName.ACTIVITY, diffResult.getDiffs().toString(), activityId);
 
         return activityRepository.save(activity);
     }
 
-    public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto, UUID accountId) {
+    public Activity update(UUID eventId, UUID subeventId, UUID activityId, ActivityCreateDto dto) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -230,7 +227,7 @@ public class ActivityService {
 
         DiffResult<?> diffResult = currentActivity.diff(activity);
 
-        auditService.logAdminUpdate(accountId, ResourceName.ACTIVITY, diffResult.getDiffs().toString(), activityId);
+        auditService.logAdminUpdate(ResourceName.ACTIVITY, diffResult.getDiffs().toString(), activityId);
 
         return activityRepository.save(activity);
     }
@@ -400,7 +397,6 @@ public class ActivityService {
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(Action.CANCEL, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
@@ -567,10 +563,9 @@ public class ActivityService {
         ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
         activitySpeakerRepository.save(activitySpeaker);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
+        auditService.logAdminUpdate(ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
+        auditService.logAdminUpdate(ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
 
         return activitySpeaker;
     }
@@ -600,10 +595,9 @@ public class ActivityService {
         ActivitySpeaker activitySpeaker = new ActivitySpeaker(activity, speaker);
         activitySpeakerRepository.save(activitySpeaker);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
+        auditService.logAdminUpdate(ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
+        auditService.logAdminUpdate(ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
 
         return activitySpeaker;
     }
@@ -614,8 +608,7 @@ public class ActivityService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         activitySpeakerRepository.deleteById(activitySpeakerId);
         log.info("Activity Speaker deleted: id={}, title={}", activityId, activity.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Activity Speaker of id %s removed", activitySpeakerId), activityId);
+        auditService.logAdminUpdate(ResourceName.ACTIVITY, String.format("Activity Speaker of id %s removed", activitySpeakerId), activityId);
     }
 
     public void deleteActivitySubEventSpeaker(UUID eventId, UUID subeventId, UUID activityId, UUID activitySpeakerId) {
@@ -626,8 +619,7 @@ public class ActivityService {
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         activitySpeakerRepository.deleteById(activitySpeakerId);
         log.info("Activity Speaker deleted: id={}, title={}", activityId, activity.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Activity Speaker of id %s removed", activitySpeakerId), activityId);
+        auditService.logAdminUpdate(ResourceName.ACTIVITY, String.format("Activity Speaker of id %s removed", activitySpeakerId), activityId);
     }
 
     public List<ActivitySpeaker> findAllActivityEventSpeaker(UUID eventId, UUID activityId) {

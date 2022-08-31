@@ -8,7 +8,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRu
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -16,7 +15,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,10 +54,9 @@ public class OrganizerSubeventService {
         OrganizerSubevent organizerSubevent = new OrganizerSubevent(dto.getType(), account, event, subevent);
         organizerSubeventRepository.save(organizerSubevent);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdmin(Action.CREATE, ResourceName.ORGANIZERSUBEVENT, organizerSubevent.getId());
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SUBEVENT, String.format("Account of email %s associated to the subevent's organization", account.getEmail()), subeventId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta associada à organização do subevento %s", subevent.getTitle()), account.getId());
+        auditService.logAdminUpdate(ResourceName.SUBEVENT, String.format("Account of email %s associated to the subevent's organization", account.getEmail()), subeventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta associada à organização do subevento %s", subevent.getTitle()), account.getId());
 
         return organizerSubevent;
     }
@@ -91,10 +88,9 @@ public class OrganizerSubeventService {
         organizerSubeventRepository.delete(organizerSubevent);
         log.info("Organizer subevent deleted: organizer id={}, subevent id={}", organizerSubeventId, subeventId);
 
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         auditService.logAdminDelete(ResourceName.ORGANIZERSUBEVENT, organizerSubeventId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SUBEVENT, String.format("Account of email %s removed from the subevent's organization", organizerSubevent.getAccount().getEmail()), subeventId);
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta removida da organização do subevento %s", organizerSubevent.getSubevent().getTitle()), organizerSubevent.getAccount().getId());
+        auditService.logAdminUpdate(ResourceName.SUBEVENT, String.format("Account of email %s removed from the subevent's organization", organizerSubevent.getAccount().getEmail()), subeventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta removida da organização do subevento %s", organizerSubevent.getSubevent().getTitle()), organizerSubevent.getAccount().getId());
     }
 
     private OrganizerSubevent getOrganizerSubevent(UUID organizerSubeventId) {

@@ -1,11 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -42,9 +40,8 @@ public class ActivityController {
     }
 
     @PutMapping("sub-events/{subeventId}/activities/{activityId}")
-    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Activity activity = activityService.update(eventId, subeventId, activityId, activityCreateDto, jwtUserDetails.getId());
+    public ResponseEntity<ActivityDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody ActivityCreateDto activityCreateDto) {
+        Activity activity = activityService.update(eventId, subeventId, activityId, activityCreateDto);
         ActivityDto activityDto = activityMapper.to(activity);
         return ResponseEntity.ok(activityDto);
     }

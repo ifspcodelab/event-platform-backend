@@ -60,7 +60,9 @@ public class AuditService {
         log(getAccount(adminId), action, resourceName, resourceId);
     }
 
-    public void logAdminUpdate(UUID adminId, ResourceName resourceName, String resourceData, UUID resourceId) {
+    public void logAdminUpdate(ResourceName resourceName, String resourceData, UUID resourceId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var adminId = jwtUserDetails.getId();
         log(getAccount(adminId), Action.UPDATE, resourceName, resourceData, resourceId);
     }
 

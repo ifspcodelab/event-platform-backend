@@ -108,7 +108,7 @@ public class EventService {
         log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }
 
-    public Event update(UUID eventId, EventCreateDto dto, UUID accountId) {
+    public Event update(UUID eventId, EventCreateDto dto) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.PUBLISHED) &&
@@ -189,7 +189,7 @@ public class EventService {
 
         DiffResult<?> diffResult = currentEvent.diff(event);
 
-        auditService.logAdminUpdate(accountId, ResourceName.EVENT, diffResult.getDiffs().toString(), eventId);
+        auditService.logAdminUpdate(ResourceName.EVENT, diffResult.getDiffs().toString(), eventId);
 
         return eventRepository.save(event);
     }
@@ -231,7 +231,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Event publish(UUID eventId, UUID accountId) {
+    public Event publish(UUID eventId) {
         Event event = getEvent(eventId);
 
         if(event.getStatus().equals(EventStatus.DRAFT)) {

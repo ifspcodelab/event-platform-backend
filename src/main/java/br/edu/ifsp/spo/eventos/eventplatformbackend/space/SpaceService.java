@@ -3,13 +3,10 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -58,8 +55,7 @@ public class SpaceService {
         spaceRepository.save(space);
 
         DiffResult<?> diffResult = currentSpace.diff(space);
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPACE, diffResult.getDiffs().toString(), spaceId);
+        auditService.logAdminUpdate(ResourceName.SPACE, diffResult.getDiffs().toString(), spaceId);
 
         return space;
     }

@@ -1,11 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -57,9 +55,8 @@ public class SubeventController {
     }
 
     @PutMapping("{subeventId}")
-    public ResponseEntity<SubeventDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody SubeventCreateDto subeventCreateDto, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Subevent subevent = subeventService.update(eventId, subeventId, subeventCreateDto, jwtUserDetails.getId());
+    public ResponseEntity<SubeventDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody SubeventCreateDto subeventCreateDto) {
+        Subevent subevent = subeventService.update(eventId, subeventId, subeventCreateDto);
 
        return ResponseEntity.ok(subeventMapper.to(subevent));
     }

@@ -6,11 +6,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAl
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceReferentialIntegrityException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,8 +48,7 @@ public class LocationService {
         locationRepository.save(location);
 
         DiffResult<?> diffResult = currentLocation.diff(location);
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.LOCATION, diffResult.getDiffs().toString(), locationId);
+        auditService.logAdminUpdate(ResourceName.LOCATION, diffResult.getDiffs().toString(), locationId);
 
         return location;
     }

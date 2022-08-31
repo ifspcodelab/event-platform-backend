@@ -571,7 +571,9 @@ public class ActivityService {
         activitySpeakerRepository.save(activitySpeaker);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Activity Speaker of id %s added", activitySpeaker.getId()), activityId);
+        auditService.logAdmin(jwtUserDetails.getId(), Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
 
         return activitySpeaker;
     }
@@ -602,7 +604,9 @@ public class ActivityService {
         activitySpeakerRepository.save(activitySpeaker);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Activity Speaker of id %s added", activitySpeaker.getId()), activityId);
+        auditService.logAdmin(jwtUserDetails.getId(), Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
 
         return activitySpeaker;
     }

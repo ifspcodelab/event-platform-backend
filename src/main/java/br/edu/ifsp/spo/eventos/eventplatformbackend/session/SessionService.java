@@ -359,6 +359,8 @@ public class SessionService {
 
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SESSION, sessionId);
     }
 
     @Transactional

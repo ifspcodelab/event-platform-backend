@@ -192,7 +192,7 @@ public class SubeventService {
         return subeventRepository.save(subevent);
     }
 
-    public Subevent cancel(UUID eventId, UUID subeventId, CancellationMessageCreateDto cancellationMessageCreateDto, UUID accountId) {
+    public Subevent cancel(UUID eventId, UUID subeventId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -219,12 +219,12 @@ public class SubeventService {
         subevent.setStatus(EventStatus.CANCELED);
         subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
-        auditService.logAdmin(accountId, Action.CANCEL, ResourceName.SUBEVENT, subeventId);
+        auditService.logAdmin(Action.CANCEL, ResourceName.SUBEVENT, subeventId);
 
         return subeventRepository.save(subevent);
     }
 
-    public Subevent publish(UUID eventId, UUID subeventId, UUID accountId) {
+    public Subevent publish(UUID eventId, UUID subeventId) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -253,11 +253,11 @@ public class SubeventService {
         subevent.setStatus(EventStatus.PUBLISHED);
 
         log.info("Subevent published: id={}, title={}", subeventId, subevent.getTitle());
-        auditService.logAdmin(accountId, Action.PUBLISH, ResourceName.SUBEVENT, subeventId);
+        auditService.logAdmin(Action.PUBLISH, ResourceName.SUBEVENT, subeventId);
         return subeventRepository.save(subevent);
     }
 
-    public Subevent unpublish(UUID eventId, UUID subeventId, UUID accountId) {
+    public Subevent unpublish(UUID eventId, UUID subeventId) {
         Subevent subevent = getSubevent(subeventId);
         checksIfSubeventIsAssociateToEvent(subevent, eventId);
 
@@ -280,7 +280,7 @@ public class SubeventService {
         subevent.setStatus(EventStatus.DRAFT);
 
         log.info("Subevent unpublished: id={}, title={}", subeventId, subevent.getTitle());
-        auditService.logAdmin(accountId, Action.UNPUBLISH, ResourceName.SUBEVENT, subeventId);
+        auditService.logAdmin(Action.UNPUBLISH, ResourceName.SUBEVENT, subeventId);
         return subeventRepository.save(subevent);
     }
 

@@ -64,9 +64,8 @@ public class EventController {
     }
 
     @PatchMapping("{eventId}/cancel")
-    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessage, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Event event = eventService.cancel(eventId, cancellationMessage, jwtUserDetails.getId());
+    public ResponseEntity<EventDto> cancel(@PathVariable UUID eventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessage) {
+        Event event = eventService.cancel(eventId, cancellationMessage);
 
         return ResponseEntity.ok(eventMapper.to(event));
     }
@@ -80,9 +79,8 @@ public class EventController {
     }
 
     @PatchMapping("{eventId}/unpublish")
-    public ResponseEntity<EventDto> unpublish(@PathVariable UUID eventId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Event event = eventService.unpublish(eventId, jwtUserDetails.getId());
+    public ResponseEntity<EventDto> unpublish(@PathVariable UUID eventId) {
+        Event event = eventService.unpublish(eventId);
 
         return ResponseEntity.ok(eventMapper.to(event));
     }

@@ -5,7 +5,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -52,7 +54,9 @@ public class AuditService {
         log(account, Action.DELETE, resourceName, resourceId);
     }
 
-    public void logAdmin(UUID adminId, Action action, ResourceName resourceName, UUID resourceId) {
+    public void logAdmin(Action action, ResourceName resourceName, UUID resourceId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var adminId = jwtUserDetails.getId();
         log(getAccount(adminId), action, resourceName, resourceId);
     }
 

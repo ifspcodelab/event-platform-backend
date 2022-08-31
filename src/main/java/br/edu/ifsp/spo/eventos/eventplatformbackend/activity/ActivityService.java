@@ -258,12 +258,11 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.PUBLISHED);
         log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdmin(jwtUserDetails.getId(), Action.PUBLISH, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.PUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
-    public Activity publish(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {
+    public Activity publish(UUID eventId, UUID subeventId, UUID activityId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -296,7 +295,7 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.PUBLISHED);
         log.info("Activity published: id={}, title={}", activityId, activity.getTitle());
-        auditService.logAdmin(accountId, Action.PUBLISH, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.PUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -325,12 +324,11 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.DRAFT);
         log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdmin(jwtUserDetails.getId(), Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
-    public Activity unpublish(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {
+    public Activity unpublish(UUID eventId, UUID subeventId, UUID activityId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -365,7 +363,7 @@ public class ActivityService {
 
         activity.setStatus(EventStatus.DRAFT);
         log.info("Activity unpublished: id={}, title={}", activityId, activity.getTitle());
-        auditService.logAdmin(accountId, Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.UNPUBLISH, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -403,11 +401,11 @@ public class ActivityService {
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdmin(jwtUserDetails.getId(), Action.CANCEL, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.CANCEL, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
-    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto, UUID accountId) {
+    public Activity cancel(UUID eventId, UUID subeventId, UUID activityId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -450,7 +448,7 @@ public class ActivityService {
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
-        auditService.logAdmin(accountId, Action.CANCEL, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.CANCEL, ResourceName.ACTIVITY, activityId);
         return activityRepository.save(activity);
     }
 
@@ -514,7 +512,7 @@ public class ActivityService {
         auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.ACTIVITY, activityId);
     }
 
-    public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID accountId) {
+    public void delete(UUID eventId, UUID subeventId, UUID activityId) {
         Event event = getEvent(eventId);
         Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
@@ -547,7 +545,7 @@ public class ActivityService {
 
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
-        auditService.logAdmin(accountId, Action.DELETE, ResourceName.ACTIVITY, activityId);
+        auditService.logAdmin(Action.DELETE, ResourceName.ACTIVITY, activityId);
     }
 
     public ActivitySpeaker addActivityEventSpeaker(UUID eventId, UUID activityId, ActivitySpeakerCreateDto dto) {
@@ -571,7 +569,7 @@ public class ActivityService {
         activitySpeakerRepository.save(activitySpeaker);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdmin(jwtUserDetails.getId(), Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
+        auditService.logAdmin(Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
 
@@ -604,7 +602,7 @@ public class ActivityService {
         activitySpeakerRepository.save(activitySpeaker);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdmin(jwtUserDetails.getId(), Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
+        auditService.logAdmin(Action.CREATE, ResourceName.ACTIVITY_SPEAKER, activitySpeaker.getId());
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACTIVITY, String.format("Ministrante de email %s adicionado", speaker.getEmail()), activityId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SPEAKER, String.format("Ministrante da atividade %s", activity.getTitle()), speaker.getId());
 

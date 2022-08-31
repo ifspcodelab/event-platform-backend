@@ -3,7 +3,6 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.webresources.JarWarResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -57,9 +56,8 @@ public class ActivityController {
     }
 
     @PatchMapping("sub-events/{subeventId}/activities/{activityId}/publish")
-    public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Activity activity = activityService.publish(eventId, subeventId, activityId, jwtUserDetails.getId());
+    public ResponseEntity<ActivityDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.publish(eventId, subeventId, activityId);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
@@ -70,9 +68,8 @@ public class ActivityController {
     }
 
     @PatchMapping("sub-events/{subeventId}/activities/{activityId}/unpublish")
-    public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Activity activity = activityService.unpublish(eventId, subeventId, activityId, jwtUserDetails.getId());
+    public ResponseEntity<ActivityDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        Activity activity = activityService.unpublish(eventId, subeventId, activityId);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
@@ -83,9 +80,8 @@ public class ActivityController {
     }
 
     @PatchMapping("sub-events/{subeventId}/activities/{activityId}/cancel")
-    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Activity activity = activityService.cancel(eventId, subeventId, activityId, cancellationMessageCreateDto, jwtUserDetails.getId());
+    public ResponseEntity<ActivityDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Activity activity = activityService.cancel(eventId, subeventId, activityId, cancellationMessageCreateDto);
         return ResponseEntity.ok(activityMapper.to(activity));
     }
 
@@ -134,9 +130,8 @@ public class ActivityController {
     }
 
     @DeleteMapping("sub-events/{subeventId}/activities/{activityId}")
-    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        activityService.delete(eventId, subeventId, activityId, jwtUserDetails.getId());
+    public ResponseEntity<Void> delete(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
+        activityService.delete(eventId, subeventId, activityId);
         return ResponseEntity.noContent().build();
     }
 

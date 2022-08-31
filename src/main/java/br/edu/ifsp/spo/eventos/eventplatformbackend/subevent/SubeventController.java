@@ -66,25 +66,22 @@ public class SubeventController {
     }
 
     @PatchMapping("{subeventId}/cancel")
-    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Subevent subevent = subeventService.cancel(eventId, subeventId, cancellationMessageCreateDto, jwtUserDetails.getId());
+    public ResponseEntity<SubeventDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
+        Subevent subevent = subeventService.cancel(eventId, subeventId, cancellationMessageCreateDto);
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }
 
     @PatchMapping("{subeventId}/publish")
-    public ResponseEntity<SubeventDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Subevent subevent = subeventService.publish(eventId, subeventId, jwtUserDetails.getId());
+    public ResponseEntity<SubeventDto> publish(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        Subevent subevent = subeventService.publish(eventId, subeventId);
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }
 
     @PatchMapping("{subeventId}/unpublish")
-    public ResponseEntity<SubeventDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId, Authentication authentication) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        Subevent subevent = subeventService.unpublish(eventId, subeventId, jwtUserDetails.getId());
+    public ResponseEntity<SubeventDto> unpublish(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        Subevent subevent = subeventService.unpublish(eventId, subeventId);
 
         return ResponseEntity.ok(subeventMapper.to(subevent));
     }

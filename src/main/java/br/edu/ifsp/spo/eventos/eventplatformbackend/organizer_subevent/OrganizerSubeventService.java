@@ -57,7 +57,7 @@ public class OrganizerSubeventService {
         organizerSubeventRepository.save(organizerSubevent);
 
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        auditService.logAdmin(jwtUserDetails.getId(), Action.CREATE, ResourceName.ORGANIZERSUBEVENT, organizerSubevent.getId());
+        auditService.logAdmin(Action.CREATE, ResourceName.ORGANIZERSUBEVENT, organizerSubevent.getId());
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SUBEVENT, String.format("Account of email %s associated to the subevent's organization", account.getEmail()), subeventId);
         auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.ACCOUNT, String.format("Conta associada à organização do subevento %s", subevent.getTitle()), account.getId());
 

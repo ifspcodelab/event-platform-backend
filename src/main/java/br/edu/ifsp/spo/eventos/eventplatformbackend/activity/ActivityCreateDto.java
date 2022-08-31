@@ -12,14 +12,14 @@ import javax.validation.constraints.Size;
 public class ActivityCreateDto {
     @NotNull
     @NotBlank
-    @Size(min = 5, max = 100)
+    @Size(min = 5, max = 200)
     String title;
     @NotNull
     @NotBlank
     String slug;
     @NotNull
     @NotBlank
-    @Size(min = 100, max = 5000)
+    @Size(min = 50, max = 5000)
     String description;
     @Valid
     @NotNull

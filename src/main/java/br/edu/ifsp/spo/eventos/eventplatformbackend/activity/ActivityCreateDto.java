@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Slug;
 import lombok.Value;
 
 import javax.validation.Valid;
@@ -16,6 +17,7 @@ public class ActivityCreateDto {
     String title;
     @NotNull
     @NotBlank
+    @Slug
     String slug;
     @NotNull
     @NotBlank

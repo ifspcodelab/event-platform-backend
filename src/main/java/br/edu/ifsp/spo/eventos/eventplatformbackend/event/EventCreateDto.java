@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Slug;
 import lombok.Value;
 import org.hibernate.validator.constraints.URL;
 import javax.validation.Valid;
@@ -14,6 +15,7 @@ public class EventCreateDto {
     String title;
     @NotNull
     @NotBlank
+    @Slug
     String slug;
     @NotNull
     @NotBlank

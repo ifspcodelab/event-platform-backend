@@ -20,4 +20,8 @@ public class LocationCreateDto {
     public String getName() {
         return name.strip();
     }
+
+    public String getAddress() {
+        return address.strip();
+    }
 }

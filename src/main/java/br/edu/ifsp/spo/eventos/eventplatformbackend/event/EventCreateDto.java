@@ -38,6 +38,18 @@ public class EventCreateDto {
     @URL
     String biggerImage;
 
+    public String getTitle() {
+        return title.strip();
+    }
+
+    public String getSlug() {
+        return slug.strip();
+    }
+
+    public String getSummary() {
+        return summary.strip();
+    }
+
     public String getPresentation() {
         return presentation.strip();
     }

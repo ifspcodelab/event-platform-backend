@@ -35,6 +35,14 @@ public class ActivityCreateDto {
     @Min(value = 5)
     Integer setupTime;
 
+    public String getTitle() {
+        return title.strip();
+    }
+
+    public String getSlug() {
+        return slug.strip();
+    }
+
     public String getDescription() {
         return description.strip();
     }

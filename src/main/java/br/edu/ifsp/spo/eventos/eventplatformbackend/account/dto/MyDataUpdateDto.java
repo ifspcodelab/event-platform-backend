@@ -28,4 +28,8 @@ public class MyDataUpdateDto {
     public String getName() {
         return name.strip();
     }
+
+    public String getCpf() {
+        return cpf.replace(".","").replace("-","");
+    }
 }

@@ -41,7 +41,8 @@ public class SpeakerService {
         Optional<Account> optionalAccount = accountRepository.findByCpf(dto.getCpf());
         if(optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
-            speaker.setAccount(account); speakerRepository.save(speaker);
+            speaker.setAccount(account);
+            speakerRepository.save(speaker);
 
             log.info(
                 "Speaker with name={}, email={} and accountId={} was created",

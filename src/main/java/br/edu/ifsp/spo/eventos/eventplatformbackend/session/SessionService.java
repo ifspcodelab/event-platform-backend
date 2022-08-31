@@ -1,11 +1,13 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
@@ -13,6 +15,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -32,6 +36,7 @@ public class SessionService {
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
     private final SpaceRepository spaceRepository;
+    private final AuditService auditService;
 
     public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
         Activity activity = getActivity(activityId);
@@ -137,11 +142,22 @@ public class SessionService {
             }
         }
 
+        Session currentSession = new Session();
+        currentSession.setTitle(session.getTitle());
+        currentSession.setSeats(session.getSeats());
+        currentSession.setSessionSchedules(session.getSessionSchedules());
+
         session.setTitle(dto.getTitle());
         session.setSeats(dto.getSeats());
         session.setSessionSchedules(sessionSchedule);
 
-        return sessionRepository.save(session);
+        sessionRepository.save(session);
+
+        DiffResult<?> diffResult = currentSession.diff(session);
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminUpdate(jwtUserDetails.getId(), ResourceName.SESSION, diffResult.getDiffs().toString(), sessionId);
+
+        return session;
     }
 
     public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
@@ -317,6 +333,8 @@ public class SessionService {
 
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        auditService.logAdminDelete(jwtUserDetails.getId(), ResourceName.SESSION, sessionId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {

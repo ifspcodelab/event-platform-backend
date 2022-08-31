@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.util.List;
@@ -16,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Session {
+public class Session implements Diffable<Session> {
     @Id
     private UUID id;
     private String title;
@@ -37,5 +41,14 @@ public class Session {
         this.activity = activity;
         this.sessionSchedules = sessionSchedules;
         this.sessionSchedules.forEach(sessionSchedule -> sessionSchedule.setSession(this));
+    }
+
+    @Override
+    public DiffResult<Session> diff(Session updatedSession) {
+        return new DiffBuilder<>(this, updatedSession, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedSession.title)
+                .append("Número de vagas", this.seats, updatedSession.seats)
+                .append("Horários da sessão", this.sessionSchedules, updatedSession.sessionSchedules)
+                .build();
     }
 }

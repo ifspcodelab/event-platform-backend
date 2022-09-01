@@ -120,10 +120,6 @@ public class RegistrationService {
     }
 
     public Account resendEmailRegistration(String resendEmail) {
-        if (!accountRepository.existsByEmail(resendEmail)) {
-            throw new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail);
-        }
-
         Account account = accountRepository.findByEmail(resendEmail)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail));
 

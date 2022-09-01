@@ -4,14 +4,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionExceptionType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionToken;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionTokenRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +25,10 @@ import java.util.UUID;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
-    private final AccountDeletionTokenRepository accountDeletionTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
     private final EmailService emailService;
-    private final AccountConfig accountConfig;
 
     public Page<Account> findAll(Pageable pageable) {
         return accountRepository.findAll(pageable);
@@ -170,7 +165,7 @@ public class AccountService {
             emailService.sendAccountDeletionEmailToAdmin(account);
             log.info("Account deletion email send to admin for email= {}", account);
         } catch (MessagingException ex) {
-            log.error("Error when trying to send account deletion e-mail to admin for {}", account, ex);
+            log.error("Error when trying to send account deletion e-mail to admin for {}", account.getEmail(), ex);
         }
 
     }

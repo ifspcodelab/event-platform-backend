@@ -1,7 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionToken;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +9,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,9 @@ public class EmailService {
 
     @Value("${support.mail}")
     private String supportMail;
+
+    @Value("${support.name}")
+    private String supportName;
 
     @Value("${frontend.url}/")
     private String url;
@@ -69,6 +73,13 @@ public class EmailService {
         message.setFrom(supportMail);
         message.setTo(email);
 
+        try {
+            message.setFrom(new InternetAddress(supportMail, supportName));
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+            message.setFrom(supportMail);
+        }
+
         mailSender.send(mail);
     }
 
@@ -95,7 +106,7 @@ public class EmailService {
 
         var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Pedido de exclus&atilde;o de conta</h1>\n" +
                 "<p>O(A) usu&aacute;rio(a) , "+ name + " solicitou a exclusão de sua conta.</p>\n" +
-                "<p>Informações do usuário:</p>\n" +
+                "<p>Informações do(a) usuário(a):</p>\n" +
                 "<p>Email: "+ email + ".</p>\n" +
                 "<p>Id: "+ id + ".</p>\n" +
                 "<p>Cpf: "+ cpf + ".</p>\n" +

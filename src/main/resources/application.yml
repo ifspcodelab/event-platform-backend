@@ -32,6 +32,7 @@ spring:
 
 support:
   mail: ${SUPPORT_EMAIL}
+  name: ${SUPPORT_NAME:Eventos IFSP SPO}
 
 frontend:
   url: ${FRONTEND_URL:http://localhost:4200}

@@ -163,6 +163,7 @@ public class AccountService {
 
         try {
             emailService.sendAccountDeletionEmailToAdmin(account);
+            account.setStatus(AccountStatus.WAITING_FOR_EXCLUSION);
             log.info("Account deletion email send to admin for email= {}", account);
         } catch (MessagingException ex) {
             log.error("Error when trying to send account deletion e-mail to admin for {}", account.getEmail(), ex);

@@ -190,10 +190,18 @@ public class ExceptionHandlerApp {
         }
         if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.INCORRECT_PASSWORD)) {
             problemDetail = new ProblemDetail(
-                    String.format("Incorrect email or password", ex.getEmail()),
+                    "Incorrect email or password",
                     List.of()
             );
         }
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_EMAIL)) {
+            problemDetail = new ProblemDetail(
+                    "Incorrect email or password",
+                    List.of()
+            );
+        }
+
+
         log.warn(String.format(ex.getAuthenticationExceptionType().getMessage(), ex.getEmail()));
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }

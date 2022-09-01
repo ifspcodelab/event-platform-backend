@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Log;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,6 +33,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
     private final AuditService auditService;
+    private final LogRepository logRepository;
 
     public Page<Account> findAll(Pageable pageable) {
         return accountRepository.findAll(pageable);
@@ -141,5 +145,10 @@ public class AccountService {
         log.info("Password reset at My Data: account with email={} updated their password", account.getEmail());
 
         auditService.logUpdate(account, ResourceName.ACCOUNT, "Alteração de senha via edição em 'Meus dados'", accountId);
+    }
+
+    public List<Log> findAllLogsByAccountId(UUID accountId) {
+        //TODO: refactor to get logs related to login, logout and account edits
+        return logRepository.findAllByAccountId(accountId);
     }
 }

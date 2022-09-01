@@ -1,5 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Log;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
@@ -14,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -24,6 +28,7 @@ import java.util.UUID;
 public class AccountController {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
+    private final LogMapper logMapper;
 
     @GetMapping()
     public ResponseEntity<Page<AccountDto>> index(
@@ -79,5 +84,14 @@ public class AccountController {
         accountService.updatePassword(jwtUserDetails, myDataUpdatePasswordDto);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("my-data/logs")
+    public ResponseEntity<List<LogDto>> index(Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        var accountId = jwtUserDetails.getId();
+        List<Log> logs = accountService.findAllLogsByAccountId(accountId);
+
+        return ResponseEntity.ok(logMapper.to(logs));
     }
 }

@@ -4,7 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.EmailService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import lombok.AllArgsConstructor;

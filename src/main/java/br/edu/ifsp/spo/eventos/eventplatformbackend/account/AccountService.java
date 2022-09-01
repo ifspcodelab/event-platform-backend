@@ -159,37 +159,20 @@ public class AccountService {
             throw new AccountDeletionException(AccountDeletionExceptionType.INCORRECT_PASSWORD ,account.getEmail());
         }
 
-        AccountDeletionToken accountDeletionToken =
-                new AccountDeletionToken(account, accountConfig.getAccountDeletionTokenExpiresIn());
-        this.accountDeletionTokenRepository.save(accountDeletionToken);
-
         try {
-            emailService.sendAccountDeletionEmail(account, accountDeletionToken);
+            emailService.sendAccountDeletionEmail(account);
             log.info("Account deletion email send to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send account deletion e-mail to {}",account.getEmail(), ex);
         }
-    }
-
-    public void sendAccountDeletionRequestToAdmin(UUID token){
-
-        AccountDeletionToken accountDeletionToken = this.accountDeletionTokenRepository.findByToken(token).orElseThrow(
-                () -> new ResourceNotFoundException(ResourceName.DELETION_TOKEN, token)
-        );
-
-        if(accountDeletionToken.isExpired()){
-            throw new AccountDeletionException(
-                    AccountDeletionExceptionType.ACCOUNT_DELETION_TOKEN_EXPIRED,
-                    accountDeletionToken.getAccount().getEmail());
-        }
 
         try {
-            emailService.sendAccountDeletionEmailToAdmin(accountDeletionToken.getAccount());
-            emailService.sendAccountDeletionConfirmationEmail(accountDeletionToken.getAccount());
-            log.info("Account deletion email send to admin for email= {}", accountDeletionToken.getAccount().getEmail());
+            emailService.sendAccountDeletionEmailToAdmin(account);
+            log.info("Account deletion email send to admin for email= {}", account);
         } catch (MessagingException ex) {
-            log.error("Error when trying to send account deletion e-mail to admin for {}",accountDeletionToken.getAccount().getEmail(), ex);
+            log.error("Error when trying to send account deletion e-mail to admin for {}", account, ex);
         }
-        accountDeletionTokenRepository.delete(accountDeletionToken);
+
     }
+
 }

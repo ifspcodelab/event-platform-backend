@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
@@ -34,8 +35,16 @@ public class AuthenticationService {
         Account account = getAccount(loginCreateDto.getEmail());
 
 
-        if (!account.getVerified()) {
+        if (account.getStatus().equals(AccountStatus.UNVERIFIED)) {
             throw new AuthenticationException(AuthenticationExceptionType.UNVERIFIED_ACCOUNT, account.getEmail());
+        }
+
+        if (account.getStatus().equals(AccountStatus.BLOCKED_BY_ADMIN)) {
+            throw new AuthenticationException(AuthenticationExceptionType.BLOCKED_BY_ADMIN_ACCOUNT, account.getEmail());
+        }
+
+        if (account.getStatus().equals(AccountStatus.WAITING_FOR_EXCLUSION)) {
+            throw new AuthenticationException(AuthenticationExceptionType.WAITING_FOR_EXCLUSION_ACCOUNT, account.getEmail());
         }
 
         if (!passwordEncoder.matches(loginCreateDto.getPassword(), account.getPassword())) {

@@ -172,7 +172,19 @@ public class ExceptionHandlerApp {
         ProblemDetail problemDetail = new ProblemDetail("", List.of());
         if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.UNVERIFIED_ACCOUNT)) {
             problemDetail = new ProblemDetail(
-                    String.format("The account for this email is not yet verified"),
+                    "The account for this email is not yet verified",
+                    List.of()
+            );
+        }
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.BLOCKED_BY_ADMIN_ACCOUNT)) {
+            problemDetail = new ProblemDetail(
+                    "The account for this email is blocked by admin",
+                    List.of()
+            );
+        }
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.WAITING_FOR_EXCLUSION_ACCOUNT)) {
+            problemDetail = new ProblemDetail(
+                    "The account for this email is waiting for exclusion",
                     List.of()
             );
         }

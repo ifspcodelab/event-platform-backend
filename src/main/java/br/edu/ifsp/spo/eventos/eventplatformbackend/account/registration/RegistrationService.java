@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
@@ -103,7 +104,7 @@ public class RegistrationService {
         }
 
         Account account = verificationToken.getAccount();
-        account.setVerified(true);
+        account.setStatus(AccountStatus.VERIFIED);
         accountRepository.save(account);
         log.info("Account with e-mail {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
@@ -111,8 +112,8 @@ public class RegistrationService {
         return account;
     }
 
-    public List<Account> search(String name, Boolean verified) {
-        List<Account> accounts = accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
+    public List<Account> search(String name, AccountStatus status) {
+        List<Account> accounts = accountRepository.findByNameStartingWithIgnoreCaseAndStatus(name.trim(), status);
         return accounts;
     }
 }

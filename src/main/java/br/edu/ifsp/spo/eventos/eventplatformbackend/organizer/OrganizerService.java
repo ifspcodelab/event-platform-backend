@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
@@ -29,7 +30,7 @@ public class OrganizerService {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_CREATE_ALREADY_ASSOCIATED);
         }
 
-        if(!account.getVerified()) {
+        if(account.getStatus().equals(AccountStatus.UNVERIFIED)) {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_CREATE_WITH_ACCOUNT_UNVERIFIED);
         }
 

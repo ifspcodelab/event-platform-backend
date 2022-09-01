@@ -17,7 +17,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByCpfAndIdNot(String cpf, UUID accountId);
     Optional<Account> findByEmail(String email);
     Optional<Account> findByCpf(String cpf);
-    List<Account> findByNameStartingWithIgnoreCaseAndVerified(String name, boolean verified);
+    List<Account> findByNameStartingWithIgnoreCaseAndStatus(String name, AccountStatus status);
     @Query("SELECT a FROM Account a WHERE UPPER(a.name) LIKE CONCAT('%',UPPER(:name),'%')")
     Page<Account> findUsersWithPartOfName(Pageable pageable, String name);
     @Query("SELECT a FROM Account a WHERE UPPER(a.email) LIKE CONCAT('%',UPPER(:email),'%')")

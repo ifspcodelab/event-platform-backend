@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountMapper;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,7 @@ public class RegistrationController {
 
     @GetMapping("searchName/{name}")
     public ResponseEntity<List<AccountDto>> findByName(@PathVariable String name) {
-        List<Account> results = registrationService.search(name, true);
+        List<Account> results = registrationService.search(name, AccountStatus.VERIFIED);
         return ResponseEntity.ok(accountMapper.to(results));
     }
 }

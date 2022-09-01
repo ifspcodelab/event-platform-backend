@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
@@ -40,7 +41,7 @@ public class PasswordResetService {
                         new PasswordResetException(PasswordResetExceptionType.NONEXISTENT_ACCOUNT, dto.getEmail())
                 );
 
-        if (!account.getVerified()){
+        if (account.getStatus().equals(AccountStatus.UNVERIFIED)){
             throw new PasswordResetException(PasswordResetExceptionType.UNVERIFIED_ACCOUNT, dto.getEmail());
         }
 

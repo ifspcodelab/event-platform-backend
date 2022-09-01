@@ -65,7 +65,7 @@ public class AccountService {
         account.setEmail(dto.getEmail());
         account.setCpf(dto.getCpf());
         account.setRole(AccountRole.valueOf(dto.getRole()));
-        account.setVerified(dto.getVerified());
+        account.setStatus(AccountStatus.valueOf(dto.getStatus()));
         log.info("Account with name={} and email={} was updated", account.getName(), account.getEmail());
 
         return accountRepository.save(account);

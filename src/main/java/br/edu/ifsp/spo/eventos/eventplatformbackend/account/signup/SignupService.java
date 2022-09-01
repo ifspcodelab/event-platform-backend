@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RegistrationService {
+public class SignupService {
     private final AccountRepository accountRepository;
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
@@ -85,11 +85,11 @@ public class RegistrationService {
 
     public Account verify(UUID token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN));
+                .orElseThrow(() -> new SignupException(SignupRuleType.NONEXISTENT_TOKEN));
 
         if (verificationToken.getExpiresIn().isBefore(Instant.now())) {
-            throw new RegistrationException(
-                RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
+            throw new SignupException(
+                SignupRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
             );
         }
 
@@ -114,8 +114,8 @@ public class RegistrationService {
             logRepository.deleteAllByAccount(account);
             verificationTokenRepository.delete(token);
             accountRepository.delete(account);
-            log.info("Verification token: token {} - removed by registration scheduler", token.getToken());
-            log.info("Account: id {}, email {} - removed by registration scheduler", account.getId(), account.getEmail());
+            log.info("Verification token: token {} - removed by signup scheduler", token.getToken());
+            log.info("Account: id {}, email {} - removed by signup scheduler", account.getId(), account.getEmail());
         });
     }
 
@@ -124,11 +124,11 @@ public class RegistrationService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail));
 
         if (!verificationTokenRepository.existsByAccount(account)) {
-            throw new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN, resendEmail);
+            throw new SignupException(SignupRuleType.NONEXISTENT_TOKEN, resendEmail);
         }
 
         if (!verificationTokenRepository.existsByExpiresInAfter(Instant.now())) {
-            throw new RegistrationException(RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
+            throw new SignupException(SignupRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
         }
 
         if (!account.getRegistrationTimestamp().plusSeconds(60).isBefore(Instant.now())) {

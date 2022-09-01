@@ -24,9 +24,9 @@ public class WebSecurityConfigure {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         var accountOpenPaths = List.of(
-            "/api/v1/accounts/registration",
-            "/api/v1/accounts/registration/resend-email",
-            "/api/v1/accounts/registration/verification/{token}",
+            "/api/v1/accounts/signup",
+            "/api/v1/accounts/signup/resend-email",
+            "/api/v1/accounts/signup/verification/{token}",
             "/api/v1/accounts/login",
             "/api/v1/accounts/refresh-token-rotation",
             "/api/v1/accounts/password/forgot",

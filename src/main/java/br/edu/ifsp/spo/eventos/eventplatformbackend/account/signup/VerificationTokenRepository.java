@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import org.springframework.data.jpa.repository.JpaRepository;

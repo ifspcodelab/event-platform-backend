@@ -9,7 +9,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,9 @@ public class EmailService {
 
     @Value("${support.mail}")
     private String supportMail;
+
+    @Value("${support.name}")
+    private String supportName;
 
     @Value("${frontend.url}/")
     private String url;
@@ -60,8 +65,8 @@ public class EmailService {
     }
 
     public void sendEmailToConfirmRegistration(Account account, Registration registration) throws MessagingException {
-        var acceptRegistrationUrl = url +"minhas-inscricoes/"+ registration.getEvent() +"/aceitar";
-        var denyRegistrationUrl = url +"minhas-inscricoes/"+ registration.getId() +"/recusar";
+        var acceptRegistrationUrl = url +"minhas-inscricoes/aceitar-vaga/"+ registration.getId();
+        var denyRegistrationUrl = url +"minhas-inscricoes/recusar-vaga/"+ registration.getId();
 
         var name = account.getName().split(" ")[0];
 
@@ -88,8 +93,14 @@ public class EmailService {
         MimeMessageHelper message = new MimeMessageHelper(mail);
         message.setSubject(subject);
         message.setText(content, true);
-        message.setFrom(supportMail);
         message.setTo(email);
+
+        try {
+            message.setFrom(new InternetAddress(supportMail, supportName));
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+            message.setFrom(supportMail);
+        }
 
         mailSender.send(mail);
     }

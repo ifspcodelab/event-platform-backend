@@ -15,7 +15,6 @@ public class RegistrationDto {
     LocalDateTime date;
     Account account;
     Session session;
-    Event event;
     RegistrationStatus registrationStatus;
     LocalDateTime timeEmailWasSent;
 }

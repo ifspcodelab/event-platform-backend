@@ -12,6 +12,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAl
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,28 +81,22 @@ public class AccountService {
                 () -> new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_ID, id.toString())
         );
     }
-    
-    public Account getUserByAccessToken(String accessToken) {
-        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
-        UUID accountId = UUID.fromString(decodedToken.getSubject());
 
-        Account account = getAccount(accountId);
-
-        return account;
+    public Account getUserByAccessToken(UUID accountId) {
+        return getAccount(accountId);
     }
 
-    public Account update(String accessToken, MyDataUpdateDto myDataUpdateDto) {
-        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+    public Account update(JwtUserDetails jwtUserDetails, MyDataUpdateDto myDataUpdateDto) {
+        var accountId = jwtUserDetails.getId();
+        var accountEmail = jwtUserDetails.getUsername();
 
         if (!recaptchaService.isValid(myDataUpdateDto.getUserRecaptcha())) {
-            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, accountEmail);
         }
 
-        if (accountRepository.existsByCpfAndIdNot(myDataUpdateDto.getCpf(), UUID.fromString(decodedToken.getSubject()))) {
+        if (accountRepository.existsByCpfAndIdNot(myDataUpdateDto.getCpf(), accountId)) {
             throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "CPF", myDataUpdateDto.getCpf());
         }
-
-        UUID accountId = UUID.fromString(decodedToken.getSubject());
 
         Account account = getAccount(accountId);
 
@@ -125,18 +120,18 @@ public class AccountService {
         return account;
     }
 
-    public void updatePassword(String accessToken, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
-        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
+    public void updatePassword(JwtUserDetails jwtUserDetails, MyDataUpdatePasswordDto myDataUpdatePasswordDto) {
+        var accountId = jwtUserDetails.getId();
+        var accountEmail = jwtUserDetails.getUsername();
 
         if (!recaptchaService.isValid(myDataUpdatePasswordDto.getUserRecaptcha())) {
-            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, decodedToken.getClaim("email").toString());
+            throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, accountEmail);
         }
 
         if (myDataUpdatePasswordDto.getCurrentPassword().equals(myDataUpdatePasswordDto.getNewPassword())) {
-            throw new MyDataResetPasswordException(MyDataResetPasswordExceptionType.SAME_PASSWORD, decodedToken.getClaim("email").toString());
+            throw new MyDataResetPasswordException(MyDataResetPasswordExceptionType.SAME_PASSWORD, accountEmail);
         }
 
-        UUID accountId = UUID.fromString(decodedToken.getSubject());
         Account account = getAccount(accountId);
 
         if (!passwordEncoder.matches(myDataUpdatePasswordDto.getCurrentPassword(), account.getPassword())) {

@@ -88,9 +88,9 @@ public class RegistrationController {
     }
 
     @GetMapping("accounts/registrations")
-    public ResponseEntity<List<RegistrationDto>> index(@PathVariable UUID eventId, Authentication authentication) {
+    public ResponseEntity<List<RegistrationDto>> index(Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
-        List<Registration> registrations = registrationService.findAll(eventId, jwtUserDetails.getId());
+        List<Registration> registrations = registrationService.findAll(jwtUserDetails.getId());
 
         return ResponseEntity.ok(registrationMapper.to(registrations));
     }

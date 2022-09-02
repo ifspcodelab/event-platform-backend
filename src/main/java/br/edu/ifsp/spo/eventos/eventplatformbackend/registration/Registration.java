@@ -28,6 +28,7 @@ public class Registration {
     @Enumerated(EnumType.STRING)
     private RegistrationStatus registrationStatus;
     private LocalDateTime timeEmailWasSent;
+    private LocalDateTime emailReplyDate;
 
     public Registration(
         Account account,

@@ -111,14 +111,19 @@ public enum BusinessRuleType {
     REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT("Inscrição não está associada à conta"),
     REGISTRATION_IS_NOT_ASSOCIATED_TO_EVENT("Inscrição não está associada ao evento"),
     REGISTRATION_CREATE_ALREADY_EXISTS("Não é possível criar uma inscrição novamente em uma mesma sessão"),
+    REGISTRATION_CREATE_WITH_ACTIVITY_DOES_NOT_NEED_REGISTRATION("Não é possível criar uma inscrição, pois a atividade não precisa de inscrições"),
     REGISTRATION_CREATE_WITH_CANCELED_SESSION("Não é possível criar uma inscrição em uma sessão cancelada"),
-    REGISTRATION_CREATE_WITH_ACTIVITY_NOT_PUBLISHED("Não é possível criar uma inscrição em uma sessão com atividade em rascunho ou cancelada"),
+    REGISTRATION_CREATE_WITH_ACTIVITY_CANCELED("Não é possível criar uma inscrição em uma sessão com atividade cancelada"),
     REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD("Não é possível criar uma inscrição fora do período de inscrições do evento"),
     REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT("Não é possível criar uma inscrição, pois já existe uma inscrição confirmada ou esperando confirmação para outra sessão neste mesmo horário"),
     REGISTRATION_CREATE_WITH_NO_SEATS_AVAILABLE("Não é possível criar uma inscrição confirmada em uma sessão sem vagas abertas"),
     REGISTRATION_CREATE_IN_WAIT_LIST_WITH_SEATS_VAILABLE("Não é possível criar uma inscrição na lista de espera em uma sessão que ainda possui vagas abertas"),
     REGISTRATION_CREATE_WITH_EXISTING_WAIT_LIST("Não é possível criar uma inscrição confirmada, pois há pessoas na lista de espera"),
-    REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já pessou do prazo de 12 horas");
+    REGISTRATION_CREATE_WITH_SESSION_STARTED("Não é possível criar uma inscrição em uma sessão que já tenha iniciado"),
+    REGISTRATION_CREATE_ACCOUNT_ALREADY_HAS_REGISTRATION_IN_ACTIVITY("Não é possível criar mais de uma inscrição em uma mesma atividade"),
+    REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já pessou do prazo de 12 horas"),
+    REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já pessou do prazo de 12 horas"),
+    REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível responder o e-mail novamente");
 
     String message;
 

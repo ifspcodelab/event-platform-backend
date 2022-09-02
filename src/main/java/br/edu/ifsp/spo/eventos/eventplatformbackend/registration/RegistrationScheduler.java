@@ -11,6 +11,6 @@ public class RegistrationScheduler {
 
     @Scheduled(fixedRateString = "${scheduler.registration.interval}")
     public void execute() {
-        registrationService.cancelAllRegistrationInWaitListThatWereNotAccepted();
+        registrationService.cancelAllRegistrationInWaitConfirmationThatWereNotAnswered();
     }
 }

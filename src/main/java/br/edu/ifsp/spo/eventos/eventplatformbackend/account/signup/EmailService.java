@@ -12,6 +12,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -69,15 +71,23 @@ public class EmailService {
         var denyRegistrationUrl = url +"minhas-inscricoes/recusar-vaga/"+ registration.getId();
 
         var name = account.getName().split(" ")[0];
+        var sessionSchedules = registration.getSession().getSessionsSchedules();
+        String sessionSchedulesString = "";
 
-        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Confirme seu cadastro na " + registration.getSession().getTitle() + "</h1>\n" +
+        for (var s : sessionSchedules) {
+            sessionSchedulesString += s.getExecutionStart().format(DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:MM")) + " às " + s.getExecutionEnd().format(DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:MM")) + "<br>";
+        }
+
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Confirme seu cadastro na atividade " + registration.getSession().getActivity().getTitle() + "</h1>\n" +
                 "<p>Ol&aacute;, "+ name + ".</p>\n" +
-                "<p>Voc&ecirc; saiu da lista de espera e conseguiu uma vaga.</p>\n" +
-                "<p>Utilize o bot&atilde;o abaixo para confirmar sua presen&ccedil;a.</p>\n" +
+                "<p>Voc&ecirc; saiu da lista de espera e conseguiu uma vaga na sess&atilde;o " + registration.getSession().getTitle() + ", para os hor&aacute;rios:\n" +
+                sessionSchedulesString +
+                "</p>\n" +
+                "<p>Ao confirmar sua presen&ccedil;a na sess&atilde;o, voc&ecirc; ser&aacute; removido automaticamente de todas as listas de espera no hor&aacute;rio dessa sess&atilde;o. Voc&ecirc; possui 12 horas para confirmar. Para confirmar sua presen&ccedil;a, selecione o bot&atilde;o abaixo.</p>\n" +
                 "<a href=\"" + acceptRegistrationUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #4caf50; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">"  +
                 "Confirmar" +
                 "</a>" +
-                "<p>Caso n&atilde;o consiga participar, cancele sua inscri&ccedil;&atilde;o acessando o bot&atilde;o abaixo:</p>\n" +
+                "<p>Caso n&atilde;o consiga participar, cancele sua inscri&ccedil;&atilde;o agora, permitindo que o pr&oacute;ximo da lista de espera seja chamado. Ao cancelar sua inscri&ccedil;&atilde;o, voc&ecirc; n&atilde;o ser&aacute; removido de outras listas de espera no hor&aacute;rio dessa sess&atilde;o. Caso voc&ecirc; n&atilde;o cancele a sua inscri&ccedil;&atilde;o, o sistema far&aacute; isso automaticamente ap&oacute;s 12 horas a partir do envio deste e-mail.</p>\n" +
                 "<a href=\"" + denyRegistrationUrl +"\" target=\"_blank\" style=\"max-width: 280px; text-decoration: none; display: inline-block; background-color: #FF0000; color: #ffffff; height: 36px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 20px 0; width: 100%; text-align: center; padding-top: 10px; \">" +
                 "Cancelar" +
                 "</a>" +

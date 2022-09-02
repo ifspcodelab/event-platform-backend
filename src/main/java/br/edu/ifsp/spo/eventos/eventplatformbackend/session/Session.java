@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -27,7 +29,7 @@ public class Session {
     @ManyToOne
     private Activity activity;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", nullable = false, insertable = false, updatable = false)
     private List<SessionSchedule> sessionsSchedules;
 
     public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedules) {

@@ -27,7 +27,11 @@ public class OrganizerSubeventController {
     public ResponseEntity<List<OrganizerSubeventDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
         List<OrganizerSubevent> organizerSubevents = organizerSubeventService.findAll(eventId, subeventId);
         return ResponseEntity.ok(organizerSubeventMapper.to(organizerSubevents));
+    }
 
+    @GetMapping("for-site")
+    public ResponseEntity<List<OrganizerSubEventSiteDto>> indexForSite(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        return ResponseEntity.ok(organizerSubeventService.findAllForSite(subeventId));
     }
 
     @DeleteMapping("{organizerSubeventId}")

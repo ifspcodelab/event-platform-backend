@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Slug;
 import lombok.Value;
 
 import javax.validation.Valid;
@@ -12,14 +13,15 @@ import javax.validation.constraints.Size;
 public class ActivityCreateDto {
     @NotNull
     @NotBlank
-    @Size(min = 5, max = 100)
+    @Size(min = 5, max = 200)
     String title;
     @NotNull
     @NotBlank
+    @Slug
     String slug;
     @NotNull
     @NotBlank
-    @Size(min = 100, max = 5000)
+    @Size(min = 50, max = 5000)
     String description;
     @Valid
     @NotNull
@@ -34,4 +36,16 @@ public class ActivityCreateDto {
     @NotNull
     @Min(value = 5)
     Integer setupTime;
+
+    public String getTitle() {
+        return title.strip();
+    }
+
+    public String getSlug() {
+        return slug.strip();
+    }
+
+    public String getDescription() {
+        return description.strip();
+    }
 }

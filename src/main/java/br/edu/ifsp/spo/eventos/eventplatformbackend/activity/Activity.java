@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -17,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Activity {
+public class Activity implements Diffable<Activity> {
     @Id
     private UUID id;
     private String title;
@@ -88,5 +92,59 @@ public class Activity {
         this.cancellationMessage = null;
         this.event = event;
         this.subevent = subevent;
+    }
+
+    public boolean isEventCanceled() {
+        return this.getEvent().getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isEventDraft() {
+        return this.getEvent().getStatus().equals(EventStatus.DRAFT);
+    }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
+    public boolean isDraft() {
+        return this.getStatus().equals(EventStatus.DRAFT);
+    }
+
+    public boolean isPublished() {
+        return this.getStatus().equals(EventStatus.PUBLISHED);
+    }
+
+    public boolean isOnline() {
+        return this.getModality().equals(ActivityModality.ONLINE);
+    }
+
+    public boolean isInPerson() {
+        return this.getModality().equals(ActivityModality.IN_PERSON);
+    }
+
+    public boolean isHibrid() {
+        return this.getModality().equals(ActivityModality.HYBRID);
+    }
+
+    public Long getDurationInSeconds() {
+        return (long) (duration * 60);
+    }
+
+    public Long getSetupTimeInSeconds() {
+        return (long) (setupTime * 60);
+    }
+
+    @Override
+    public DiffResult<Activity> diff(Activity updatedActivity) {
+        return new DiffBuilder<>(this, updatedActivity, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedActivity.title)
+                .append("Slug", this.slug, updatedActivity.slug)
+                .append("Descrição", this.description, updatedActivity.description)
+                .append("Tipo", this.type, updatedActivity.type)
+                .append("Modalidade", this.modality, updatedActivity.modality)
+                .append("Requer inscrição", this.needRegistration, updatedActivity.needRegistration)
+                .append("Duração", this.duration, updatedActivity.duration)
+                .append("Tempo de credenciamento", this.setupTime, updatedActivity.setupTime)
+                .build();
     }
 }

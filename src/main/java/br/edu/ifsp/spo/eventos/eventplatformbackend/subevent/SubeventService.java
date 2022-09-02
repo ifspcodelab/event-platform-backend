@@ -1,5 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -7,6 +10,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -21,6 +25,8 @@ import java.util.UUID;
 public class SubeventService {
     private final SubeventRepository subeventRepository;
     private final EventRepository eventRepository;
+    private final ActivityService activityService;
+    private final AuditService auditService;
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
@@ -106,6 +112,7 @@ public class SubeventService {
 
         subeventRepository.deleteById(subeventId);
         log.info("Subevent deleted: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdminDelete(ResourceName.SUBEVENT, subeventId);
     }
 
     public Subevent update(UUID eventId, UUID subeventId, SubeventCreateDto dto) {
@@ -159,6 +166,16 @@ public class SubeventService {
             }
         }
 
+        Subevent currentSubevent = new Subevent();
+        currentSubevent.setTitle(subevent.getTitle());
+        currentSubevent.setSlug(subevent.getSlug());
+        currentSubevent.setSummary(subevent.getSummary());
+        currentSubevent.setPresentation(subevent.getPresentation());
+        currentSubevent.setContact(subevent.getContact());
+        currentSubevent.setExecutionPeriod(subevent.getExecutionPeriod());
+        currentSubevent.setSmallerImage(subevent.getSmallerImage());
+        currentSubevent.setBiggerImage(subevent.getBiggerImage());
+
         subevent.setTitle(dto.getTitle());
         subevent.setSlug(dto.getSlug());
         subevent.setSummary(dto.getSummary());
@@ -167,6 +184,10 @@ public class SubeventService {
         subevent.setExecutionPeriod(dto.getExecutionPeriod());
         subevent.setSmallerImage(dto.getSmallerImage());
         subevent.setBiggerImage(dto.getBiggerImage());
+
+        DiffResult<?> diffResult = currentSubevent.diff(subevent);
+
+        auditService.logAdminUpdate(ResourceName.SUBEVENT, diffResult.getDiffs().toString(), subeventId);
 
         return subeventRepository.save(subevent);
     }
@@ -194,9 +215,11 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_CANCEL_WITH_CANCELED_STATUS);
         }
 
+        activityService.cancelAllBySubeventId(eventId, subeventId, cancellationMessageCreateDto.getReason());
         subevent.setStatus(EventStatus.CANCELED);
         subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdmin(Action.CANCEL, ResourceName.SUBEVENT, subeventId);
 
         return subeventRepository.save(subevent);
     }
@@ -230,6 +253,7 @@ public class SubeventService {
         subevent.setStatus(EventStatus.PUBLISHED);
 
         log.info("Subevent published: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdmin(Action.PUBLISH, ResourceName.SUBEVENT, subeventId);
         return subeventRepository.save(subevent);
     }
 
@@ -256,11 +280,12 @@ public class SubeventService {
         subevent.setStatus(EventStatus.DRAFT);
 
         log.info("Subevent unpublished: id={}, title={}", subeventId, subevent.getTitle());
+        auditService.logAdmin(Action.UNPUBLISH, ResourceName.SUBEVENT, subeventId);
         return subeventRepository.save(subevent);
     }
 
     @Transactional
-    public void cancelAllByEventId(UUID eventId) {
+    public void cancelAllByEventId(UUID eventId, String reason) {
         getEvent(eventId);
 
         List<Subevent> subevents = new ArrayList<>();
@@ -275,8 +300,12 @@ public class SubeventService {
                 subevent.setStatus(EventStatus.CANCELED);
                 subevents.add(subevent);
             }
+
+            activityService.cancelAllBySubeventId(eventId, subevent.getId(), reason);
+
         }
         subeventRepository.saveAll(subevents);
+
     }
 
     @Transactional

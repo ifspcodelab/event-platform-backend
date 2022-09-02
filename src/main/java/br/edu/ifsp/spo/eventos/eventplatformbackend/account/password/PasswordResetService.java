@@ -53,7 +53,7 @@ public class PasswordResetService {
             passwordResetTokenRepository.save(passwordResetToken);
             emailService.sendPasswordResetEmail(account, passwordResetToken);
             log.info("Password Reset: token generated for account {}", dto.getEmail());
-            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de alteração de senha em 'Esqueci minha senha'");
+            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de alteração de senha em 'Esqueci minha senha'", passwordResetToken.getId());
             log.info("Password Reset email was sent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to send password reset email to {}",account.getEmail(), ex);
@@ -81,7 +81,7 @@ public class PasswordResetService {
         accountRepository.save(account);
         log.info("Password Reset: password update for account: {}", account.getEmail());
         passwordResetTokenRepository.deleteById(passwordResetToken.getId());
-        auditService.logUpdate(account, ResourceName.ACCOUNT, "Redefinição de senha via 'Esqueci minha senha'");
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Redefinição de senha via 'Esqueci minha senha'", account.getId());
         log.info("Password Reset: reset token deleted");
     }
 
@@ -89,7 +89,7 @@ public class PasswordResetService {
     public void removePasswordResetTokens() {
         passwordResetTokenRepository.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
             Account account = token.getAccount();
-            auditService.logDelete(account, ResourceName.PASSWORD_RESET_TOKEN, "Solicitação de redefinição de senha removida pelo sistema");
+            auditService.logDelete(account, ResourceName.PASSWORD_RESET_TOKEN, "Solicitação de redefinição de senha removida pelo sistema", token.getId());
             passwordResetTokenRepository.delete(token);
             log.info("Password Reset token: token {}, account id {}, email {} - removed by password reset scheduler", token.getToken(), account.getId(),account.getEmail());
         });
@@ -121,7 +121,7 @@ public class PasswordResetService {
 
         try {
             emailService.sendPasswordResetEmail(account, passwordResetToken);
-            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de reenvio de email em 'Esqueci minha senha'");
+            auditService.logCreate(account, ResourceName.PASSWORD_RESET_TOKEN, "Requisição de reenvio de email em 'Esqueci minha senha'", passwordResetToken.getId());
             log.info("Password Reset email was resent to {}", account.getEmail());
         } catch (MessagingException ex) {
             log.error("Error when trying to resend password reset email to {}",account.getEmail(), ex);

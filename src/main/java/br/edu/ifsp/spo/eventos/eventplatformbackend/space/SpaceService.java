@@ -1,11 +1,12 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final AreaRepository areaRepository;
+    private final AuditService auditService;
 
     public Space create(UUID locationId, UUID areaId, SpaceCreateDto dto) {
         Area area = getArea(areaId);
@@ -41,10 +43,21 @@ public class SpaceService {
             throw new ResourceAlreadyExistsException(ResourceName.SPACE, "name", dto.getName());
         }
 
+        Space currentSpace = new Space();
+        currentSpace.setName(space.getName());
+        currentSpace.setCapacity(space.getCapacity());
+        currentSpace.setType(space.getType());
+
         space.setName(dto.getName());
         space.setCapacity(dto.getCapacity());
         space.setType(dto.getType());
-        return spaceRepository.save(space);
+
+        spaceRepository.save(space);
+
+        DiffResult<?> diffResult = currentSpace.diff(space);
+        auditService.logAdminUpdate(ResourceName.SPACE, diffResult.getDiffs().toString(), spaceId);
+
+        return space;
     }
 
     public List<Space> findAll(UUID locationId, UUID areaId) {
@@ -66,6 +79,7 @@ public class SpaceService {
         checkIfSpaceIsAssociateToArea(space, areaId);
         spaceRepository.deleteById(spaceId);
         log.info("Delete space id={}, name={}", spaceId, space.getName());
+        auditService.logAdminDelete(ResourceName.SPACE, spaceId);
     }
 
     private Area getArea(UUID areaId) {

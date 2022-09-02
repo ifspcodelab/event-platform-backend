@@ -75,7 +75,7 @@ public class SignupService {
 
             emailService.sendVerificationEmail(account, verificationToken);
             log.info("Verification email was sent to {}", account.getEmail());
-            auditService.log(account, Action.SIGN_UP, ResourceName.ACCOUNT);
+            auditService.log(account, Action.SIGN_UP, ResourceName.ACCOUNT, account.getId());
             return account;
         } catch (MessagingException ex) {
             log.error("Error when trying to send confirmation e-mail to {}",account.getEmail(), ex);
@@ -98,7 +98,7 @@ public class SignupService {
         accountRepository.save(account);
         log.info("Account with email {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
-        auditService.logUpdate(account, ResourceName.ACCOUNT, "Conta verificada");
+        auditService.logUpdate(account, ResourceName.ACCOUNT, "Conta verificada", account.getId());
         log.info("Verification token with id {} was deleted", verificationToken.getId());
         return account;
     }
@@ -139,7 +139,7 @@ public class SignupService {
             VerificationToken verificationToken = verificationTokenRepository.findByAccount(account);
             emailService.sendVerificationEmail(account, verificationToken);
             log.info("Verification email was resent to {}", account.getEmail());
-            auditService.log(account, Action.VERIFICATION_TOKEN, ResourceName.ACCOUNT);
+            auditService.log(account, Action.VERIFICATION_TOKEN, ResourceName.ACCOUNT, verificationToken.getId());
             return account;
         } catch (MessagingException ex) {
             log.error("Error when trying to resend confirmation e-mail to {}",account.getEmail(), ex);

@@ -60,7 +60,7 @@ public class AuthenticationService {
 
         log.info("Successful login for the email {}", account.getEmail());
 
-        auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login");
+        auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login", refreshToken.getId());
 
         return tokensDto;
     }
@@ -70,11 +70,12 @@ public class AuthenticationService {
         UUID accountId = jwtUserDetails.getId();
         String accountEmail = jwtUserDetails.getUsername();
 
+        UUID refreshTokenId = refreshTokenRepository.findByAccountId(accountId).getId();
         refreshTokenRepository.deleteAllByAccountId(accountId);
 
         log.info("Successful logout for the email {}", accountEmail);
 
-        auditService.logDelete(getAccount(accountId), ResourceName.REFRESH_TOKEN, "Desconectou da aplicação");
+        auditService.logDelete(getAccount(accountId), ResourceName.REFRESH_TOKEN, "Desconectou da aplicação", refreshTokenId);
     }
 
     @Transactional
@@ -92,15 +93,11 @@ public class AuthenticationService {
             throw new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_TOKEN, account.getEmail());
         }
 
-        refreshTokenRepository.deleteAllByAccountId(accountId);
-
         UUID refreshTokenId = UUID.randomUUID();
         String newAccessTokenString = jwtService.generateAccessToken(account);
         String newRefreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
 
-        RefreshToken refreshToken = new RefreshToken(refreshTokenId, newRefreshTokenString, account);
-
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.updateTokenByAccountId(refreshTokenId, newRefreshTokenString, account);
 
         TokensDto tokensDto = new TokensDto(newAccessTokenString, newRefreshTokenString);
 

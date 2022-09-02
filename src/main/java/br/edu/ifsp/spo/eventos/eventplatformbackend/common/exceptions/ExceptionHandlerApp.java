@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.SignupException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRuleException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -19,10 +20,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
-import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.*;
+import static br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND;
 
 @ControllerAdvice
 @Slf4j
@@ -90,6 +90,48 @@ public class ExceptionHandlerApp {
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ResourceAlreadyReservedInTheSpaceException.class)
+    public ResponseEntity<ProblemDetail> handlerResourceAlreadyReservedInTheSpace(
+            ResourceAlreadyReservedInTheSpaceException ex,
+            HttpServletRequest request
+    ) {
+        String message = String.format(
+                "%s não está disponível neste horário. A sessão %s da atividade %s está reservada neste espaço.",
+                ex.getSessionSchedule().getSpace().getName(),
+                ex.getSessionSchedule().getSession().getTitle(),
+                ex.getSessionSchedule().getSession().getActivity().getTitle()
+        );
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource already reserved in the space exception",
+                List.of(new Violation(ex.getSessionSchedule().getSpace().toString(), message))
+        );
+
+        log.warn("Resource already reserved in the space at {} {}", request.getMethod(), request.getRequestURI());
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ResourceIntersectionInExecutionTimesException.class)
+    public ResponseEntity<ProblemDetail> handlerResourceIntersectionInExecutionTimesException(
+            ResourceIntersectionInExecutionTimesException ex,
+            HttpServletRequest request
+    ) {
+        String message = String.format(
+                "O horário de sessão inicial %s e final %s está entre o horário de sessão inicial %s e final %s no espaço %s",
+                ex.getStartScheduleOuter(),
+                ex.getEndScheduleOuter(),
+                ex.getStartScheduleInner(),
+                ex.getEndScheduleInner(),
+                ex.getSpace()
+        );
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Resource Intersection In Execution Times Exception",
+                List.of(new Violation(ex.getSpace(), message))
+        );
+
+        log.warn("Resource intersection in execution times at {} {}", request.getMethod(), request.getRequestURI());
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ResourceReferentialIntegrityException.class)
     public ResponseEntity<ProblemDetail> resourceReferentialIntegrity(
         ResourceReferentialIntegrityException ex,
@@ -145,20 +187,24 @@ public class ExceptionHandlerApp {
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(SessionRuleException.class)
+    public ResponseEntity<ProblemDetail> handlerSessionRuleException(SessionRuleException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+            "Session rule exception", List.of(new Violation(ex.getRuleType().name(), ex.getRuleType().getMessage()))
+        );
+
+        log.warn("Session rule exception: name={}, message={}", ex.getRuleType().name(), ex.getRuleType().getMessage());
+
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(PasswordResetException.class)
-    public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex) throws InterruptedException {
+    public ResponseEntity<Void> handlerForgotPasswordEmailNotFound(PasswordResetException ex){
         log.warn(String.format(ex.getPasswordResetExceptionType().getMessage(), ex.getEmail()));
         if (ex.getPasswordResetExceptionType().equals(RESET_TOKEN_NOT_FOUND)){
             ProblemDetail problemDetail = new ProblemDetail("Token not valid", List.of());
             return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
         }
-        if (ex.getPasswordResetExceptionType().equals(NONEXISTENT_ACCOUNT)){
-            Random random = new Random();
-            int randomNumber = random.ints(3000,7000).findAny().getAsInt();
-            Thread.sleep(randomNumber);
-            return ResponseEntity.accepted().build();
-        }
-
         return ResponseEntity.accepted().build();
     }
     
@@ -187,6 +233,11 @@ public class ExceptionHandlerApp {
                     List.of()
             );
         }
+
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.NONEXISTENT_TOKEN)) {
+            problemDetail = new ProblemDetail("Invalid Refresh Token", List.of());
+        }
+
         log.warn(String.format(ex.getAuthenticationExceptionType().getMessage(), ex.getEmail()));
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }

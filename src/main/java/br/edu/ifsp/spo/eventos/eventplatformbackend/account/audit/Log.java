@@ -28,13 +28,15 @@ public class Log {
     @Enumerated(EnumType.STRING)
     private ResourceName resourceName;
     private String resourceData;
+    private UUID resourceId;
 
-    public Log(Account account, Action action, ResourceName resourceName, String resourceData) {
+    public Log(Account account, Action action, ResourceName resourceName, String resourceData, UUID resourceId) {
         this.id = UUID.randomUUID();
         this.createdAt = Instant.now();
         this.account = account;
         this.action = action;
         this.resourceName = resourceName;
         this.resourceData = resourceData;
+        this.resourceId = resourceId;
     }
 }

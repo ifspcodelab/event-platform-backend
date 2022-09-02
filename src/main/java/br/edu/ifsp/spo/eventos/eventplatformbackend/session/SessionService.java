@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
@@ -7,19 +8,19 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -40,23 +41,18 @@ public class SessionService {
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSessionTitleExists(dto, activityId);
+        checkIfEventSubEventActivityIsNotCancelled(activity);
+        checkIfSchedulesTimesAreValid(activity, dto);
+        checkIfSchedulesHasNotIntersections(dto);
+        checkIfSchedulesTimesAreInsideExecutionPeriod(activity, dto);
+        checkIfSchedulesDurationIsTheSameAsActivity(activity, dto);
+        checkIfActivityRegistrationRequirementsPass(activity, dto);
+        checkIfActivityModalityRequirementsPass(activity, dto);
 
-        if(activity.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
+        List<SessionSchedule> sessionSchedules = getValidSessionSchedules(dto);
+        checkIfSpaceIsAvailable(sessionSchedules);
 
-        if(activity.isNeedRegistration() && activity.getEvent().isRegistrationPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-        }
-
-        if(!activity.isNeedRegistration() && !activity.getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
-        }
-
-        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto, true);
-
-        Session session = new Session(dto.getTitle(), dto.getSeats(), activity, sessionsSchedule);
-
+        Session session = new Session(dto.getTitle(), dto.getSeats(), activity, sessionSchedules);
         return sessionRepository.save(session);
     }
 
@@ -65,158 +61,266 @@ public class SessionService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         checksIfSessionTitleExists(dto, activityId);
+        checkIfEventSubEventActivityIsNotCancelled(activity);
+        checkIfSchedulesTimesAreValid(activity, dto);
+        checkIfSchedulesHasNotIntersections(dto);
+        checkIfSchedulesTimesAreInsideExecutionPeriod(activity, dto);
+        checkIfSchedulesDurationIsTheSameAsActivity(activity, dto);
+        checkIfActivityRegistrationRequirementsPass(activity, dto);
+        checkIfActivityModalityRequirementsPass(activity, dto);
 
-        if(activity.isEventCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_EVENT_WITH_CANCELED_STATUS);
-        }
+        List<SessionSchedule> sessionSchedules = getValidSessionSchedules(dto);
+        checkIfSpaceIsAvailable(sessionSchedules);
 
-        if(activity.getSubevent().getStatus().equals(EventStatus.CANCELED)) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_A_SUBEVENT_WITH_CANCELED_STATUS);
-        }
-
-        if(activity.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
-
-        if(activity.isNeedRegistration() && activity.getEvent().isRegistrationPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
-        }
-
-        if(!activity.isNeedRegistration() && activity.getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
-        }
-
-        List<SessionSchedule> sessionsSchedule = getSessionsSchedule(activity, dto, true);
-
-        Session session = new Session(
-                dto.getTitle(),
-                dto.getSeats(),
-                activity,
-                sessionsSchedule
-        );
-
+        Session session = new Session(dto.getTitle(), dto.getSeats(), activity, sessionSchedules);
         return sessionRepository.save(session);
     }
 
-    public Session update(UUID eventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+    public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Session session = getSession(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
-        checksIfSessionTitleExistsExcludedId(dto, activityId, sessionId);
+        checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
+        checkIfSessionIsNotCanceled(session);
 
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
-        }
+        //TODO: Send email verify session time
 
-        if(session.getActivity().isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isPublished() && session.getActivity().getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_EVENT_EXECUTION_PERIOD);
-        }
-
-        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto, false);
-
-        if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
-            var executionStartList = session.getSessionSchedules().stream()
-                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
-
-            var newExecutionStartList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
-
-            if(!executionStartList.equals(newExecutionStartList)) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
-            }
-
-            var executionEndList = session.getSessionSchedules().stream()
-                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
-
-            var newExecutionEndList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
-
-            if(!executionEndList.equals(newExecutionEndList)) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
-            }
-        }
-
-        Session currentSession = new Session();
-        currentSession.setTitle(session.getTitle());
-        currentSession.setSeats(session.getSeats());
-        currentSession.setSessionSchedules(session.getSessionSchedules());
-
-        session.setTitle(dto.getTitle());
-        session.setSeats(dto.getSeats());
-        session.setSessionSchedules(sessionSchedule);
-
-        sessionRepository.save(session);
-
-        DiffResult<?> diffResult = currentSession.diff(session);
-        auditService.logAdminUpdate(ResourceName.SESSION, diffResult.getDiffs().toString(), sessionId);
-
-        return session;
+        session.setCanceled(true);
+        session.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdmin(Action.CANCEL, ResourceName.SESSION, sessionId);
+        return sessionRepository.save(session);
     }
 
-    public Session update(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, SessionCreateDto dto) {
+    public Session cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
         Session session = getSession(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfSubeventIsAssociateToSession(subeventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
-        checksIfSessionTitleExistsExcludedId(dto, activityId, sessionId);
+        checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
+        checkIfSessionIsNotCanceled(session);
 
+        //TODO: Send email verify session time
+
+        session.setCanceled(true);
+        session.setCancellationMessage(cancellationMessageCreateDto.getReason());
+        log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdmin(Action.CANCEL, ResourceName.SESSION, sessionId);
+        return sessionRepository.save(session);
+    }
+
+    public void delete(UUID eventId, UUID activityId, UUID sessionId) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
+        checkIfSessionIsNotCanceled(session);
+        checkIfRegistrationPeriodNotStarted(session);
+        sessionRepository.delete(session);
+        log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
+    }
+
+    public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociateToSession(eventId, session);
+        checksIfSubeventIsAssociateToSession(subeventId, session);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
+        checkIfSessionIsNotCanceled(session);
+        checkIfRegistrationPeriodNotStarted(session);
+        sessionRepository.delete(session);
+        log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
+    }
+
+    private void checkIfEventSubEventActivityIsNotCancelled(Activity activity) {
+        if(activity.getEvent().isCanceled()) {
+            throw new SessionRuleException(SessionRuleType.CANCELED_EVENT);
+        }
+
+        if(activity.getSubevent() != null) {
+            if(activity.getSubevent().isCanceled()) {
+                throw new SessionRuleException(SessionRuleType.CANCELED_SUBEVENT);
+            }
+        }
+
+        if(activity.isCanceled()) {
+            throw new SessionRuleException(SessionRuleType.CANCELED_ACTIVITY);
+        }
+    }
+
+    private void checkIfSessionIsNotCanceled(Session session) {
         if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_CANCELED_STATUS);
+            throw new SessionRuleException(SessionRuleType.CANCELED_SESSION);
         }
+    }
 
-        if(session.getActivity().isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
+    private void checkIfSchedulesTimesAreValid(Activity activity, SessionCreateDto dto) {
+        dto.getSessionSchedules().forEach(s -> {
+            if(s.getExecutionStart().isAfter(s.getExecutionEnd())) {
+                throw new SessionRuleException(SessionRuleType.SCHEDULE_INVALID_PERIOD);
+            }
+
+            if(s.getExecutionStart().isEqual(s.getExecutionEnd())) {
+                throw new SessionRuleException(SessionRuleType.SCHEDULE_INVALID_PERIOD);
+            }
+
+            if(s.getExecutionStart().isBefore(LocalDateTime.now()) || s.getExecutionEnd().isBefore(LocalDateTime.now())) {
+                throw new SessionRuleException(SessionRuleType.SCHEDULE_IN_PAST);
+            }
+        });
+    }
+
+    private void checkIfSchedulesHasNotIntersections(SessionCreateDto dto) {
+        for (SessionScheduleCreateDto outerSession: dto.getSessionSchedules()) {
+            for (SessionScheduleCreateDto innerSession: dto.getSessionSchedules()) {
+                if(!outerSession.equals(innerSession) && outerSession.hasIntersection(innerSession)) {
+                    throw new SessionRuleException(SessionRuleType.SCHEDULE_HAS_INTERSECTIONS);
+                }
+            }
         }
+    }
 
-        if(session.getActivity().isPublished()) {
-            if (session.getActivity().getSubevent().isExecutionPeriodEnded()) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_AN_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
+    private void checkIfSchedulesTimesAreInsideExecutionPeriod(Activity activity, SessionCreateDto dto) {
+        dto.getSessionSchedules().forEach(s -> {
+            Event event = activity.getEvent();
+            Subevent subevent = activity.getSubevent();
+
+            boolean outSideExecutionPeriod = true;
+
+            if(subevent != null) {
+                outSideExecutionPeriod =
+                    s.getExecutionStart().isBefore(subevent.getExecutionPeriod().getStartDate().atStartOfDay()) ||
+                    s.getExecutionEnd().isAfter(subevent.getExecutionPeriod().getEndDate().atStartOfDay());
+            } else {
+                outSideExecutionPeriod =
+                    s.getExecutionStart().isBefore(event.getExecutionPeriod().getStartDate().atStartOfDay()) ||
+                    s.getExecutionEnd().isAfter(event.getExecutionPeriod().getEndDate().atStartOfDay());
+            }
+
+            if(outSideExecutionPeriod) {
+                throw new SessionRuleException(SessionRuleType.OUTSIDE_EXECUTION_PERIOD);
+            }
+        });
+    }
+
+    private void checkIfSchedulesDurationIsTheSameAsActivity(Activity activity, SessionCreateDto dto) {
+        Long sessionDurationInSeconds = dto.getSessionSchedules().stream()
+            .map(s -> Duration.between(s.getExecutionStart(), s.getExecutionEnd()).getSeconds())
+            .reduce(0L, Long::sum);
+
+        Long activityCredentialTimeTotalDuration = (long) activity.getSetupTimeInSeconds() * dto.getSessionSchedules().size();
+
+        Long activityDurationPlusCredentialTime = activity.getDurationInSeconds() + activityCredentialTimeTotalDuration;
+
+        if(!activityDurationPlusCredentialTime.equals(sessionDurationInSeconds)) {
+            throw new SessionRuleException(SessionRuleType.SESSION_DURATION);
+        }
+    }
+
+    private void checkIfActivityRegistrationRequirementsPass(Activity activity, SessionCreateDto dto) {
+        if(activity.isNeedRegistration()) {
+            if(dto.getSeats() == 0) {
+                throw new SessionRuleException(SessionRuleType.SEATS_NOT_DEFINED);
+            }
+
+            if(activity.getEvent().isRegistrationPeriodEnded()) {
+                throw new SessionRuleException(SessionRuleType.REGISTRATION_PERIOD_ENDED);
+            }
+        } else {
+            if(activity.getEvent().isExecutionPeriodEnded()) {
+                throw new SessionRuleException(SessionRuleType.EXECUTION_PERIOD_ENDED);
+            }
+        }
+    }
+
+    private void checkIfActivityModalityRequirementsPass(Activity activity, SessionCreateDto dto) {
+        boolean locationIsNotPresent = dto.getSessionSchedules().stream().anyMatch(s -> s.getLocationId() == null);
+        boolean urlIsNotPresent = dto.getSessionSchedules().stream().anyMatch(s -> s.getUrl().isBlank());
+
+        if(activity.isInPerson()) {
+            if(locationIsNotPresent) {
+                throw new SessionRuleException(SessionRuleType.LOCATION_NOT_DEFINED);
             }
         }
 
-        List<SessionSchedule> sessionSchedule = getSessionsSchedule(session.getActivity(), dto, false);
+        if(activity.isOnline()) {
+            if(urlIsNotPresent) {
+                throw new SessionRuleException(SessionRuleType.URL_NOT_DEFINED);
+            }
+        }
 
+        if(activity.isHibrid()) {
+            dto.getSessionSchedules().stream()
+                .filter(s -> !s.getUrl().isBlank())
+                .findAny()
+                .orElseThrow(() -> new SessionRuleException(SessionRuleType.URL_OR_LOCATION_NOT_DEFINED));
+
+            dto.getSessionSchedules().stream()
+                .filter(s -> s.getLocationId() != null)
+                .findAny()
+                .orElseThrow(() -> new SessionRuleException(SessionRuleType.URL_OR_LOCATION_NOT_DEFINED));
+        }
+    }
+
+    private void checkIfRegistrationPeriodNotStarted(Session session) {
         if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
-            var executionStartList = session.getSessionSchedules().stream()
-                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
+            throw new SessionRuleException(SessionRuleType.REGISTRATION_PERIOD_STARTED);
+        }
+    }
 
-            var newExecutionStartList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionStart).collect(Collectors.toList());
+    private List<SessionSchedule> getValidSessionSchedules(SessionCreateDto dto) {
+       return dto.getSessionSchedules().stream()
+            .map(this::toSessionSchedule)
+            .collect(Collectors.toList());
+    }
 
-            if(!executionStartList.equals(newExecutionStartList)) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
-            }
+    private SessionSchedule toSessionSchedule(SessionScheduleCreateDto dto) {
+        Location location = null;
+        Area area = null;
+        Space space = null;
 
-            var executionEndList = session.getSessionSchedules().stream()
-                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
-
-            var newExecutionEndList = sessionSchedule.stream()
-                    .map(SessionSchedule::getExecutionEnd).collect(Collectors.toList());
-
-            if(!executionEndList.equals(newExecutionEndList)) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_UPDATE_WITH_SESSION_SCHEDULE_EXECUTION_IN_REGISTRATION_PERIOD);
+        if(dto.getLocationId() == null) {
+            if(dto.getAreaId() != null || dto.getSpaceId() != null) {
+                throw new SessionRuleException(SessionRuleType.AREA_OR_SPACE_NULL_LOCATION);
             }
         }
 
-        Session currentSession = new Session();
-        currentSession.setTitle(session.getTitle());
-        currentSession.setSeats(session.getSeats());
-        currentSession.setSessionSchedules(session.getSessionSchedules());
+        if(dto.getLocationId() != null) {
+            if(dto.getAreaId() == null && dto.getSpaceId() != null) {
+                throw new SessionRuleException(SessionRuleType.SPACE_NULL_AREA);
+            }
+        }
 
-        session.setTitle(dto.getTitle());
-        session.setSeats(dto.getSeats());
-        session.setSessionSchedules(sessionSchedule);
+        if(dto.getLocationId() != null) {
+            location = getLocation(dto.getLocationId());
 
-        sessionRepository.save(session);
+            if(dto.getAreaId() != null) {
+                area = getArea(dto.getAreaId());
 
-        DiffResult<?> diffResult = currentSession.diff(session);
-        auditService.logAdminUpdate(ResourceName.SESSION, diffResult.getDiffs().toString(), sessionId);
+                if(dto.getSpaceId() != null) {
+                    space = getSpace(dto.getSpaceId());
+                }
+            }
+        }
 
-        return session;
+        return new SessionSchedule(dto.getExecutionStart(), dto.getExecutionEnd(), dto.getUrl(), location, area, space);
+    }
+
+    private void checkIfSpaceIsAvailable(List<SessionSchedule> sessionSchedules) {
+        sessionSchedules.forEach(sessionSchedule -> {
+            if (sessionSchedule.getSpace() != null) {
+                var sessionSchedulesAtSpace = sessionScheduleRepository
+                    .findAllBySpaceIdAndExecutionStartGreaterThanEqual(sessionSchedule.getSpace().getId(), LocalDateTime.now());
+
+                for (SessionSchedule s : sessionSchedulesAtSpace) {
+                    if (s.hasIntersection(sessionSchedule) && !s.getSession().isCanceled()) {
+                        throw new ResourceAlreadyReservedInTheSpaceException(s);
+                    }
+                }
+            }
+        });
     }
 
     public List<Session> findAll(UUID eventId, UUID activityId) {
@@ -246,156 +350,22 @@ public class SessionService {
         return session;
     }
 
-    public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Session session = getSession(sessionId);
-        checksIfEventIsAssociateToSession(eventId, session);
-        checksIfActivityIsAssociateToSession(activityId, session);
-
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isEventDraft()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_EVENT_WITH_DRAFT_STATUS);
-        }
-
-        if(session.getActivity().isDraft()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS);
-        }
-
-        if(session.getActivity().isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
-        }
-
-        if(session.getActivity().getEvent().isRegistrationPeriodNotStart()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_BEFORE_EVENT_REGISTRATION_PERIOD);
-        }
-
-        session.setCanceled(true);
-        session.setCancellationMessage(cancellationMessageCreateDto.getReason());
-        log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
-        return sessionRepository.save(session);
-    }
-
-    public Session cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Session session = getSession(sessionId);
-        checksIfEventIsAssociateToSession(eventId, session);
-        checksIfSubeventIsAssociateToSession(subeventId, session);
-        checksIfActivityIsAssociateToSession(activityId, session);
-
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().getSubevent().getStatus().equals(EventStatus.DRAFT)) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_A_SUBEVENT_WITH_DRAFT_STATUS);
-        }
-
-        if(session.getActivity().isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isDraft()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_AN_ACTIVITY_WITH_DRAFT_STATUS);
-        }
-
-        if(session.getActivity().getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_AFTER_EVENT_EXECUTION_PERIOD);
-        }
-
-        if(session.getActivity().isPublished()) {
-            if(session.getActivity().getSubevent().isExecutionPeriodEnded()) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_CANCEL_WITH_ACTIVITY_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
-            }
-        }
-
-        session.setCanceled(true);
-        session.setCancellationMessage(cancellationMessageCreateDto.getReason());
-        log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
-        return sessionRepository.save(session);
-    }
-
-    public void delete(UUID eventId, UUID activityId, UUID sessionId) {
-        Session session = getSession(sessionId);
-        checksIfEventIsAssociateToSession(eventId, session);
-        checksIfActivityIsAssociateToSession(activityId, session);
-
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isPublished()) {
-            if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
-            }
-        }
-
-        sessionRepository.delete(session);
-        log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
-        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
-    }
-
-    public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
-        Session session = getSession(sessionId);
-        checksIfEventIsAssociateToSession(eventId, session);
-        checksIfSubeventIsAssociateToSession(subeventId, session);
-        checksIfActivityIsAssociateToSession(activityId, session);
-
-        if(session.isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isCanceled()) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_CANCELED_STATUS);
-        }
-
-        if(session.getActivity().isPublished()) {
-            if(session.getActivity().getEvent().isRegistrationPeriodStarted()) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_AN_ACTIVITY_WITH_PUBLISHED_STATUS_AND_AFTER_EVENT_REGISTRATION_PERIOD_START);
-            }
-        }
-
-        sessionRepository.delete(session);
-        log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
-        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
+    @Transactional
+    public void cancelAllByActivityId(UUID eventId, UUID activityId, String reason) {
+        this.findAll(eventId, activityId).forEach(session -> {
+            var cancellationMessageCreateDto = new CancellationMessageCreateDto();
+            cancellationMessageCreateDto.setReason(reason);
+            this.cancel(eventId, activityId, session.getId(), cancellationMessageCreateDto);
+        });
     }
 
     @Transactional
-    public void cancelAllByActivityId(UUID eventId, UUID activityId) {
-
-        List<Session> sessions = new ArrayList<>();
-        for (Session session : this.findAll(eventId, activityId)) {
-
-            if(!session.isCanceled())
-            {
-                session.setCanceled(true);
-                sessions.add(session);
-            }
-        }
-        sessionRepository.saveAll(sessions);
-    }
-
-    @Transactional
-    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId) {
-
-        List<Session> sessions = new ArrayList<>();
-        for (Session session : this.findAll(eventId, subeventId, activityId)) {
-
-            if(!session.isCanceled())
-            {
-                session.setCanceled(true);
-                sessions.add(session);
-            }
-        }
-        sessionRepository.saveAll(sessions);
+    public void cancelAllByActivityId(UUID eventId, UUID subeventId, UUID activityId, String reason) {
+        this.findAll(eventId, subeventId, activityId).forEach(session -> {
+            var cancellationMessageCreateDto = new CancellationMessageCreateDto();
+            cancellationMessageCreateDto.setReason(reason);
+            this.cancel(eventId, activityId, session.getId(), cancellationMessageCreateDto);
+        });
     }
 
     private void checksIfEventIsAssociateToSession(UUID eventId, Session session) {
@@ -457,115 +427,5 @@ public class SessionService {
         if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
         }
-    }
-
-    private void checksIfSessionTitleExistsExcludedId(SessionCreateDto dto, UUID activityId, UUID sessionId) {
-        if (sessionRepository.existsByTitleIgnoreCaseAndActivityIdAndIdNot(dto.getTitle(), activityId, sessionId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
-        }
-    }
-
-    private List<SessionSchedule> getSessionsSchedule(Activity activity, SessionCreateDto dto, boolean isCreate) {
-        return getValidSessionSchedules(dto).stream()
-                .map(sessionSchedule -> {
-                    var event = activity.getEvent();
-
-                    if(sessionSchedule.getExecutionStart().isAfter(sessionSchedule.getExecutionEnd())) {
-                        throw  new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_AFTER_EXECUTION_END);
-                    }
-
-                    if(sessionSchedule.getExecutionStart().equals(sessionSchedule.getExecutionEnd())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_START_IS_EQUALS_TO_EXECUTION_END);
-                    }
-
-                    if(sessionSchedule.getExecutionStart().isBefore(LocalDateTime.now()) || sessionSchedule.getExecutionEnd().isBefore(LocalDateTime.now())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULES_EXECUTION_PERIOD_BEFORE_TODAY);
-                    }
-
-                    if(activity.getSubevent() != null) {
-                        if(!sessionSchedule.isInsidePeriod(activity.getSubevent().getExecutionPeriod())) {
-                            throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT_EXECUTION);
-                        }
-                    }
-
-                    if(event.isExecutionPeriodEnded()) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT_EXECUTION);
-                    }
-
-                    if(!sessionSchedule.isInsidePeriod(event.getExecutionPeriod())) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_BEFORE_EVENT_EXECUTION);
-                    }
-
-                    if(activity.isNeedRegistration() && event.isRegistrationPeriodEnded()) {
-                        throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_EXECUTION_AFTER_EVENT_EXECUTION);
-                    }
-
-
-                    if(sessionSchedule.getSpace() != null){
-                        var sessionScheduleWithSpace = sessionScheduleRepository
-                                .findAllBySpaceIdAndExecutionStartGreaterThanEqual(sessionSchedule.getSpace().getId(), LocalDateTime.now());
-
-//                        if(isCreate) {
-//                            sessionScheduleWithSpace = sessionScheduleWithSpace.stream().filter(s -> {})
-//                        }
-                        for(SessionSchedule s: sessionScheduleWithSpace) {
-                            if(s.hasIntersection(sessionSchedule)) {
-                                throw new ResourceAlreadyReservedInTheSpaceException(s);
-                            }
-                        }
-                    }
-
-                    return sessionSchedule;
-                }).collect(Collectors.toList());
-    }
-
-    private List<SessionSchedule> getValidSessionSchedules(SessionCreateDto dto) {
-        List<SessionSchedule> sessionScheduleCreate = dto.getSessionSchedules().stream()
-                .map(this::getValidSessionSchedule).collect(Collectors.toList());
-
-        for (SessionSchedule outerSession: sessionScheduleCreate) {
-            for (SessionSchedule innerSession: sessionScheduleCreate) {
-                if(!outerSession.equals(innerSession) && outerSession.hasIntersection(innerSession)) {
-                    throw new ResourceIntersectionInExecutionTimesException(
-                            outerSession.getExecutionStart(), outerSession.getExecutionEnd(),
-                            innerSession.getExecutionStart(), innerSession.getExecutionEnd(),
-                            innerSession.getSpace().getName());
-                }
-            }
-        }
-
-        return sessionScheduleCreate;
-    }
-
-    private SessionSchedule getValidSessionSchedule(SessionScheduleCreateDto dto) {
-        Location location = null;
-        Area area = null;
-        Space space = null;
-
-        if(dto.getLocationId() == null) {
-            if(dto.getAreaId() != null || dto.getSpaceId() != null) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_AREA_OR_SPACE_IN_A_NULL_LOCATION);
-            }
-        }
-
-        if(dto.getLocationId() != null) {
-            if(dto.getAreaId() == null && dto.getSpaceId() != null) {
-                throw new BusinessRuleException(BusinessRuleType.SESSION_SCHEDULE_ADD_SPACE_IN_A_NULL_AREA);
-            }
-        }
-
-        if(dto.getLocationId() != null) {
-            location = getLocation(dto.getLocationId());
-
-            if(dto.getAreaId() != null) {
-                area = getArea(dto.getAreaId());
-
-                if(dto.getSpaceId() != null) {
-                    space = getSpace(dto.getSpaceId());
-                }
-            }
-        }
-
-        return new SessionSchedule(dto.getExecutionStart(), dto.getExecutionEnd(), dto.getUrl(), location, area, space);
     }
 }

@@ -73,6 +73,10 @@ public class Subevent implements Diffable<Subevent> {
         return this.getExecutionPeriod().getEndDate().isBefore(LocalDate.now());
     }
 
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
     @Override
     public DiffResult<Subevent> diff(Subevent updatedSubevent) {
         return new DiffBuilder<>(this, updatedSubevent, ToStringStyle.SHORT_PREFIX_STYLE)

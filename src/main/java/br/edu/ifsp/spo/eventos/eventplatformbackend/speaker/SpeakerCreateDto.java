@@ -26,7 +26,7 @@ public class SpeakerCreateDto {
     String cpf;
     @NotNull
     @NotBlank
-    @Size(min = 150, max = 300)
+    @Size(min = 50, max = 300)
     String curriculum;
     @URL
     String lattes;

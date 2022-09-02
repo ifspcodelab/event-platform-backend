@@ -9,15 +9,19 @@ import javax.validation.constraints.Size;
 public class LocationCreateDto {
     @NotNull
     @NotBlank
-    @Size(min = 4, max = 150)
+    @Size(min = 1, max = 200)
     String name;
 
     @NotNull
     @NotBlank
-    @Size(min = 20, max = 300)
+    @Size(min = 10, max = 300)
     String address;
 
     public String getName() {
         return name.strip();
+    }
+
+    public String getAddress() {
+        return address.strip();
     }
 }

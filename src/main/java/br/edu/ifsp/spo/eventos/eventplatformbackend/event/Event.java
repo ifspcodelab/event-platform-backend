@@ -87,6 +87,14 @@ public class Event implements Diffable<Event> {
         return this.executionPeriod.ended();
     }
 
+    public boolean isExecutionPeriodNotEnded() {
+        return !this.executionPeriod.ended();
+    }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
     @Override
     public DiffResult<Event> diff(Event updatedEvent) {
         return new DiffBuilder<>(this, updatedEvent, ToStringStyle.SHORT_PREFIX_STYLE)

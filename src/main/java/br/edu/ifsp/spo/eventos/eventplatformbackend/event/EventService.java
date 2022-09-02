@@ -221,8 +221,8 @@ public class EventService {
 
         event.setStatus(EventStatus.CANCELED);
         event.setCancellationMessage(cancellationMessageCreateDto.getReason());
-        activityService.cancelAllByEventId(eventId);
-        subeventService.cancelAllByEventId(eventId);
+        activityService.cancelAllByEventId(eventId, cancellationMessageCreateDto.getReason());
+        subeventService.cancelAllByEventId(eventId, cancellationMessageCreateDto.getReason());
 
         log.info("Event canceled: id={}, title={}", eventId, event.getTitle());
 

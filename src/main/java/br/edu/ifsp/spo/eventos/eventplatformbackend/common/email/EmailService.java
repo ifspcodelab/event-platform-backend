@@ -1,7 +1,8 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.common.email;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.VerificationToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,7 +10,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,9 @@ public class EmailService {
 
     @Value("${support.mail}")
     private String supportMail;
+
+    @Value("${support.name}")
+    private String supportName;
 
     @Value("${frontend.url}/")
     private String url;
@@ -65,8 +71,14 @@ public class EmailService {
         MimeMessageHelper message = new MimeMessageHelper(mail);
         message.setSubject(subject);
         message.setText(content, true);
-        message.setFrom(supportMail);
         message.setTo(email);
+
+        try {
+            message.setFrom(new InternetAddress(supportMail, supportName));
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace();
+            message.setFrom(supportMail);
+        }
 
         mailSender.send(mail);
     }

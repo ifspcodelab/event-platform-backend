@@ -9,5 +9,6 @@ public enum Action {
     CANCEL,
     SIGN_UP,
     REQUEST_PASSWORD_RESET,
-    UPDATE_PASSWORD
+    UPDATE_PASSWORD,
+    VERIFICATION_TOKEN,
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum BusinessRuleType {
     MAIL_SERVER_PROBLEM("Problema com o envio do email, tente novamente mais tarde"),
+    RESEND_EMAIL_DELAY("Não passou um minuto do envio do email"),
     EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("O período de incrições está no passado"),
     EVENT_EXECUTION_PERIOD_BEFORE_TODAY("O período de execução está no passado"),
     EVENT_REGISTRATION_END_AFTER_EVENT_EXECUTION_END("A data de fim das incrições é posterior à data de fim de execução"),

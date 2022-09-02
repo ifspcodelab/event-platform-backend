@@ -1,11 +1,13 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
@@ -25,7 +27,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RegistrationService {
+public class SignupService {
     private final AccountRepository accountRepository;
     private final AccountConfig accountConfig;
     private final VerificationTokenRepository verificationTokenRepository;
@@ -34,6 +36,7 @@ public class RegistrationService {
     private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
     private final AuditService auditService;
+    private final LogRepository logRepository;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
@@ -82,11 +85,11 @@ public class RegistrationService {
 
     public Account verify(UUID token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RegistrationException(RegistrationRuleType.NONEXISTENT_TOKEN));
+                .orElseThrow(() -> new SignupException(SignupRuleType.NONEXISTENT_TOKEN));
 
         if (verificationToken.getExpiresIn().isBefore(Instant.now())) {
-            throw new RegistrationException(
-                RegistrationRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
+            throw new SignupException(
+                SignupRuleType.VERIFICATION_TOKEN_EXPIRED, verificationToken.getAccount().getEmail()
             );
         }
 
@@ -108,11 +111,39 @@ public class RegistrationService {
     public void deleteVerificationTokenAndAccount() {
         verificationTokenRepository.findAllByExpiresInBefore(Instant.now()).forEach(token -> {
             Account account = token.getAccount();
-            // TODO: apagar os logs do usuario com esse id
+            logRepository.deleteAllByAccount(account);
             verificationTokenRepository.delete(token);
             accountRepository.delete(account);
-            log.info("Verification token: token {} - removed by registration scheduler", token.getToken());
-            log.info("Account: id {}, email {} - removed by registration scheduler", account.getId(), account.getEmail());
+            log.info("Verification token: token {} - removed by signup scheduler", token.getToken());
+            log.info("Account: id {}, email {} - removed by signup scheduler", account.getId(), account.getEmail());
         });
+    }
+
+    public Account resendEmailRegistration(String resendEmail) {
+        Account account = accountRepository.findByEmail(resendEmail)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, resendEmail));
+
+        if (!verificationTokenRepository.existsByAccount(account)) {
+            throw new SignupException(SignupRuleType.NONEXISTENT_TOKEN, resendEmail);
+        }
+
+        if (!verificationTokenRepository.existsByExpiresInAfter(Instant.now())) {
+            throw new SignupException(SignupRuleType.VERIFICATION_TOKEN_EXPIRED, resendEmail);
+        }
+
+        if (!account.getRegistrationTimestamp().plusSeconds(60).isBefore(Instant.now())) {
+            throw new BusinessRuleException(BusinessRuleType.RESEND_EMAIL_DELAY);
+        }
+
+        try {
+            VerificationToken verificationToken = verificationTokenRepository.findByAccount(account);
+            emailService.sendVerificationEmail(account, verificationToken);
+            log.info("Verification email was resent to {}", account.getEmail());
+            auditService.log(account, Action.VERIFICATION_TOKEN, ResourceName.ACCOUNT, verificationToken.getId());
+            return account;
+        } catch (MessagingException ex) {
+            log.error("Error when trying to resend confirmation e-mail to {}",account.getEmail(), ex);
+            throw new BusinessRuleException(BusinessRuleType.MAIL_SERVER_PROBLEM);
+        }
     }
 }

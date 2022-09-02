@@ -5,10 +5,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.SignupException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRuleException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.extern.slf4j.Slf4j;
@@ -209,10 +208,10 @@ public class ExceptionHandlerApp {
         return ResponseEntity.accepted().build();
     }
     
-    @ExceptionHandler(RegistrationException.class)
-    public ResponseEntity<ProblemDetail> handlerRegistrationException(RegistrationException ex) {
-        String message = String.format(ex.getRegistrationRuleType().getMessage(), ex.getEmail());
-        ProblemDetail problemDetail = new ProblemDetail(ex.getRegistrationRuleType().name(), List.of());
+    @ExceptionHandler(SignupException.class)
+    public ResponseEntity<ProblemDetail> handlerRegistrationException(SignupException ex) {
+        String message = String.format(ex.getSignupRuleType().getMessage(), ex.getEmail());
+        ProblemDetail problemDetail = new ProblemDetail(ex.getSignupRuleType().name(), List.of());
 
         log.warn(message);
 

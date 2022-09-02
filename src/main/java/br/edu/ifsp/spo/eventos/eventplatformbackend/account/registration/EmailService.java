@@ -114,7 +114,7 @@ public class EmailService {
                 "<p>Atenciosamente,</p>\n" +
                 "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
 
-        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", "diegocdsantos@gmail.com", content);
+        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", supportMail, content);
     }
 
 }

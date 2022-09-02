@@ -46,8 +46,14 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
         }
 
-        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        if(event.isExecutionPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(dto.isNeedRegistration()) {
+            if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            }
         }
 
         Activity activity = new Activity(
@@ -82,12 +88,22 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_CANCELED_STATUS);
         }
 
+        if(event.isExecutionPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
         if(subevent.getStatus().equals(EventStatus.CANCELED)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_SUBEVENT_CANCELED_STATUS);
         }
 
-        if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+        if(subevent.isExecutionPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_EXECUTION_PERIOD_BEFORE_TODAY);
+        }
+
+        if(dto.isNeedRegistration()) {
+            if(event.getRegistrationPeriod().getEndDate().isBefore(LocalDate.now())) {
+                throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CREATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY);
+            }
         }
 
         Activity activity = new Activity(
@@ -357,7 +373,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
         }
 
-        sessionService.cancelAllByActivityId(eventId, activityId);
+        sessionService.cancelAllByActivityId(eventId, activityId, cancellationMessageCreateDto.getReason());
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -403,7 +419,7 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_CANCEL_WITH_PUBLISHED_STATUS_AND_REGISTRATION_PERIOD_DOESNT_START);
         }
 
-        sessionService.cancelAllByActivityId(eventId, subeventId, activityId);
+        sessionService.cancelAllByActivityId(eventId, subeventId, activityId, cancellationMessageCreateDto.getReason());
         activity.setStatus(EventStatus.CANCELED);
         activity.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Activity canceled: id={}, title={}", activityId, activity.getTitle());
@@ -414,6 +430,7 @@ public class ActivityService {
         checksEventExists(eventId);
         return activityRepository.findAllByEventIdAndSubeventNull(eventId);
     }
+
     public List<ActivitySiteDto> findAllForSite(UUID eventId) {
         return activityRepository.findAllForSiteByEventId(eventId);
     }
@@ -632,7 +649,7 @@ public class ActivityService {
     }
 
     @Transactional
-    public void cancelAllByEventId(UUID eventId) {
+    public void cancelAllByEventId(UUID eventId, String reason) {
 
         List<Activity> activities = new ArrayList<>();
         for (Activity activity : this.findAll(eventId)) {
@@ -645,7 +662,7 @@ public class ActivityService {
                 activities.add(activity);
             }
 
-            sessionService.cancelAllByActivityId(eventId, activity.getId());
+            sessionService.cancelAllByActivityId(eventId, activity.getId(), reason);
 
         }
 
@@ -653,7 +670,7 @@ public class ActivityService {
     }
 
     @Transactional
-    public void cancelAllBySubeventId(UUID eventId, UUID subeventId) {
+    public void cancelAllBySubeventId(UUID eventId, UUID subeventId, String reason) {
 
         List<Activity> activities = new ArrayList<>();
         for (Activity activity : this.findAll(eventId, subeventId)) {
@@ -668,7 +685,7 @@ public class ActivityService {
                 activities.add(activity);
             }
 
-            sessionService.cancelAllByActivityId(eventId, subeventId, activity.getId());
+            sessionService.cancelAllByActivityId(eventId, subeventId, activity.getId(), reason);
         }
 
         activityRepository.saveAll(activities);

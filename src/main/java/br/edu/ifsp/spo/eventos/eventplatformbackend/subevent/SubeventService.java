@@ -196,7 +196,7 @@ public class SubeventService {
             throw new BusinessRuleException(BusinessRuleType.SUBEVENT_CANCEL_WITH_CANCELED_STATUS);
         }
 
-        activityService.cancelAllBySubeventId(eventId, subeventId);
+        activityService.cancelAllBySubeventId(eventId, subeventId, cancellationMessageCreateDto.getReason());
         subevent.setStatus(EventStatus.CANCELED);
         subevent.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Subevent canceled: id={}, title={}", subeventId, subevent.getTitle());
@@ -263,7 +263,7 @@ public class SubeventService {
     }
 
     @Transactional
-    public void cancelAllByEventId(UUID eventId) {
+    public void cancelAllByEventId(UUID eventId, String reason) {
         getEvent(eventId);
 
         List<Subevent> subevents = new ArrayList<>();
@@ -279,7 +279,7 @@ public class SubeventService {
                 subevents.add(subevent);
             }
 
-            activityService.cancelAllBySubeventId(eventId, subevent.getId());
+            activityService.cancelAllBySubeventId(eventId, subevent.getId(), reason);
 
         }
         subeventRepository.saveAll(subevents);

@@ -68,4 +68,8 @@ public class Subevent {
     public boolean isExecutionPeriodEnded() {
         return this.getExecutionPeriod().getEndDate().isBefore(LocalDate.now());
     }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
 }

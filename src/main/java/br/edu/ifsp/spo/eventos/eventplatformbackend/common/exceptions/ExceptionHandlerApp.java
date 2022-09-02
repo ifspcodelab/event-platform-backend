@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration.RegistrationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRuleException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
@@ -183,6 +184,17 @@ public class ExceptionHandlerApp {
             ex.getBusinessRuleType().name(),
             ex.getBusinessRuleType().getMessage()
         );
+
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(SessionRuleException.class)
+    public ResponseEntity<ProblemDetail> handlerSessionRuleException(SessionRuleException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+            "Session rule exception", List.of(new Violation(ex.getRuleType().name(), ex.getRuleType().getMessage()))
+        );
+
+        log.warn("Session rule exception: name={}, message={}", ex.getRuleType().name(), ex.getRuleType().getMessage());
 
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }

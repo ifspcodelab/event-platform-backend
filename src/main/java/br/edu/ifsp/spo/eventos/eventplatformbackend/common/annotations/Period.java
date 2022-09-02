@@ -21,7 +21,7 @@ public class Period {
     LocalDate endDate;
 
     public boolean started() {
-        return startDate.equals(LocalDate.now()) || startDate.isBefore(LocalDate.now());
+        return startDate.isEqual(LocalDate.now()) || startDate.isBefore(LocalDate.now());
     }
 
     public boolean ended() {

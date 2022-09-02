@@ -81,4 +81,12 @@ public class Event {
     public boolean isExecutionPeriodEnded() {
         return this.executionPeriod.ended();
     }
+
+    public boolean isExecutionPeriodNotEnded() {
+        return !this.executionPeriod.ended();
+    }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
 }

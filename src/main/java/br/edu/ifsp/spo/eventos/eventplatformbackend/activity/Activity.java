@@ -109,4 +109,24 @@ public class Activity {
     public boolean isPublished() {
         return this.getStatus().equals(EventStatus.PUBLISHED);
     }
+
+    public boolean isOnline() {
+        return this.getModality().equals(ActivityModality.ONLINE);
+    }
+
+    public boolean isInPerson() {
+        return this.getModality().equals(ActivityModality.IN_PERSON);
+    }
+
+    public boolean isHibrid() {
+        return this.getModality().equals(ActivityModality.HYBRID);
+    }
+
+    public Long getDurationInSeconds() {
+        return (long) (duration * 60);
+    }
+
+    public Long getSetupTimeInSeconds() {
+        return (long) (setupTime * 60);
+    }
 }

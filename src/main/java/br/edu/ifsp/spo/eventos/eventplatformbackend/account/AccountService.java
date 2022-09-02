@@ -148,7 +148,6 @@ public class AccountService {
     }
 
     public List<Log> findAllLogsByAccountId(UUID accountId) {
-        //TODO: refactor to get logs related to login, logout and account edits
-        return logRepository.findAllByAccountId(accountId);
+        return logRepository.findAllByAccountIdAndResourceNameIn(accountId, List.of(ResourceName.ACCOUNT, ResourceName.REFRESH_TOKEN));
     }
 }

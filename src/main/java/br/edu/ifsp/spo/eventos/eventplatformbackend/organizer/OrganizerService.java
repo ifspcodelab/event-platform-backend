@@ -2,7 +2,12 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -20,6 +25,7 @@ public class OrganizerService {
     private OrganizerRepository organizerRepository;
     private AccountRepository accountRepository;
     private EventRepository eventRepository;
+    private final AuditService auditService;
 
     public Organizer create(UUID eventId, OrganizerCreateDto organizerDto) {
         Account account = getAccount(organizerDto.getAccountId());
@@ -38,7 +44,13 @@ public class OrganizerService {
         }
 
         Organizer organizer = new Organizer(organizerDto.getType(), account, event);
-        return organizerRepository.save(organizer);
+        organizerRepository.save(organizer);
+
+        auditService.logAdmin(Action.CREATE, ResourceName.ORGANIZER, organizer.getId());
+        auditService.logAdminUpdate(ResourceName.EVENT, String.format("Account of email %s associated to the event's organization", account.getEmail()), eventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta associada à organização do evento %s", event.getTitle()), account.getId());
+
+        return organizer;
     }
 
     public List<Organizer> findAll(UUID eventId) {
@@ -61,6 +73,10 @@ public class OrganizerService {
 
         organizerRepository.delete(organizer);
         log.info("Organizer event deleted: organizer id={}, event id={}", organizerId, eventId);
+
+        auditService.logAdminDelete(ResourceName.ORGANIZER, organizerId);
+        auditService.logAdminUpdate(ResourceName.EVENT, String.format("Account of email %s removed from the event's organization", organizer.getAccount().getEmail()), eventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta removida da organização do evento %s", organizer.getEvent().getTitle()), organizer.getAccount().getId());
     }
 
     private Organizer getOrganizer(UUID organizerId) {

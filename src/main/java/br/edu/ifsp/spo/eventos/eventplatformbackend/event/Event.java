@@ -5,6 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Event {
+public class Event implements Diffable<Event> {
     @Id
     private UUID id;
     private String title;
@@ -88,5 +93,24 @@ public class Event {
 
     public boolean isCanceled() {
         return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
+    @Override
+    public DiffResult<Event> diff(Event updatedEvent) {
+        return new DiffBuilder<>(this, updatedEvent, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedEvent.title)
+                .append("Slug", this.slug, updatedEvent.slug)
+                .append("Resumo", this.summary, updatedEvent.summary)
+                .append("Apresentação", this.presentation, updatedEvent.presentation)
+                .append("Contato", this.contact, updatedEvent.contact)
+                .append("Período de inscrições",
+                        String.format(this.registrationPeriod.getStartDate() + " - " + this.registrationPeriod.getEndDate()),
+                        String.format(updatedEvent.registrationPeriod.getStartDate() + " - " + updatedEvent.registrationPeriod.getEndDate()))
+                .append("Período de execução",
+                        String.format(this.executionPeriod.getStartDate() + " - " + this.executionPeriod.getEndDate()),
+                        String.format(updatedEvent.executionPeriod.getStartDate() + " - " + updatedEvent.executionPeriod.getEndDate()))
+                .append("Capa menor", this.smallerImage, updatedEvent.smallerImage)
+                .append("Capa maior", this.biggerImage, updatedEvent.biggerImage)
+                .build();
     }
 }

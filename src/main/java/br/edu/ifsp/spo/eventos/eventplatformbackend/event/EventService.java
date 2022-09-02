@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
@@ -7,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +23,7 @@ public class EventService {
     private final SubeventRepository subeventRepository;
     private final SubeventService subeventService;
     private final ActivityService activityService;
+    private final AuditService auditService;
 
     public Event create(EventCreateDto dto) {
         if(eventRepository.existsByTitle(dto.getTitle())) {
@@ -99,6 +103,8 @@ public class EventService {
 
         eventRepository.deleteById(eventId);
 
+        auditService.logAdminDelete(ResourceName.EVENT, eventId);
+
         log.info("Event deleted: id={}, title={}", eventId, event.getTitle());
     }
 
@@ -160,6 +166,17 @@ public class EventService {
             throw new BusinessRuleException(BusinessRuleType.EVENT_UPDATE_WITH_CANCELED_STATUS);
         }
 
+        Event currentEvent = new Event();
+        currentEvent.setTitle(event.getTitle());
+        currentEvent.setSlug(event.getSlug());
+        currentEvent.setSummary(event.getSummary());
+        currentEvent.setPresentation(event.getPresentation());
+        currentEvent.setContact(event.getContact());
+        currentEvent.setRegistrationPeriod(event.getRegistrationPeriod());
+        currentEvent.setExecutionPeriod(event.getExecutionPeriod());
+        currentEvent.setSmallerImage(event.getSmallerImage());
+        currentEvent.setBiggerImage(event.getBiggerImage());
+
         event.setTitle(dto.getTitle());
         event.setSlug(dto.getSlug());
         event.setSummary(dto.getSummary());
@@ -169,6 +186,10 @@ public class EventService {
         event.setExecutionPeriod(dto.getExecutionPeriod());
         event.setSmallerImage(dto.getSmallerImage());
         event.setBiggerImage(dto.getBiggerImage());
+
+        DiffResult<?> diffResult = currentEvent.diff(event);
+
+        auditService.logAdminUpdate(ResourceName.EVENT, diffResult.getDiffs().toString(), eventId);
 
         return eventRepository.save(event);
     }
@@ -205,6 +226,8 @@ public class EventService {
 
         log.info("Event canceled: id={}, title={}", eventId, event.getTitle());
 
+        auditService.logAdmin(Action.CANCEL, ResourceName.EVENT, eventId);
+
         return eventRepository.save(event);
     }
 
@@ -228,6 +251,8 @@ public class EventService {
         event.setStatus(EventStatus.PUBLISHED);
 
         log.info("Event published: id={}, title={}", eventId, event.getTitle());
+
+        auditService.logAdmin(Action.PUBLISH, ResourceName.EVENT, eventId);
 
         return eventRepository.save(event);
     }
@@ -257,6 +282,8 @@ public class EventService {
         subeventService.unpublishAllByEventId(eventId);
 
         log.info("Event unpublished: id={}, title={}", eventId, event.getTitle());
+
+        auditService.logAdmin(Action.UNPUBLISH, ResourceName.EVENT, eventId);
 
         return eventRepository.save(event);
     }

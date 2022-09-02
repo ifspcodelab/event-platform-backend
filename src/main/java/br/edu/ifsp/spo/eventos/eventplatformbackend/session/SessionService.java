@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
@@ -33,6 +35,7 @@ public class SessionService {
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
     private final SpaceRepository spaceRepository;
+    private final AuditService auditService;
 
     public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
         Activity activity = getActivity(activityId);
@@ -85,6 +88,7 @@ public class SessionService {
         session.setCanceled(true);
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdmin(Action.CANCEL, ResourceName.SESSION, sessionId);
         return sessionRepository.save(session);
     }
 
@@ -101,6 +105,7 @@ public class SessionService {
         session.setCanceled(true);
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdmin(Action.CANCEL, ResourceName.SESSION, sessionId);
         return sessionRepository.save(session);
     }
 
@@ -113,6 +118,7 @@ public class SessionService {
         checkIfRegistrationPeriodNotStarted(session);
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
@@ -125,6 +131,7 @@ public class SessionService {
         checkIfRegistrationPeriodNotStarted(session);
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
+        auditService.logAdminDelete(ResourceName.SESSION, sessionId);
     }
 
     private void checkIfEventSubEventActivityIsNotCancelled(Activity activity) {

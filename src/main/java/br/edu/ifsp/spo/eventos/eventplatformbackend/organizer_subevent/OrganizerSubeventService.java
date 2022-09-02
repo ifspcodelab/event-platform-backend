@@ -2,6 +2,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
@@ -26,6 +28,7 @@ public class OrganizerSubeventService {
     private final AccountRepository accountRepository;
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
+    private final AuditService auditService;
 
     public OrganizerSubevent create(UUID eventId, UUID subeventId, OrganizerSubeventCreateDto dto) {
         Account account = getAccount(dto.getAccountId());
@@ -49,7 +52,13 @@ public class OrganizerSubeventService {
         }
 
         OrganizerSubevent organizerSubevent = new OrganizerSubevent(dto.getType(), account, event, subevent);
-        return organizerSubeventRepository.save(organizerSubevent);
+        organizerSubeventRepository.save(organizerSubevent);
+
+        auditService.logAdmin(Action.CREATE, ResourceName.ORGANIZERSUBEVENT, organizerSubevent.getId());
+        auditService.logAdminUpdate(ResourceName.SUBEVENT, String.format("Account of email %s associated to the subevent's organization", account.getEmail()), subeventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta associada à organização do subevento %s", subevent.getTitle()), account.getId());
+
+        return organizerSubevent;
     }
 
     public List<OrganizerSubevent> findAll(UUID eventId, UUID subeventId) {
@@ -78,6 +87,10 @@ public class OrganizerSubeventService {
 
         organizerSubeventRepository.delete(organizerSubevent);
         log.info("Organizer subevent deleted: organizer id={}, subevent id={}", organizerSubeventId, subeventId);
+
+        auditService.logAdminDelete(ResourceName.ORGANIZERSUBEVENT, organizerSubeventId);
+        auditService.logAdminUpdate(ResourceName.SUBEVENT, String.format("Account of email %s removed from the subevent's organization", organizerSubevent.getAccount().getEmail()), subeventId);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, String.format("Conta removida da organização do subevento %s", organizerSubevent.getSubevent().getTitle()), organizerSubevent.getAccount().getId());
     }
 
     private OrganizerSubevent getOrganizerSubevent(UUID organizerSubeventId) {

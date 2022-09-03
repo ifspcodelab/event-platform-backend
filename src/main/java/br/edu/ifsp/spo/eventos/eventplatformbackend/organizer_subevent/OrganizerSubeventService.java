@@ -67,11 +67,6 @@ public class OrganizerSubeventService {
         return organizerSubeventRepository.findAllBySubeventId(subeventId);
     }
 
-    public List<OrganizerSubEventSiteDto> findAllForSite(UUID subeventId) {
-        checkSubeventExists(subeventId);
-        return organizerSubeventRepository.findAllOrganizerBySubEventId(subeventId);
-    }
-
     public void delete(UUID eventId, UUID subeventId, UUID organizerSubeventId) {
         OrganizerSubevent organizerSubevent = getOrganizerSubevent(organizerSubeventId);
         checkEventExists(eventId);

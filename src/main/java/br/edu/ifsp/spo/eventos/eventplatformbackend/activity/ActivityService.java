@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;

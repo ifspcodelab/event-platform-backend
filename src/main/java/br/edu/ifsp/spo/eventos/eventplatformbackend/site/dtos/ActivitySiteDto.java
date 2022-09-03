@@ -1,5 +1,6 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

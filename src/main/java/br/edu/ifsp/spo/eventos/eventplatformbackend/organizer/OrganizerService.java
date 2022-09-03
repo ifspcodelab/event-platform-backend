@@ -58,11 +58,6 @@ public class OrganizerService {
         return organizerRepository.findAllByEventId(eventId);
     }
 
-    public List<OrganizerSiteDto> findAllForSite(UUID eventId) {
-        checkEventExists(eventId);
-        return organizerRepository.findAllOrganizerByEventId(eventId);
-    }
-
     public void delete(UUID eventId, UUID organizerId) {
         Organizer organizer = getOrganizer(organizerId);
         checkEventExists(eventId);

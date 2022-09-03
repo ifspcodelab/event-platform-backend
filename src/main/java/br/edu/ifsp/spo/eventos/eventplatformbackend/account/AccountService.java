@@ -148,6 +148,6 @@ public class AccountService {
     }
 
     public List<Log> findAllLogsByAccountId(UUID accountId) {
-        return logRepository.findAllByAccountIdAndResourceNameIn(accountId, List.of(ResourceName.ACCOUNT, ResourceName.REFRESH_TOKEN));
+        return logRepository.findAllByAccountIdAndResourceNameInOrderByCreatedAtDesc(accountId, List.of(ResourceName.ACCOUNT, ResourceName.REFRESH_TOKEN));
     }
 }

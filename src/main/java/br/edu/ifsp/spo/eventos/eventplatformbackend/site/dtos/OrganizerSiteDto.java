@@ -1,4 +1,4 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.site;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerType;
 import lombok.AllArgsConstructor;

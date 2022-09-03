@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -15,6 +14,5 @@ public class SessionDto {
     Integer seats;
     String cancellationMessage;
     boolean canceled;
-    ActivityDto activity;
     List<SessionScheduleDto> sessionSchedules;
 }

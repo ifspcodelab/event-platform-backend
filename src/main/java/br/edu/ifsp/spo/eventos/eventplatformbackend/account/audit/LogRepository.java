@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface LogRepository extends JpaRepository<Log, UUID> {
-    List<Log> findAllByAccountIdAndResourceNameIn(UUID id, List<ResourceName> resourceNames);
+    List<Log> findAllByAccountIdAndResourceNameInOrderByCreatedAtDesc(UUID id, List<ResourceName> resourceNames);
     void deleteAllByAccount(Account account);
 }

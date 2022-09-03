@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,5 +17,6 @@ public interface SubeventRepository extends JpaRepository<Subevent, UUID> {
     boolean existsBySlugAndEventIdAndIdNot(String Slug, UUID eventId, UUID subeventId);
     List<Subevent> findAllByEventId(UUID eventId);
     boolean existsByEventId(UUID eventId);
-    Optional<Subevent> findSubeventBySlugAndEventId(String slug, UUID subeventId);
+    List<Subevent> findAllByEventSlugAndStatus(String eventSlug,EventStatus status);
+    Optional<Subevent> findByEventSlugAndSlugAndStatus(String eventSlug, String subeventSlug, EventStatus status);
 }

@@ -14,6 +14,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.site.mappers.SubeventSiteMap
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,11 +37,13 @@ public class SiteController {
     private final OrganizerSubeventRepository organizerSubeventRepository;
     private final ActivityRepository activityRepository;
 
+    @Cacheable(value = "events")
     @GetMapping("events")
     public ResponseEntity<List<EventSiteDto>> home() {
         return ResponseEntity.ok(eventSiteMapper.to(eventRepository.findAllByStatus(EventStatus.PUBLISHED)));
     }
 
+    @Cacheable(value = "event", key = "#eventSlug")
     @GetMapping("events/{eventSlug}")
     public ResponseEntity<EventSiteDto> event(@PathVariable String eventSlug) {
         Optional<Event> optionalEvent = eventRepository.findBySlugAndStatus(eventSlug, EventStatus.PUBLISHED);
@@ -51,6 +54,7 @@ public class SiteController {
         return ResponseEntity.ok(eventSiteMapper.to(optionalEvent.get()));
     }
 
+    @Cacheable(value = "event_subevents", key = "#eventSlug")
     @GetMapping("events/{eventSlug}/sub-events")
     public ResponseEntity<List<SubeventSiteDto>> subEventList(@PathVariable String eventSlug) {
         return ResponseEntity.ok(
@@ -58,6 +62,7 @@ public class SiteController {
         );
     }
 
+    @Cacheable(value = "subevent", key = "#subeventSlug")
     @GetMapping("events/{eventSlug}/sub-events/{subeventSlug}")
     public ResponseEntity<SubeventSiteDto> subEvent(@PathVariable String eventSlug, @PathVariable String subeventSlug) {
         Optional<Subevent> subeventOptional =
@@ -70,11 +75,13 @@ public class SiteController {
         return ResponseEntity.ok(subeventSiteMapper.to(subeventOptional.get()));
     }
 
+    @Cacheable(value = "event_organizers", key = "#eventId")
     @GetMapping("events/{eventId}/organizers")
     public ResponseEntity<List<OrganizerSiteDto>> eventOrganizers(@PathVariable UUID eventId) {
         return ResponseEntity.ok(organizerRepository.findAllOrganizerByEventId(eventId));
     }
 
+    @Cacheable(value = "subevent_organizers", key = "#subeventId")
     @GetMapping("events/{eventId}/sub-events/{subeventId}/organizers")
     public ResponseEntity<List<OrganizerSubEventSiteDto>> subeventOrganizers(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
         return ResponseEntity.ok(organizerSubeventRepository.findAllOrganizerBySubEventId(subeventId));
@@ -98,6 +105,7 @@ public class SiteController {
 
     record SessionsGroupByDate(String day, List<SessionSiteDto> sessions) {}
 
+    @Cacheable(value = "event_activities", key = "#eventId")
     @GetMapping("events/{eventId}/activities")
     public ResponseEntity<List<SessionsGroupByDate>> eventActivities(@PathVariable UUID eventId) {
         List<ActivitySiteDto> sessions = activityRepository.findAllForSiteByEventId(eventId);
@@ -135,6 +143,7 @@ public class SiteController {
         return ResponseEntity.ok(sessionsGroupByDate);
     }
 
+    @Cacheable(value = "subevent_activities", key = "#subeventId")
     @GetMapping("events/{eventId}/sub-events/{subeventId}/activities")
     public ResponseEntity<List<SessionsGroupByDate>> subeventActivities(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
         List<ActivitySiteDto> sessions = activityRepository.findAllForSiteByEventIdAndSubeventId(eventId, subeventId);

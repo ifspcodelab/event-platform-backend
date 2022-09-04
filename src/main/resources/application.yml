@@ -57,6 +57,10 @@ scheduler:
   password-reset:
     interval: ${SCHEDULER_PASSWORD_RESET_INTERVAL:300000}
 
+app:
+  cache:
+    expireTimeInSeconds: ${APP_CACHE_EXPIRE_TIME_IN_SECONDS:60}
+
 logging:
   level:
     root: INFO

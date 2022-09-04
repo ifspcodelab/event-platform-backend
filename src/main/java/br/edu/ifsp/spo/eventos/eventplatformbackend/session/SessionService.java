@@ -192,11 +192,11 @@ public class SessionService {
             if(subevent != null) {
                 outSideExecutionPeriod =
                     s.getExecutionStart().isBefore(subevent.getExecutionPeriod().getStartDate().atStartOfDay()) ||
-                    s.getExecutionEnd().isAfter(subevent.getExecutionPeriod().getEndDate().atStartOfDay());
+                    s.getExecutionEnd().isAfter(subevent.getExecutionPeriod().getEndDate().plusDays(1).atStartOfDay());
             } else {
                 outSideExecutionPeriod =
                     s.getExecutionStart().isBefore(event.getExecutionPeriod().getStartDate().atStartOfDay()) ||
-                    s.getExecutionEnd().isAfter(event.getExecutionPeriod().getEndDate().atStartOfDay());
+                    s.getExecutionEnd().isAfter(event.getExecutionPeriod().getEndDate().plusDays(1).atStartOfDay());
             }
 
             if(outSideExecutionPeriod) {

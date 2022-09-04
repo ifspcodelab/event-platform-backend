@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityModality;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,10 +14,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActivitySiteDto {
-    UUID activityid;
+    UUID eventId;
+    UUID subEventId;
+    UUID activityId;
     String activityTitle;
     String activitySlug;
     ActivityType activityType;
+    ActivityModality activityModality;
     String activityDescription;
     String speakerName;
     String sessionTitle;
@@ -27,5 +31,4 @@ public class ActivitySiteDto {
     public LocalDate getSessionScheduleExecutionStartDate() {
         return sessionScheduleExecutionStart.toLocalDate();
     }
-
 }

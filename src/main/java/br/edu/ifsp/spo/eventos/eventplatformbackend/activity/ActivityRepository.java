@@ -21,27 +21,22 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     boolean existsBySlugAndEventIdAndIdNot(String Slug, UUID eventId, UUID activityId);
     boolean existsBySlugAndSubeventIdAndIdNot(String Slug, UUID subeventId, UUID activityId);
 
-//    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(a.id, a.title, a.slug) FROM Activity a WHERE a.event.id = ?1 AND a.subevent.id = NULL")
-//    List<ActivitySiteDto> findAllForSiteByEventId(UUID eventId);
-
-    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.id, act.title, act.slug, act.type, act.description, spe.name, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
            "FROM Activity act\n" +
            "JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
            "JOIN Speaker spe ON act_spe.speaker = spe\n" +
            "JOIN Session ses ON act = ses.activity\n" +
            "JOIN SessionSchedule sch ON ses = sch.session\n" +
-           "WHERE act.event.id = ?1 AND act.subevent = null AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED\n" +
-           "ORDER BY sch.executionStart, act.title, ses.title, spe.name")
+           "WHERE act.event.id = ?1 AND act.subevent = null AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED")
     List<ActivitySiteDto> findAllForSiteByEventId(UUID eventId);
 
-    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.id, act.title, act.slug, act.type, spe.name, act.description, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
            "FROM Activity act\n" +
            "JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
            "JOIN Speaker spe ON act_spe.speaker = spe\n" +
            "JOIN Session ses ON act = ses.activity\n" +
            "JOIN SessionSchedule sch ON ses = sch.session\n" +
-           "WHERE act.event.id = ?1 AND act.subevent.id = ?2 AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED\n" +
-           "ORDER BY sch.executionStart, act.title, ses.title, spe.name")
+           "WHERE act.event.id = ?1 AND act.subevent.id = ?2 AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED")
     List<ActivitySiteDto> findAllForSiteByEventIdAndSubeventId(UUID eventId, UUID subeventId);
 
 }

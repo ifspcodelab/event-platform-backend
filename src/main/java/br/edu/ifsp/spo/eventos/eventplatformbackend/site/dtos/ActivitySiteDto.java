@@ -23,6 +23,7 @@ public class ActivitySiteDto {
     ActivityModality activityModality;
     String activityDescription;
     String speakerName;
+    UUID sessionId;
     String sessionTitle;
     UUID sessionScheduleId;
     LocalDateTime sessionScheduleExecutionStart;

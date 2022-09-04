@@ -21,7 +21,7 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     boolean existsBySlugAndEventIdAndIdNot(String Slug, UUID eventId, UUID activityId);
     boolean existsBySlugAndSubeventIdAndIdNot(String Slug, UUID subeventId, UUID activityId);
 
-    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.id, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
            "FROM Activity act\n" +
            "JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
            "JOIN Speaker spe ON act_spe.speaker = spe\n" +
@@ -30,7 +30,7 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
            "WHERE act.event.id = ?1 AND act.subevent = null AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED")
     List<ActivitySiteDto> findAllForSiteByEventId(UUID eventId);
 
-    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.id, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
            "FROM Activity act\n" +
            "JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
            "JOIN Speaker spe ON act_spe.speaker = spe\n" +

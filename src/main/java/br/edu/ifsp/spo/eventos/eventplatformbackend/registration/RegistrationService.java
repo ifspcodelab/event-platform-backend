@@ -11,8 +11,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
@@ -23,13 +24,15 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class RegistrationService {
     private final SessionRepository sessionRepository;
     private final RegistrationRepository registrationRepository;
     private final AccountRepository accountRepository;
     private final EmailService emailService;
+    @Value("${registration.email-confirmation-time}")
+    private String emailConfirmationTime;
 
     @Transactional
     public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID activityId, UUID sessionId) {
@@ -39,7 +42,7 @@ public class RegistrationService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
         checkIfSessionIsCancelled(session);
-        
+
         //Verificar se já tem uma inscrição nessa atividade
         //flag se requer inscrição ou não
 
@@ -49,7 +52,7 @@ public class RegistrationService {
 
         checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(accountLock, session);
+        checkIfExistsAnyRegistrationWithConflict(accountLock, session);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -84,7 +87,7 @@ public class RegistrationService {
 
         checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(accountLock, session);
+        checkIfExistsAnyRegistrationWithConflict(accountLock, session);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -108,7 +111,7 @@ public class RegistrationService {
         var event = activity.getEvent();
         checkIfSessionIsCancelled(session);
         checkIfActivityIsCanceled(activity);
-        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+        checksIfItIsOutOfRegistrationPeriod(event);
         checksIfAccountHasARegistrationInActivity(account.getId(), activity.getId());
         checkIfSessionStarted(session);
         //Verificar se já tem uma inscrição nessa atividade
@@ -118,7 +121,7 @@ public class RegistrationService {
 
         checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(accountLock, session);
+        checkIfExistsAnyRegistrationWithConflict(accountLock, session);
 
         // Verificar se a sesssao ja iniciou (so para participantes, admin pode)
 
@@ -144,7 +147,7 @@ public class RegistrationService {
         checksIfActivityIsAssociateToSession(activityId, session);
         checkIfSessionIsCancelled(session);
         checkIfActivityIsCanceled(activity);
-        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+        checksIfItIsOutOfRegistrationPeriod(event);
         checksIfAccountHasARegistrationInActivity(account.getId(), activityId);
         checkIfSessionStarted(session);
         // Verificar se a sesssao ja iniciou
@@ -154,7 +157,7 @@ public class RegistrationService {
 
         checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(accountLock, session);
+        checkIfExistsAnyRegistrationWithConflict(accountLock, session);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -177,7 +180,7 @@ public class RegistrationService {
         checksIfActivityIsAssociateToSession(activityId, session);
         checkIfSessionIsCancelled(session);
         checkIfActivityIsCanceled(activity);
-        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+        checksIfItIsOutOfRegistrationPeriod(event);
         checksIfAccountHasARegistrationInActivity(account.getId(), activityId);
         checkIfSessionStarted(session);
         // Verificar se a sesssao ja iniciou
@@ -186,7 +189,7 @@ public class RegistrationService {
 
         checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
 
-        checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(accountLock, session);
+        checkIfExistsAnyRegistrationWithConflict(accountLock, session);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -208,11 +211,11 @@ public class RegistrationService {
 
         checkIfSessionIsCancelled(session);
         checkIfActivityIsCanceled(activity);
-        checkIfTodayIsOutOfRegistrationPeriodOfEvent(event);
+        checksIfItIsOutOfRegistrationPeriod(event);
         checkIfAccountHasARegistrationInSession(accountLock.getId(), sessionId);
         checksIfAccountHasARegistrationInActivity(account.getId(), activity.getId());
         checkIfSessionStarted(session);
-        checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(accountLock, session);
+        checkIfExistsAnyRegistrationWithConflict(accountLock, session);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -239,11 +242,11 @@ public class RegistrationService {
         }
         else if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
             //TODO: garantir que está vindo por data, orderByDate ou ascendente no final
-           var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(sessionId, RegistrationStatus.WAITING_LIST).get();
-           firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
-           firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
-           registrationRepository.save(firstRegistrationInWaitList);
-           sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
+            var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(sessionId, RegistrationStatus.WAITING_LIST).get();
+            firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+            firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
+            registrationRepository.save(firstRegistrationInWaitList);
+            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
         }
         else {
             sessionLock.decrementNumberOfConfirmedSeats();
@@ -270,7 +273,12 @@ public class RegistrationService {
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
-        if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
+        if(isSessionStarted(sessionLock)) {
+            sessionLock.decrementNumberOfConfirmedSeats();
+            sessionRepository.save(sessionLock);
+        }
+
+        else if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
             var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(sessionId, RegistrationStatus.WAITING_LIST).get();
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
@@ -298,8 +306,12 @@ public class RegistrationService {
         checksIfAccountIsAssociateToRegistration(accountId, registration);
 
         Session sessionLock = sessionRepository.findByIdWithPessimisticLock(session.getId()).get();
+        if(isSessionStarted(sessionLock)) {
+            sessionLock.decrementNumberOfConfirmedSeats();
+            sessionRepository.save(sessionLock);
+        }
 
-        if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
+        else if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
             var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(session.getId(), RegistrationStatus.WAITING_LIST).get();
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
@@ -351,6 +363,7 @@ public class RegistrationService {
 
     @Transactional
     public Registration acceptSessionSeat(UUID accountId, UUID registrationId) {
+        log.info(emailConfirmationTime);
         var registration = getRegistration(registrationId);
         var account = registration.getAccount();
         var session = registration.getSession();
@@ -359,7 +372,7 @@ public class RegistrationService {
         //verificar se o usuário ja aceitou ou se o sistema negou (data resposta)
         checksIfEmailWasAnswered(registration);
 
-        if(registration.getTimeEmailWasSent().plusHours(12).isBefore(LocalDateTime.now())) {
+        if(registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now())) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS);
         }
 
@@ -382,11 +395,16 @@ public class RegistrationService {
         //verificar se o usuário ja negou ou sistema negou
         checksIfEmailWasAnswered(registration);
 
-        if(registration.getTimeEmailWasSent().plusHours(12).isBefore(LocalDateTime.now())) {
+        if(registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now())) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_DENY_WITH_EXPIRED_HOURS);
         }
 
-        if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
+        if(isSessionStarted(session)) {
+            session.decrementNumberOfConfirmedSeats();
+            sessionRepository.save(session);
+        }
+
+        else if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
             var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(session.getId(), RegistrationStatus.WAITING_LIST).get();
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
@@ -407,17 +425,22 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void cancelAllRegistrationInWaitConfirmationThatWereNotAnswered() {
+    public void cancelAllRegistrationInWaitConfirmation() {
         List<Registration> registrations = registrationRepository.findAllByRegistrationStatus(LocalDateTime.now(), RegistrationStatus.WAITING_CONFIRMATION);
-        
-        registrations.stream().filter(registration -> registration.getTimeEmailWasSent().plusHours(12).isBefore(LocalDateTime.now()))
+
+        registrations.stream().filter(registration -> registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now()))
             .forEach(registration -> {
                 registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_SYSTEM);
                 log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
 
                 Session sessionLock = sessionRepository.findByIdWithPessimisticLock(registration.getSession().getId()).get();
 
-                if(checkIfExistAnyRegistrationInWaitListBySessionId(registration.getSession().getId())) {
+                if(isSessionStarted(sessionLock)) {
+                    sessionLock.decrementNumberOfConfirmedSeats();
+                    sessionRepository.save(sessionLock);
+                }
+
+                else if(checkIfExistAnyRegistrationInWaitListBySessionId(registration.getSession().getId())) {
                     var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(registration.getSession().getId(), RegistrationStatus.WAITING_LIST).get();
                     firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
                     firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
@@ -452,7 +475,7 @@ public class RegistrationService {
             .get();
 
         if(firstSessionSchedule.getExecutionStart().isBefore(LocalDateTime.now()) ||
-                firstSessionSchedule.getExecutionStart().isBefore(LocalDateTime.now())
+            firstSessionSchedule.getExecutionStart().isBefore(LocalDateTime.now())
         ) {
             return true;
         }
@@ -462,11 +485,11 @@ public class RegistrationService {
 
     private void checkIfSessionStarted(Session session) {
         SessionSchedule firstSessionSchedule = session.getSessionsSchedules().stream()
-                .min(Comparator.comparing(SessionSchedule::getExecutionStart))
-                .get();
+            .min(Comparator.comparing(SessionSchedule::getExecutionStart))
+            .get();
 
         if(firstSessionSchedule.getExecutionStart().isBefore(LocalDateTime.now()) ||
-            firstSessionSchedule.getExecutionStart().isBefore(LocalDateTime.now())
+                firstSessionSchedule.getExecutionStart().isBefore(LocalDateTime.now())
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_SESSION_STARTED);
         }
@@ -487,7 +510,7 @@ public class RegistrationService {
         }
     }
 
-    private void checkIfExistsAnyRegistrationConfirmedOrWaitingConfirmationWithConflict(Account accountLock, Session session) {
+    private void checkIfExistsAnyRegistrationWithConflict(Account accountLock, Session session) {
         //TODO: pegar data de hj e verificar os registros de hj e do futuro
         var registrations = registrationRepository.findAllByAccountIdAndRegistrationStatusInAndDate(
             accountLock.getId(),
@@ -506,21 +529,21 @@ public class RegistrationService {
 
     private void cancellAllRegistrationsInWaitListWithConflict(Account accountLock, Session session) {
         var registrationsInWaitList = registrationRepository.findAllByAccountIdAndRegistrationStatusInAndDate(
-                accountLock.getId(),
-                LocalDateTime.now(),
-                List.of(RegistrationStatus.WAITING_LIST)
+            accountLock.getId(),
+            LocalDateTime.now(),
+            List.of(RegistrationStatus.WAITING_LIST)
         );
 
         List<UUID> sessionsId = new ArrayList<>();
 
         registrationsInWaitList.stream()
-            .flatMap(registrationInWaitList -> registrationInWaitList.getSession().getSessionsSchedules().stream())
-            .forEach(schedule -> {
-                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
-                    sessionsId.add(schedule.getSession().getId());
-                    //TODO: adicionar o id da sessão que está dentro do schedule dentro de uma lista de sessões
-                }
-            });
+                .flatMap(registrationInWaitList -> registrationInWaitList.getSession().getSessionsSchedules().stream())
+                .forEach(schedule -> {
+                    if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                        sessionsId.add(schedule.getSession().getId());
+                        //TODO: adicionar o id da sessão que está dentro do schedule dentro de uma lista de sessões
+                    }
+                });
 
         List<Registration> registrationsToBeCancel = registrationRepository.findAllByAccountIdAndSessionIdIn(accountLock.getId(), sessionsId);
         registrationsToBeCancel.forEach(s -> s.setRegistrationStatus(RegistrationStatus.CANCELED_BY_SYSTEM));
@@ -543,7 +566,7 @@ public class RegistrationService {
         }
     }
 
-    private void checkIfTodayIsOutOfRegistrationPeriodOfEvent(Event event) {
+    private void checksIfItIsOutOfRegistrationPeriod(Event event) {
         if(event.getRegistrationPeriod().todayIsOutOfPeriod()) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD);
         }
@@ -563,9 +586,9 @@ public class RegistrationService {
 
     private void checkIfAccountHasARegistrationInSession(UUID accountId, UUID sessionId) {
         if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatusIn(
-            sessionId,
-            accountId,
-            List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.WAITING_LIST)
+                sessionId,
+                accountId,
+                List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.WAITING_LIST)
         )) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
         }
@@ -609,16 +632,16 @@ public class RegistrationService {
 
     private Account getAccount(UUID accountId) {
         return accountRepository.findById(accountId)
-            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, accountId));
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, accountId));
     }
 
     private Session getSession(UUID sessionId) {
         return sessionRepository.findById(sessionId)
-            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
     }
 
     private Registration getRegistration(UUID registrationId) {
         return registrationRepository.findById(registrationId)
-            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, registrationId));
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, registrationId));
     }
 }

@@ -49,11 +49,14 @@ jwt:
 
 recaptcha:
   secret: ${RECAPTCHA_SECRET}
-  site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
+  site: ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
 
 scheduler:
   registration:
-    interval: ${SCHEDULER_REGISTRATION_INTERVAL:1800000}
+    interval: ${SCHEDULER_REGISTRATION_INTERVAL:300000}
+
+registration:
+  email-confirmation-time: 12
 
 logging:
   level:

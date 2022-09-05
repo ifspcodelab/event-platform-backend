@@ -80,7 +80,7 @@ public class EmailService {
 
         var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Confirme seu cadastro na atividade " + registration.getSession().getActivity().getTitle() + "</h1>\n" +
                 "<p>Ol&aacute;, "+ name + ".</p>\n" +
-                "<p>Voc&ecirc; saiu da lista de espera e conseguiu uma vaga na sess&atilde;o " + registration.getSession().getTitle() + ", para os hor&aacute;rios:\n" +
+                "<p>Voc&ecirc; saiu da lista de espera e conseguiu uma vaga na sess&atilde;o " + registration.getSession().getTitle() + ", para os hor&aacute;rios:<br>" +
                 sessionSchedulesString +
                 "</p>\n" +
                 "<p>Ao confirmar sua presen&ccedil;a na sess&atilde;o, voc&ecirc; ser&aacute; removido automaticamente de todas as listas de espera no hor&aacute;rio dessa sess&atilde;o. Voc&ecirc; possui 12 horas para confirmar. Para confirmar sua presen&ccedil;a, selecione o bot&atilde;o abaixo.</p>\n" +

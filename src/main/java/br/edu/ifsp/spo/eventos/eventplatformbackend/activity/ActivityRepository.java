@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -39,4 +40,28 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
            "WHERE act.event.id = ?1 AND act.subevent.id = ?2 AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED")
     List<ActivitySiteDto> findAllForSiteByEventIdAndSubeventId(UUID eventId, UUID subeventId);
 
+
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.status, act.modality, act.needRegistration, act.setupTime, act.duration, act.description, spe.name,  ses.id, ses.title, ses.seats, sch.id, sch.executionStart, sch.executionEnd, sch.url, loc.name, are.name, spa.name) \n" +
+        "FROM Activity act\n" +
+        "INNER JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
+        "INNER JOIN Speaker spe ON act_spe.speaker = spe\n" +
+        "INNER JOIN Session ses ON act = ses.activity\n" +
+        "INNER JOIN SessionSchedule sch ON ses = sch.session\n" +
+        "LEFT JOIN Location loc ON sch.location = loc\n" +
+        "LEFT JOIN Area are ON sch.area = are\n" +
+        "LEFT JOIN Space spa ON sch.area = spa\n" +
+        "WHERE act.event.id = ?1 AND act.subevent = null AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED AND act.slug = ?2")
+    List<SessionSiteQueryDto> findByEventIdAndSlugForSite(UUID eventId, String activitySlug);
+
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.status, act.modality, act.needRegistration, act.setupTime, act.duration, act.description, spe.name,  ses.id, ses.title, ses.seats, sch.id, sch.executionStart, sch.executionEnd, sch.url, loc.name, are.name, spa.name) \n" +
+        "FROM Activity act\n" +
+        "INNER JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
+        "INNER JOIN Speaker spe ON act_spe.speaker = spe\n" +
+        "INNER JOIN Session ses ON act = ses.activity\n" +
+        "INNER JOIN SessionSchedule sch ON ses = sch.session\n" +
+        "LEFT JOIN Location loc ON sch.location = loc\n" +
+        "LEFT JOIN Area are ON sch.area = are\n" +
+        "LEFT JOIN Space spa ON sch.area = spa\n" +
+        "WHERE act.event.id = ?1 AND act.subevent.id = ?2 AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED AND act.slug = ?3")
+    List<SessionSiteQueryDto> findBySubEventIdAndSlugForSite(UUID eventId, UUID subEventId, String activitySlug);
 }

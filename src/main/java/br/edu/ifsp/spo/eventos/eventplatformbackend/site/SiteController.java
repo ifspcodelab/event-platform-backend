@@ -3,6 +3,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.site;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityModality;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -183,12 +185,85 @@ public class SiteController {
         return ResponseEntity.ok(sessionsGroupByDate);
     }
 
+
+    @Cacheable(value = "event_activity", key = "#activitySlug")
+    @GetMapping("events/{eventId}/activities/{activitySlug}")
+    public ResponseEntity<?> eventActivity(@PathVariable UUID eventId, @PathVariable String activitySlug) {
+        List<SessionSiteQueryDto> sessions = activityRepository.findByEventIdAndSlugForSite(eventId, activitySlug);
+
+        ActivityForSiteDto activity = sessions.stream()
+            .map(s ->
+                s.toActivityForSiteDto(
+                    getSpeakersMapForActivity(sessions).get(s.getActivityId()),
+                    getSessionsMap(sessions).get(s.getActivityId())
+                )
+            )
+            .findFirst()
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACTIVITY, activitySlug));
+
+        return ResponseEntity.ok(activity);
+    }
+
+    @Cacheable(value = "subevent_activity", key = "#activitySlug")
+    @GetMapping("events/{eventId}/sub-events/{subeventId}/activities/{activitySlug}")
+    public ResponseEntity<?> subeventActivity(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable String activitySlug) {
+        List<SessionSiteQueryDto> sessions = activityRepository.findBySubEventIdAndSlugForSite(eventId, subeventId, activitySlug);
+
+        ActivityForSiteDto activity = sessions.stream()
+            .map(s ->
+                s.toActivityForSiteDto(
+                    getSpeakersMapForActivity(sessions).get(s.getActivityId()),
+                    getSessionsMap(sessions).get(s.getActivityId())
+                )
+            )
+            .findFirst()
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACTIVITY, activitySlug));
+
+        return ResponseEntity.ok(activity);
+    }
+
+    private Map<UUID, Set<String>> getSpeakersMapForActivity(List<SessionSiteQueryDto> sessions) {
+        return sessions.stream()
+            .collect(
+                Collectors.groupingBy(
+                    SessionSiteQueryDto::getActivityId,
+                    Collectors.mapping(SessionSiteQueryDto::getSpeakerName, Collectors.toSet())
+                )
+            );
+    }
+
     private Map<UUID, Set<String>> getSpeakersMap(List<ActivitySiteDto> sessions) {
         return sessions.stream()
             .collect(
                 Collectors.groupingBy(
                     ActivitySiteDto::getActivityId,
                     Collectors.mapping(ActivitySiteDto::getSpeakerName, Collectors.toSet())
+                )
+            );
+    }
+
+    private Map<UUID, Set<SessionForSiteDto>> getSessionsMap(List<SessionSiteQueryDto> sessions) {
+        return sessions.stream()
+            .collect(
+                Collectors.groupingBy(
+                    SessionSiteQueryDto::getActivityId,
+                    Collectors.mapping(
+                        a -> a.toSessionForSiteDto(getSessionsScheduleMap(sessions).get(a.getSessionId())),
+                        Collectors.toSet()
+                    )
+                )
+            );
+    }
+
+    private Map<UUID, Set<SessionScheduleForSiteDto>> getSessionsScheduleMap(List<SessionSiteQueryDto> sessions) {
+        return sessions.stream()
+            .collect(
+                Collectors.groupingBy(
+                    SessionSiteQueryDto::getSessionId,
+                    Collectors.mapping(
+                        SessionSiteQueryDto::toSessionScheduleForSiteDto,
+                        Collectors.toSet()
+                    )
                 )
             );
     }

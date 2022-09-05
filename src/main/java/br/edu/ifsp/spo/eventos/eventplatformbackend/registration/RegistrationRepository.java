@@ -11,7 +11,9 @@ import java.util.UUID;
 
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, UUID> {
-    @Query("select count(r) > 0 from Registration r join Activity as a on a.id = r.session.activity.id where a.id = ?2 and r.account.id = ?1")
+    @Query("select count(r) > 0 from Registration r join Activity as a on a.id = r.session.activity.id where a.id = ?2 and r.account.id = ?1 " +
+            "and (r.registrationStatus = br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationStatus.CONFIRMED " +
+            "or r.registrationStatus = br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationStatus.WAITING_CONFIRMATION)")
     boolean existsByAccountIdAndActivityId(UUID accountId, UUID activityId);
     boolean existsBySessionIdAndAccountIdAndRegistrationStatusIn(UUID sessionId, UUID accountId, List<RegistrationStatus> registrationStatus);
     boolean existsBySessionIdAndRegistrationStatus(UUID sessionId, RegistrationStatus registrationStatus);

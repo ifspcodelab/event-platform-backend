@@ -121,8 +121,8 @@ public enum BusinessRuleType {
     REGISTRATION_CREATE_WITH_EXISTING_WAIT_LIST("Não é possível criar uma inscrição confirmada, pois há pessoas na lista de espera"),
     REGISTRATION_CREATE_WITH_SESSION_STARTED("Não é possível criar uma inscrição em uma sessão que já tenha iniciado"),
     REGISTRATION_CREATE_ACCOUNT_ALREADY_HAS_REGISTRATION_IN_ACTIVITY("Não é possível criar mais de uma inscrição em uma mesma atividade"),
-    REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já pessou do prazo especificado no e-mail"),
-    REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já pessou do prazo especificado no e-mail"),
+    REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já passou do prazo especificado no e-mail"),
+    REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível responder o e-mail novamente");
 
     String message;

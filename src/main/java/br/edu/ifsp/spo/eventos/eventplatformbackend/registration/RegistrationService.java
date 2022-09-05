@@ -372,7 +372,9 @@ public class RegistrationService {
         //verificar se o usuário ja aceitou ou se o sistema negou (data resposta)
         checksIfEmailWasAnswered(registration);
 
-        if(registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now())) {
+        if(registration.getTimeEmailWasSent() != null &&
+            registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now())
+        ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS);
         }
 
@@ -537,13 +539,12 @@ public class RegistrationService {
         List<UUID> sessionsId = new ArrayList<>();
 
         registrationsInWaitList.stream()
-                .flatMap(registrationInWaitList -> registrationInWaitList.getSession().getSessionsSchedules().stream())
-                .forEach(schedule -> {
-                    if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
-                        sessionsId.add(schedule.getSession().getId());
-                        //TODO: adicionar o id da sessão que está dentro do schedule dentro de uma lista de sessões
-                    }
-                });
+            .flatMap(registrationInWaitList -> registrationInWaitList.getSession().getSessionsSchedules().stream())
+            .forEach(schedule -> {
+                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                    sessionsId.add(schedule.getSession().getId());
+                }
+            });
 
         List<Registration> registrationsToBeCancel = registrationRepository.findAllByAccountIdAndSessionIdIn(accountLock.getId(), sessionsId);
         registrationsToBeCancel.forEach(s -> s.setRegistrationStatus(RegistrationStatus.CANCELED_BY_SYSTEM));
@@ -588,7 +589,7 @@ public class RegistrationService {
         if(registrationRepository.existsBySessionIdAndAccountIdAndRegistrationStatusIn(
                 sessionId,
                 accountId,
-                List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.WAITING_LIST)
+                List.of(RegistrationStatus.CONFIRMED, RegistrationStatus.WAITING_CONFIRMATION, RegistrationStatus.WAITING_LIST)
         )) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_ALREADY_EXISTS);
         }

@@ -3,7 +3,6 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -16,5 +15,5 @@ public class SessionDto {
     String cancellationMessage;
     boolean isCanceled;
     Activity activity;
-    List<SessionSchedule> sessionsSchedules;
+    List<SessionScheduleDto> sessionsSchedules;
 }

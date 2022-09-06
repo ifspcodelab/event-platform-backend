@@ -1,12 +1,32 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/organizers/authorization")
 @AllArgsConstructor
 public class OrganizerAuthorizationController {
     private final OrganizerAuthorizationService organizerAuthorizationService;
+    private final EventMapper eventMapper;
+
+    @GetMapping("events")
+    public ResponseEntity<List<EventDto>> eventsIndex (Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        UUID accountId = jwtUserDetails.getId();
+        List<Event> events = organizerAuthorizationService.findAllOrganizerEvents(accountId);
+
+        return ResponseEntity.ok(eventMapper.to(events));
+    }
 }

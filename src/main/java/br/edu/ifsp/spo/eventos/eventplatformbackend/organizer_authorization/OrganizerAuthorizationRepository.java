@@ -12,6 +12,6 @@ import java.util.UUID;
 
 @Repository
 public interface OrganizerAuthorizationRepository extends JpaRepository<Organizer, UUID> {
-    @Query("select distinct (e) from Event e join Organizer as o on o.event = e.id where o.account.id = ?1")
+    @Query("select distinct (e) from Event e join Organizer as o on o.event = e.id where o.account.id = :accountId")
     List<Event> findAllEventsByOrganizerAccountId(UUID accountId);
 }

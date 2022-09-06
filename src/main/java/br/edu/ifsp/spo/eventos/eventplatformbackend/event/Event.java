@@ -83,6 +83,10 @@ public class Event implements Diffable<Event> {
         return !this.registrationPeriod.started();
     }
 
+    public boolean isExecutionPeriodStarted() {
+        return executionPeriod.started();
+    }
+
     public boolean isExecutionPeriodEnded() {
         return this.executionPeriod.ended();
     }

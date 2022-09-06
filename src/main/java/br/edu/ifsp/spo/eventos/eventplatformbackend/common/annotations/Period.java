@@ -27,4 +27,12 @@ public class Period {
     public boolean ended() {
         return endDate.isBefore(LocalDate.now());
     }
+
+    public boolean todayIsWithinThePeriod() {
+        return started() && !ended();
+    }
+
+    public boolean todayIsOutOfPeriod() {
+        return !started() || ended();
+    }
 }

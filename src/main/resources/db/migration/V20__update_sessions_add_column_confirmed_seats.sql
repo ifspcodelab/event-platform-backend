@@ -1,0 +1,1 @@
+ALTER TABLE sessions ADD COLUMN confirmed_seats SMALLINT NOT NULL DEFAULT 0;

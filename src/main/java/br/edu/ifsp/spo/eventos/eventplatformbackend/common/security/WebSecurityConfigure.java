@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import java.util.List;
 
 @Configuration
@@ -46,6 +45,8 @@ public class WebSecurityConfigure {
             .authorizeHttpRequests((authz) -> authz
                 .antMatchers(accountOpenPaths.toArray(String[]::new)).permitAll()
                 .antMatchers(HttpMethod.GET, siteOpenPaths.toArray(String[]::new)).permitAll()
+                .antMatchers("/api/v1/sessions/**").hasAnyRole("ADMIN", "ATTENDANT")
+                .antMatchers("/api/v1/accounts/registrations/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/my-data/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/logout").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/**").hasRole("ADMIN")

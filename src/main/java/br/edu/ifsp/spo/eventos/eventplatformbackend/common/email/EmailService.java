@@ -1,7 +1,8 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.registration;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.common.email;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.VerificationToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -70,7 +71,6 @@ public class EmailService {
         MimeMessageHelper message = new MimeMessageHelper(mail);
         message.setSubject(subject);
         message.setText(content, true);
-        message.setFrom(supportMail);
         message.setTo(email);
 
         try {
@@ -114,7 +114,7 @@ public class EmailService {
                 "<p>Atenciosamente,</p>\n" +
                 "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
 
-        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", supportMail, content);
+        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", "diegocdsantos@gmail.com", content);
     }
 
 }

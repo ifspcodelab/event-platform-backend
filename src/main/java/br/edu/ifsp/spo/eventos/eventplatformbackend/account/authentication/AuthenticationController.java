@@ -1,8 +1,10 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,8 +30,10 @@ public class AuthenticationController {
     }
 
     @DeleteMapping("logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken) {
-        authenticationService.logout(accessToken.replace("Bearer ", ""));
+    public ResponseEntity<Void> logout(Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+
+        authenticationService.logout(jwtUserDetails);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

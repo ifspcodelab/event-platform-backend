@@ -26,8 +26,6 @@ public class PasswordResetToken {
     private UUID id;
     private Instant expiresIn;
     private UUID token;
-    private Instant createdAt = Instant.now();
-    private Instant updatedAt;
     @ManyToOne
     private Account account;
 

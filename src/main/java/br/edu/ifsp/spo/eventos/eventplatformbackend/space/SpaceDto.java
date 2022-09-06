@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,5 +12,4 @@ public class SpaceDto {
     String name;
     Integer capacity;
     SpaceType type;
-    AreaDto area;
 }

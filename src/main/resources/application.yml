@@ -31,7 +31,7 @@ spring:
             enabled: true
 
 support:
-  mail: ${SUPPORT_EMAIL}
+  mail: ${SUPPORT_EMAIL:}
   name: ${SUPPORT_NAME:Eventos IFSP SPO}
 
 frontend:
@@ -45,12 +45,22 @@ account:
 jwt:
   issuer: event-platform
   secret: ${JWT_SECRET:81ad58d0-eea6-44a0-a765-a8fb8b2e39c1}
-  access-token-expires-in: ${JWT_ACCESS_TOKEN_EXPIRES_IN:900}
+  access-token-expires-in: ${JWT_ACCESS_TOKEN_EXPIRES_IN:2700}
   refresh-token-expires-in: ${JWT_REFRESH_TOKEN_EXPIRES_IN:86400}
 
 recaptcha:
   secret: ${RECAPTCHA_SECRET}
   site : ${RECAPTCHA_SITE:https://www.google.com/recaptcha/api/siteverify}
+
+scheduler:
+  signup:
+    interval: ${SCHEDULER_SIGNUP_INTERVAL:300000}
+  password-reset:
+    interval: ${SCHEDULER_PASSWORD_RESET_INTERVAL:300000}
+
+app:
+  cache:
+    expireTimeInSeconds: ${APP_CACHE_EXPIRE_TIME_IN_SECONDS:60}
 
 logging:
   level:

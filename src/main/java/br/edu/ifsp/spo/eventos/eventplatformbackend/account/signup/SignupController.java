@@ -5,6 +5,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.SignupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,29 +19,35 @@ import java.util.UUID;
 @RequestMapping("api/v1/accounts")
 @AllArgsConstructor
 @CrossOrigin(origins = "*")
-public class RegistrationController {
-    private final RegistrationService registrationService;
+public class SignupController {
+    private final SignupService signupService;
     private final AccountMapper accountMapper;
 
-    @PostMapping("registration")
-    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) throws InterruptedException {
-        Account account = registrationService.create(accountCreateDto);
+    @PostMapping("signup")
+    public ResponseEntity<AccountDto> create(@Valid @RequestBody AccountCreateDto accountCreateDto) {
+        Account account = signupService.create(accountCreateDto);
 
         AccountDto accountDto = accountMapper.to(account);
 
         return new ResponseEntity<>(accountDto, HttpStatus.CREATED);
     }
 
-    @PatchMapping("registration/verification/{token}")
+    @PatchMapping("signup/verification/{token}")
     public ResponseEntity<AccountDto> verification(@PathVariable UUID token) {
-        Account account = registrationService.verify(token);
+        Account account = signupService.verify(token);
 
         return ResponseEntity.ok(accountMapper.to(account));
     }
 
+    @PostMapping("signup/resend-email")
+    public ResponseEntity<AccountDto> resendEmail(@RequestBody String resendEmail) {
+        Account account = signupService.resendEmailRegistration(resendEmail);
+        return  ResponseEntity.ok(accountMapper.to(account));
+    }
+
     @GetMapping("searchName/{name}")
     public ResponseEntity<List<AccountDto>> findByName(@PathVariable String name) {
-        List<Account> results = registrationService.search(name, AccountStatus.VERIFIED);
+        List<Account> results = signupService.search(name, AccountStatus.VERIFIED);
         return ResponseEntity.ok(accountMapper.to(results));
     }
 }

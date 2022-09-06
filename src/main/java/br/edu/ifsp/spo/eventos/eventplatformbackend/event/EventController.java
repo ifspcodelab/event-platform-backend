@@ -34,15 +34,8 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventDto>> index(@RequestParam(required = false) String slug) {
-        if(slug != null) {
-            List<Event> events = List.of(eventService.findBySlug(slug));
-            return ResponseEntity.ok(eventMapper.to(events));
-        }
-
-        List<Event> events = eventService.findAll();
-
-        return ResponseEntity.ok(eventMapper.to(events));
+    public ResponseEntity<List<EventDto>> index() {
+        return ResponseEntity.ok(eventMapper.to(eventService.findAll()));
     }
 
     @DeleteMapping("{eventId}")

@@ -9,14 +9,17 @@ import javax.validation.constraints.*;
 public class SpaceCreateDto {
     @NotNull
     @NotBlank
-    @Size (min=1, max=100)
+    @Size (min = 1, max = 100)
     String name;
     @NotNull
     @Min(value = 2)
     @Max(value = 9999)
     Integer capacity;
-    //TODO: Validar tipos que não existem
     @Valid
     @NotNull
     SpaceType type;
+
+    public String getName() {
+        return name.strip();
+    }
 }

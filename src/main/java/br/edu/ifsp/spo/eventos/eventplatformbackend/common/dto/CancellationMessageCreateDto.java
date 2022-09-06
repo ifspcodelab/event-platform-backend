@@ -12,4 +12,8 @@ public class CancellationMessageCreateDto {
     @NotBlank
     @Size(min = 5)
     String reason;
+
+    public String getReason() {
+        return reason.strip();
+    }
 }

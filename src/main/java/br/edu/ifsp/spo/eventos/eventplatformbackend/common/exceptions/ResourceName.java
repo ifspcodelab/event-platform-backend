@@ -18,7 +18,11 @@ public enum ResourceName {
     EMAIL("E-mail"),
     CPF("CPF"),
     ACTIVITY("Activity"),
-    DELETION_TOKEN("Deletion token");
+    DELETION_TOKEN("Deletion token"),
+    SESSION("Session"),
+    PASSWORD_RESET_TOKEN("Password reset token"),
+    ACTIVITY_SPEAKER("Activity Speaker"),
+    REFRESH_TOKEN("Refresh token");
 
     private String name;
 }

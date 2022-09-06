@@ -27,7 +27,6 @@ public class OrganizerSubeventController {
     public ResponseEntity<List<OrganizerSubeventDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
         List<OrganizerSubevent> organizerSubevents = organizerSubeventService.findAll(eventId, subeventId);
         return ResponseEntity.ok(organizerSubeventMapper.to(organizerSubevents));
-
     }
 
     @DeleteMapping("{organizerSubeventId}")

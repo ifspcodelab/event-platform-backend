@@ -26,7 +26,7 @@ public class SpeakerCreateDto {
     String cpf;
     @NotNull
     @NotBlank
-    @Size(min = 150, max = 300)
+    @Size(min = 50, max = 300)
     String curriculum;
     @URL
     String lattes;
@@ -36,6 +36,14 @@ public class SpeakerCreateDto {
     @NotBlank
     @Size(min = 8)
     String phoneNumber;
+
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getCurriculum() {
+        return curriculum.strip();
+    }
 
     public String getCpf() {
         return cpf.replace(".", "").replace("-", "");

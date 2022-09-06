@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,15 +84,27 @@ public class ActivityController {
     }
 
     @GetMapping("activities")
-    public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId) {
-        List<Activity> activities = activityService.findALl(eventId);
+    public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId, @RequestParam(defaultValue = "false") boolean forSite) {
+        List<Activity> activities = activityService.findAll(eventId);
         return ResponseEntity.ok(activityMapper.to(activities));
+    }
+
+    @GetMapping("activities/for-site")
+    public ResponseEntity<List<ActivitySiteDto>> indexForSite(@PathVariable UUID eventId) {
+        List<ActivitySiteDto> activities = activityService.findAllForSite(eventId);
+        return ResponseEntity.ok(activities);
     }
 
     @GetMapping("sub-events/{subeventId}/activities")
     public ResponseEntity<List<ActivityDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
         List<Activity> activities = activityService.findAll(eventId, subeventId);
         return ResponseEntity.ok(activityMapper.to(activities));
+    }
+
+    @GetMapping("sub-events/{subeventId}/activities/for-site")
+    public ResponseEntity<List<ActivitySiteDto>> indexForSite(@PathVariable UUID eventId, @PathVariable UUID subeventId) {
+        List<ActivitySiteDto> activities = activityService.findAllForSite(eventId, subeventId);
+        return ResponseEntity.ok(activities);
     }
 
     @GetMapping("activities/{activityId}")

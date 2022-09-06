@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPeriod {
-    String message() default "Start date must be less than or equal to end date";
+    String message() default "A data de início deve ser menor ou igual a data de fim do período";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

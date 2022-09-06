@@ -24,30 +24,19 @@ public class WebSecurityConfigure {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         var accountOpenPaths = List.of(
-            "/api/v1/accounts/registration",
-            "/api/v1/accounts/registration/verification/{token}",
+            "/api/v1/accounts/signup",
+            "/api/v1/accounts/signup/resend-email",
+            "/api/v1/accounts/signup/verification/{token}",
             "/api/v1/accounts/login",
             "/api/v1/accounts/refresh-token-rotation",
             "/api/v1/accounts/password/forgot",
             "/api/v1/accounts/password/reset",
-            "/api/v1/accounts/account-deletion-confirmation/{token}"
+            "/api/v1/accounts/password/forgot/resend-email",
+            "/api/v1/accounts/password/reset"
         );
 
         var siteOpenPaths = List.of(
-            "/api/v1/locations",
-            "/api/v1/locations/{locationId}",
-            "/api/v1/locations/{locationId}/areas",
-            "/api/v1/locations/{locationId}/areas/{areaId}",
-            "/api/v1/locations/{locationId}/areas/{areaId}/spaces",
-            "/api/v1/locations/{locationId}/areas/{areaId}/spaces/{spaceId}",
-            "/api/v1/events",
-            "/api/v1/events/{eventId}",
-            "/api/v1/events/{eventId}/sub-events",
-            "/api/v1/events/{eventId}/sub-events/{subeventId}",
-            "/api/v1/events/{eventId}/activities",
-            "/api/v1/events/{eventId}/activities/{activityId}",
-            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities",
-            "/api/v1/events/{eventId}/sub-events/{subeventId}/activities/{activityId}"
+            "/api/v1/for-site/**"
         );
 
         http

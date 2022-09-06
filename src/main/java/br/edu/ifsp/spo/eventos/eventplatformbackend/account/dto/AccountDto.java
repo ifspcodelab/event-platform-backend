@@ -15,5 +15,6 @@ public class AccountDto {
     private Boolean agreed;
     private String role;
     private AccountStatus status;
+    private Boolean allowEmail;
     private Instant registrationTimestamp;
 }

@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -15,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Space {
+public class Space implements Diffable<Space> {
     @Id
     private UUID id;
     private String name;
@@ -31,5 +35,14 @@ public class Space {
         this.capacity = capacity;
         this.type = type;
         this.area = area;
+    }
+
+    @Override
+    public DiffResult<Space> diff(Space updatedSpace) {
+        return new DiffBuilder<>(this, updatedSpace, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Nome", this.name, updatedSpace.name)
+                .append("Capacidade", this.capacity, updatedSpace.capacity)
+                .append("Tipo", this.type, updatedSpace.type)
+                .build();
     }
 }

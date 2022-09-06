@@ -4,6 +4,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetai
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventMapper;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +23,7 @@ import java.util.UUID;
 public class OrganizerAuthorizationController {
     private final OrganizerAuthorizationService organizerAuthorizationService;
     private final EventMapper eventMapper;
+    private final SubeventMapper subeventMapper;
 
     @GetMapping("events")
     public ResponseEntity<List<EventDto>> eventsIndex (Authentication authentication) {
@@ -28,5 +32,14 @@ public class OrganizerAuthorizationController {
         List<Event> events = organizerAuthorizationService.findAllOrganizerEvents(accountId);
 
         return ResponseEntity.ok(eventMapper.to(events));
+    }
+
+    @GetMapping("subevents")
+    public ResponseEntity<List<SubeventDto>> subeventsIndex (Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        UUID accountId = jwtUserDetails.getId();
+        List<Subevent> subevents = organizerAuthorizationService.findAllSubeventOrganizerSubevents(accountId);
+
+        return ResponseEntity.ok(subeventMapper.to(subevents));
     }
 }

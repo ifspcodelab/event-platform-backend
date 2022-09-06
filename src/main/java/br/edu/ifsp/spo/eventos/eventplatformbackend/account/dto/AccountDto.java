@@ -14,5 +14,6 @@ public class AccountDto {
     private Boolean agreed;
     private String role;
     private Boolean verified;
+    private Boolean allowEmail;
     private Instant registrationTimestamp;
 }

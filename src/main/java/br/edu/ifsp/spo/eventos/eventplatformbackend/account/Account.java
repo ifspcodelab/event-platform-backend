@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -15,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Account {
+public class Account implements Diffable<Account> {
     @Id
     private UUID id;
     private String name;
@@ -26,6 +30,7 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountRole role;
     private Boolean verified;
+    private Boolean allowEmail;
     private Instant registrationTimestamp;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
@@ -37,6 +42,16 @@ public class Account {
         this.agreed = agreed;
         this.role = AccountRole.ATTENDANT;
         this.verified = false;
+        this.allowEmail = true;
         this.registrationTimestamp = Instant.now();
+    }
+
+    @Override
+    public DiffResult<Account> diff(Account updatedAccount) {
+        return new DiffBuilder<>(this, updatedAccount, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Nome", this.name, updatedAccount.name)
+                .append("CPF", this.cpf, updatedAccount.cpf)
+                .append("Permite comunicação por email", this.allowEmail, updatedAccount.allowEmail)
+                .build();
     }
 }

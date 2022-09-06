@@ -22,4 +22,14 @@ public class MyDataUpdateDto {
     private String cpf;
     @NotNull
     String userRecaptcha;
+    @NotNull
+    Boolean allowEmail;
+
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getCpf() {
+        return cpf.replace(".","").replace("-","");
+    }
 }

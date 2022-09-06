@@ -1,6 +1,5 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.ValidPeriod;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +21,7 @@ public class Period {
     LocalDate endDate;
 
     public boolean started() {
-        return startDate.equals(LocalDate.now()) || startDate.isBefore(LocalDate.now());
+        return startDate.isEqual(LocalDate.now()) || startDate.isBefore(LocalDate.now());
     }
 
     public boolean ended() {
@@ -36,6 +35,4 @@ public class Period {
     public boolean todayIsOutOfPeriod() {
         return !started() || ended();
     }
-
-
 }

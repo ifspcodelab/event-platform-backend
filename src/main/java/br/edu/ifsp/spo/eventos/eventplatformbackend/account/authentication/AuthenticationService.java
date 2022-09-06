@@ -2,10 +2,13 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
+    private final AuditService auditService;
 
     @Transactional
     public TokensDto login(LoginCreateDto loginCreateDto){
@@ -56,18 +60,22 @@ public class AuthenticationService {
 
         log.info("Successful login for the email {}", account.getEmail());
 
+        auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login", refreshToken.getId());
+
         return tokensDto;
     }
 
     @Transactional
-    public void logout(String accessToken) {
-        DecodedJWT decodedToken = jwtService.decodeToken(accessToken);
-        UUID accountId = UUID.fromString(decodedToken.getSubject());
-        String accountEmail = decodedToken.getClaim("email").asString();
+    public void logout(JwtUserDetails jwtUserDetails) {
+        UUID accountId = jwtUserDetails.getId();
+        String accountEmail = jwtUserDetails.getUsername();
 
+        UUID refreshTokenId = refreshTokenRepository.findByAccountId(accountId).getId();
         refreshTokenRepository.deleteAllByAccountId(accountId);
 
         log.info("Successful logout for the email {}", accountEmail);
+
+        auditService.logDelete(getAccount(accountId), ResourceName.REFRESH_TOKEN, "Desconectou da aplicação", refreshTokenId);
     }
 
     @Transactional
@@ -85,15 +93,11 @@ public class AuthenticationService {
             throw new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_TOKEN, account.getEmail());
         }
 
-        refreshTokenRepository.deleteAllByAccountId(accountId);
-
         UUID refreshTokenId = UUID.randomUUID();
         String newAccessTokenString = jwtService.generateAccessToken(account);
         String newRefreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
 
-        RefreshToken refreshToken = new RefreshToken(refreshTokenId, newRefreshTokenString, account);
-
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.updateTokenByAccountId(refreshTokenId, newRefreshTokenString, account);
 
         TokensDto tokensDto = new TokensDto(newAccessTokenString, newRefreshTokenString);
 

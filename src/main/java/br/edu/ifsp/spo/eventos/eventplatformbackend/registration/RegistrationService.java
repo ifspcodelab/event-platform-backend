@@ -2,8 +2,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.registration;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -472,7 +472,7 @@ public class RegistrationService {
     }
 
     private boolean isSessionStarted(Session session) {
-        SessionSchedule firstSessionSchedule = session.getSessionsSchedules().stream()
+        SessionSchedule firstSessionSchedule = session.getSessionSchedules().stream()
             .min(Comparator.comparing(SessionSchedule::getExecutionStart))
             .get();
 
@@ -486,7 +486,7 @@ public class RegistrationService {
     }
 
     private void checkIfSessionStarted(Session session) {
-        SessionSchedule firstSessionSchedule = session.getSessionsSchedules().stream()
+        SessionSchedule firstSessionSchedule = session.getSessionSchedules().stream()
             .min(Comparator.comparing(SessionSchedule::getExecutionStart))
             .get();
 
@@ -521,9 +521,9 @@ public class RegistrationService {
         );
 
         registrations.stream()
-            .flatMap(registration -> registration.getSession().getSessionsSchedules().stream())
+            .flatMap(registration -> registration.getSession().getSessionSchedules().stream())
             .forEach(schedule -> {
-                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                if(session.getSessionSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
                     throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT);
                 }
             });
@@ -539,9 +539,9 @@ public class RegistrationService {
         List<UUID> sessionsId = new ArrayList<>();
 
         registrationsInWaitList.stream()
-            .flatMap(registrationInWaitList -> registrationInWaitList.getSession().getSessionsSchedules().stream())
+            .flatMap(registrationInWaitList -> registrationInWaitList.getSession().getSessionSchedules().stream())
             .forEach(schedule -> {
-                if(session.getSessionsSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
+                if(session.getSessionSchedules().stream().anyMatch(s -> s.hasIntersection(schedule))) {
                     sessionsId.add(schedule.getSession().getId());
                 }
             });

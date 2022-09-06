@@ -31,20 +31,6 @@ public class SessionController {
         return new ResponseEntity<>(sessionDto, HttpStatus.CREATED);
     }
 
-    @PutMapping("activities/{activityId}/sessions/{sessionId}")
-    public ResponseEntity<SessionDto> update(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {
-        Session session = sessionService.update(eventId, activityId, sessionId, sessionCreateDto);
-        SessionDto sessionDto = sessionMapper.to(session);
-        return ResponseEntity.ok(sessionDto);
-    }
-
-    @PutMapping("sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}")
-    public ResponseEntity<SessionDto> update(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody SessionCreateDto sessionCreateDto) {
-        Session session = sessionService.update(eventId, subeventId, activityId, sessionId, sessionCreateDto);
-        SessionDto sessionDto = sessionMapper.to(session);
-        return ResponseEntity.ok(sessionDto);
-    }
-
     @PatchMapping("activities/{activityId}/sessions/{sessionId}/cancel")
     public ResponseEntity<SessionDto> cancel(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @Valid @RequestBody CancellationMessageCreateDto cancellationMessageCreateDto) {
         Session session = sessionService.cancel(eventId, activityId, sessionId, cancellationMessageCreateDto);
@@ -79,5 +65,17 @@ public class SessionController {
     public ResponseEntity<List<SessionDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId) {
         List<Session> sessions = sessionService.findAll(eventId, subeventId , activityId);
         return ResponseEntity.ok(sessionMapper.to(sessions));
+    }
+
+    @GetMapping("activities/{activityId}/sessions/{sessionId}")
+    public ResponseEntity<SessionDto> show(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
+        Session session = sessionService.findById(eventId, activityId, sessionId);
+        return ResponseEntity.ok(sessionMapper.to(session));
+    }
+
+    @GetMapping("sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}")
+    public ResponseEntity<SessionDto> show(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId) {
+        Session session = sessionService.findById(eventId, subeventId , activityId, sessionId);
+        return ResponseEntity.ok(sessionMapper.to(session));
     }
 }

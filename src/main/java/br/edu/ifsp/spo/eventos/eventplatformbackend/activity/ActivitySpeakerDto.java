@@ -10,6 +10,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ActivitySpeakerDto {
     UUID id;
-    ActivityDto activity;
     SpeakerDto speaker;
 }

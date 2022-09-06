@@ -1,13 +1,18 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.session;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import javax.persistence.*;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -54,5 +59,10 @@ public class SessionSchedule {
         var condition4 = end2.isAfter(start1);
 
         return (condition1 && condition2) || (condition3 && condition4);
+    }
+
+    public boolean isInsidePeriod(Period period) {
+        return  executionStart.toLocalDate().isEqual(period.getStartDate()) || executionStart.toLocalDate().isAfter(period.getStartDate())
+                && executionEnd.toLocalDate().isEqual(period.getEndDate()) || executionEnd.toLocalDate().isBefore(period.getEndDate());
     }
 }

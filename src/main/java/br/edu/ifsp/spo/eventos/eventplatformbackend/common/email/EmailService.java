@@ -1,7 +1,8 @@
-package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
+package br.edu.ifsp.spo.eventos.eventplatformbackend.common.email;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetToken;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.VerificationToken;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.Registration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +71,7 @@ public class EmailService {
         var denyRegistrationUrl = url +"minhas-inscricoes/recusar-vaga/"+ registration.getId();
 
         var name = account.getName().split(" ")[0];
-        var sessionSchedules = registration.getSession().getSessionsSchedules();
+        var sessionSchedules = registration.getSession().getSessionSchedules();
         String sessionSchedulesString = "";
 
         for (var s : sessionSchedules) {

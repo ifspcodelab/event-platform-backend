@@ -13,9 +13,14 @@ public class SessionCreateDto {
     @Size(min = 1, max= 30)
     String title;
     @NotNull
-    @Min(value = 1)
+    @Min(value = 0)
     Integer seats;
     @NotNull
     @Valid
-    List<SessionScheduleCreateDto> sessionsSchedules;
+    @Size(min = 1)
+    List<SessionScheduleCreateDto> sessionSchedules;
+
+    public String getTitle() {
+        return title.strip();
+    }
 }

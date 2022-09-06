@@ -5,7 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -14,13 +20,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Event {
+public class Event implements Diffable<Event> {
     @Id
     private UUID id;
     private String title;
     private String slug;
     private String summary;
     private String presentation;
+    private String contact;
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "startDate", column = @Column(name = "registration_start_date")),
@@ -44,6 +51,7 @@ public class Event {
         String slug,
         String summary,
         String presentation,
+        String contact,
         Period registrationPeriod,
         Period executionPeriod,
         String smallerImage,
@@ -54,6 +62,7 @@ public class Event {
         this.slug = slug;
         this.summary = summary;
         this.presentation = presentation;
+        this.contact = contact;
         this.registrationPeriod = registrationPeriod;
         this.executionPeriod = executionPeriod;
         this.smallerImage = smallerImage;
@@ -62,12 +71,16 @@ public class Event {
         this.cancellationMessage = null;
     }
 
-    public boolean isRegistrationPeriodStarted() {
-        return registrationPeriod.started();
+    public boolean isRegistrationPeriodEnded() {
+        return this.registrationPeriod.ended();
     }
 
-    public boolean isRegistrationPeriodEnded() {
-        return registrationPeriod.ended();
+    public boolean isRegistrationPeriodStarted() {
+        return this.registrationPeriod.started();
+    }
+
+    public boolean isRegistrationPeriodNotStart(){
+        return !this.registrationPeriod.started();
     }
 
     public boolean isExecutionPeriodStarted() {
@@ -75,6 +88,33 @@ public class Event {
     }
 
     public boolean isExecutionPeriodEnded() {
-        return executionPeriod.ended();
+        return this.executionPeriod.ended();
+    }
+
+    public boolean isExecutionPeriodNotEnded() {
+        return !this.executionPeriod.ended();
+    }
+
+    public boolean isCanceled() {
+        return this.getStatus().equals(EventStatus.CANCELED);
+    }
+
+    @Override
+    public DiffResult<Event> diff(Event updatedEvent) {
+        return new DiffBuilder<>(this, updatedEvent, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedEvent.title)
+                .append("Slug", this.slug, updatedEvent.slug)
+                .append("Resumo", this.summary, updatedEvent.summary)
+                .append("Apresentação", this.presentation, updatedEvent.presentation)
+                .append("Contato", this.contact, updatedEvent.contact)
+                .append("Período de inscrições",
+                        String.format(this.registrationPeriod.getStartDate() + " - " + this.registrationPeriod.getEndDate()),
+                        String.format(updatedEvent.registrationPeriod.getStartDate() + " - " + updatedEvent.registrationPeriod.getEndDate()))
+                .append("Período de execução",
+                        String.format(this.executionPeriod.getStartDate() + " - " + this.executionPeriod.getEndDate()),
+                        String.format(updatedEvent.executionPeriod.getStartDate() + " - " + updatedEvent.executionPeriod.getEndDate()))
+                .append("Capa menor", this.smallerImage, updatedEvent.smallerImage)
+                .append("Capa maior", this.biggerImage, updatedEvent.biggerImage)
+                .build();
     }
 }

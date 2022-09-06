@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -15,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Speaker {
+public class Speaker implements Diffable<Speaker> {
     @Id
     private UUID id;
     private String name;
@@ -49,5 +53,18 @@ public class Speaker {
         this.linkedin = linkedin;
         this.phoneNumber = phoneNumber;
         this.account = account;
+    }
+
+    @Override
+    public DiffResult<Speaker> diff(Speaker updatedSpeaker) {
+        return new DiffBuilder<>(this, updatedSpeaker, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Nome", this.name, updatedSpeaker.name)
+                .append("Email", this.email, updatedSpeaker.email)
+                .append("CPF", this.cpf, updatedSpeaker.cpf)
+                .append("Mini-currículo", this.curriculum, updatedSpeaker.curriculum)
+                .append("Lattes", this.lattes, updatedSpeaker.lattes)
+                .append("Linkedin", this.linkedin, updatedSpeaker.linkedin)
+                .append("Telefone", this.phoneNumber, updatedSpeaker.phoneNumber)
+                .build();
     }
 }

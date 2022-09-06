@@ -8,9 +8,17 @@ import javax.validation.constraints.*;
 public class AreaCreateDto {
     @NotNull
     @NotBlank
-    @Size(min = 4, max = 80)
+    @Size(min = 1, max = 200)
     String name;
 
-    @Size(min = 4, max = 150)
+    @Size(min = 1, max = 200)
     String reference;
+
+    public String getName() {
+        return name.strip();
+    }
+
+    public String getReference() {
+        return reference != null ? reference.strip() : null;
+    }
 }

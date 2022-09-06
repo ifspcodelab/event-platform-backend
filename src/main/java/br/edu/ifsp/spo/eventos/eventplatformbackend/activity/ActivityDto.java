@@ -1,8 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.activity;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -22,6 +20,4 @@ public class ActivityDto {
     Integer duration;
     Integer setupTime;
     String cancellationMessage;
-    Event event;
-    Subevent subevent;
 }

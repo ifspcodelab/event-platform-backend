@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum SignupRuleType {
-    NONEXISTENT_TOKEN("Registration Exception: verification token not found"),
-    VERIFICATION_TOKEN_EXPIRED("Registration Exception: verification token with email=%s is expired");
+    NONEXISTENT_TOKEN("Signup Exception: verification token not found"),
+    VERIFICATION_TOKEN_EXPIRED("Signup Exception: verification token with email=%s is expired");
 
     String message;
 }

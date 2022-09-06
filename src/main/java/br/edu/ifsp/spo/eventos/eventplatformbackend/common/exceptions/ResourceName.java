@@ -15,10 +15,11 @@ public enum ResourceName {
     SPEAKER("Speaker"),
     ORGANIZER("Organizer"),
     ORGANIZERSUBEVENT("Organizer Subevent"),
-    EMAIL("E-mail"),
-    CPF("CPF"),
     ACTIVITY("Activity"),
     SESSION("Session"),
+    PASSWORD_RESET_TOKEN("Password reset token"),
+    ACTIVITY_SPEAKER("Activity Speaker"),
+    REFRESH_TOKEN("Refresh token"),
     REGISTRATION("Registration");
 
     private String name;

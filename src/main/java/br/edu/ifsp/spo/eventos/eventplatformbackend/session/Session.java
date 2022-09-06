@@ -5,11 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import javax.persistence.*;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -18,28 +19,29 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Session {
+public class Session implements Diffable<Session> {
     @Id
     private UUID id;
     private String title;
     private Integer seats;
     private Integer confirmedSeats;
     private String cancellationMessage;
-    private boolean isCanceled;
+    private boolean canceled;
     @ManyToOne
     private Activity activity;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "session_id", nullable = false, insertable = false, updatable = false)
-    private List<SessionSchedule> sessionsSchedules;
+    private List<SessionSchedule> sessionSchedules;
 
-    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionsShedules) {
+    public Session(String title, Integer seats, Activity activity, List<SessionSchedule> sessionSchedules) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.seats = seats;
         this.confirmedSeats = 0;
         this.cancellationMessage = null;
         this.activity = activity;
-        this.sessionsSchedules = sessionsShedules;
+        this.sessionSchedules = sessionSchedules;
+        this.sessionSchedules.forEach(sessionSchedule -> sessionSchedule.setSession(this));
     }
 
     public boolean isFull() {
@@ -53,6 +55,13 @@ public class Session {
     public void decrementNumberOfConfirmedSeats() {
         this.confirmedSeats--;
     }
+
+    @Override
+    public DiffResult<Session> diff(Session updatedSession) {
+        return new DiffBuilder<>(this, updatedSession, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("Título", this.title, updatedSession.title)
+                .append("Número de vagas", this.seats, updatedSession.seats)
+                .append("Horários da sessão", this.sessionSchedules, updatedSession.sessionSchedules)
+                .build();
+    }
 }
-
-

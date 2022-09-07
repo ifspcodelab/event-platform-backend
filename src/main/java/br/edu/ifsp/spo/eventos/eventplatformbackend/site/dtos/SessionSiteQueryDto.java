@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityModality;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,8 +37,10 @@ public class SessionSiteQueryDto {
     LocalDateTime sessionScheduleExecutionEnd;
     String sessionScheduleUrl;
     String sessionLocationName;
+    String sessionLocationAddress;
     String sessionAreaName;
     String sessionSpaceName;
+    SpaceType sessionSpaceType;
 
     public ActivityForSiteDto toActivityForSiteDto(Set<String> speakers, Set<SessionForSiteDto> sessions) {
         return new ActivityForSiteDto(
@@ -72,8 +75,10 @@ public class SessionSiteQueryDto {
             this.getSessionScheduleExecutionEnd(),
             this.getSessionScheduleUrl(),
             this.getSessionLocationName(),
+            this.getSessionLocationAddress(),
             this.getSessionAreaName(),
-            this.getSessionSpaceName()
+            this.getSessionSpaceName(),
+            this.getSessionSpaceType()
         );
     }
 }

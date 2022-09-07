@@ -1,5 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceType;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,7 +10,9 @@ public record SessionScheduleForSiteDto(
     LocalDateTime executionStart,
     LocalDateTime executionEnd,
     String url,
-    String location,
-    String area,
-    String space
+    String locationName,
+    String locationAddress,
+    String areaName,
+    String spaceName,
+    SpaceType spaceType
 ) {}

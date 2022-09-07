@@ -41,7 +41,7 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     List<ActivitySiteDto> findAllForSiteByEventIdAndSubeventId(UUID eventId, UUID subeventId);
 
 
-    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.status, act.modality, act.needRegistration, act.setupTime, act.duration, act.description, spe.name,  ses.id, ses.title, ses.seats, sch.id, sch.executionStart, sch.executionEnd, sch.url, loc.name, loc.address, are.name, spa.name, spa.type) \n" +
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.status, act.modality, act.needRegistration, act.setupTime, act.duration, act.description, spe.name,  ses.id, ses.title, ses.seats, ses.confirmedSeats, sch.id, sch.executionStart, sch.executionEnd, sch.url, loc.name, loc.address, are.name, spa.name, spa.type) \n" +
         "FROM Activity act\n" +
         "INNER JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
         "INNER JOIN Speaker spe ON act_spe.speaker = spe\n" +
@@ -53,7 +53,7 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
         "WHERE act.event.id = ?1 AND act.subevent = null AND act.status = br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus.PUBLISHED AND act.slug = ?2")
     List<SessionSiteQueryDto> findByEventIdAndSlugForSite(UUID eventId, String activitySlug);
 
-    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.status, act.modality, act.needRegistration, act.setupTime, act.duration, act.description, spe.name,  ses.id, ses.title, ses.seats, sch.id, sch.executionStart, sch.executionEnd, sch.url, loc.name, loc.address, are.name, spa.name, spa.type) \n" +
+    @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.SessionSiteQueryDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.status, act.modality, act.needRegistration, act.setupTime, act.duration, act.description, spe.name,  ses.id, ses.title, ses.seats, ses.confirmedSeats, sch.id, sch.executionStart, sch.executionEnd, sch.url, loc.name, loc.address, are.name, spa.name, spa.type) \n" +
         "FROM Activity act\n" +
         "INNER JOIN ActivitySpeaker act_spe ON act = act_spe.activity\n" +
         "INNER JOIN Speaker spe ON act_spe.speaker = spe\n" +

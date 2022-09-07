@@ -32,6 +32,7 @@ public class SessionSiteQueryDto {
     UUID sessionId;
     String sessionTitle;
     Integer sessionSeats;
+    Integer sessionConfirmedSeats;
     UUID sessionScheduleId;
     LocalDateTime sessionScheduleExecutionStart;
     LocalDateTime sessionScheduleExecutionEnd;
@@ -64,6 +65,7 @@ public class SessionSiteQueryDto {
             this.getSessionId(),
             this.getSessionTitle(),
             this.getSessionSeats(),
+            this.getSessionConfirmedSeats(),
             sessionSchedules
         );
     }

@@ -17,4 +17,9 @@ public interface OrganizerAuthorizationRepository extends JpaRepository<Organize
 
     @Query("select distinct (se) from Subevent se join OrganizerSubevent as os on os.subevent = se.id where os.account.id = :accountId")
     List<Subevent> findAllSubeventsBySubeventOrganizerAccountId(UUID accountId);
+
+    boolean existsOrganizerByAccountId(UUID accountId);
+
+    @Query("select distinct (o.event.id) from Organizer o where o.account.id = :accountId")
+    List<UUID> findAllEventIdByAccountId(UUID accountId);
 }

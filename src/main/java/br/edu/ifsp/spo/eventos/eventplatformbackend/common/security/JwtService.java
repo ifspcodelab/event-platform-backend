@@ -10,14 +10,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
 public class JwtService {
     private JwtConfig jwtConfig;
 
-    public String generateAccessToken(Account account){
+    public String generateAccessToken(Account account) {
         Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
         Instant now = Instant.now();
 
@@ -32,7 +34,23 @@ public class JwtService {
         return builder.sign(algorithm);
     }
 
-    public String generateRefreshToken(Account account, UUID jwtId){
+    public String generateOrganizerAccessToken(Account account, List<UUID> organizerEventIds) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
+        Instant now = Instant.now();
+
+        JWTCreator.Builder builder = JWT.create();
+        builder.withIssuer(jwtConfig.getIssuer());
+        builder.withSubject(account.getId().toString());
+        builder.withIssuedAt(now);
+        builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
+        builder.withClaim("email", account.getEmail());
+        builder.withClaim("role", account.getRole().name());
+        builder.withClaim("organizer", organizerEventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
+
+        return builder.sign(algorithm);
+    }
+
+    public String generateRefreshToken(Account account, UUID jwtId) {
         Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
         Instant now = Instant.now();
 

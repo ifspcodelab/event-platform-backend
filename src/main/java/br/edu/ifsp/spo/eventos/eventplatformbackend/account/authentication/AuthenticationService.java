@@ -9,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationRepository;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationService {
     private final AccountRepository accountRepository;
+    private final OrganizerAuthorizationRepository organizerAuthorizationRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -48,8 +50,16 @@ public class AuthenticationService {
 
         refreshTokenRepository.deleteAllByAccountId(account.getId());
 
+        String accessTokenString;
+
+        if (organizerAuthorizationRepository.existsOrganizerByAccountId(account.getId())) {
+            var organizerEventIds = organizerAuthorizationRepository.findAllEventIdByAccountId(account.getId());
+            accessTokenString = jwtService.generateOrganizerAccessToken(account, organizerEventIds);
+        } else {
+            accessTokenString = jwtService.generateAccessToken(account);
+        }
+
         UUID refreshTokenId = UUID.randomUUID();
-        String accessTokenString = jwtService.generateAccessToken(account);
         String refreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
 
         RefreshToken refreshToken = new RefreshToken(refreshTokenId, refreshTokenString, account);

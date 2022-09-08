@@ -33,6 +33,7 @@ public class Account implements Diffable<Account> {
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
     private Instant registrationTimestamp;
+    private boolean verified;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
         this.id = UUID.randomUUID();
@@ -45,6 +46,7 @@ public class Account implements Diffable<Account> {
         this.status = AccountStatus.UNVERIFIED;
         this.allowEmail = true;
         this.registrationTimestamp = Instant.now();
+        this.verified = true;
     }
 
     @Override

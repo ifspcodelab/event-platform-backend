@@ -8,6 +8,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRu
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -39,7 +41,7 @@ public class OrganizerSubeventService {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_ALREADY_ASSOCIATED);
         }
 
-        if(!account.getVerified()) {
+        if(account.getStatus().equals(AccountStatus.UNVERIFIED)) {
             throw new BusinessRuleException(BusinessRuleType.ORGANIZER_SUBEVENT_CREATE_WITH_ACCOUNT_UNVERIFIED);
         }
 

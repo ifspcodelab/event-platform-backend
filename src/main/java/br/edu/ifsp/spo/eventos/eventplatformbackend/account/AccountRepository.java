@@ -18,7 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByCpfAndIdNot(String cpf, UUID accountId);
     Optional<Account> findByEmail(String email);
     Optional<Account> findByCpf(String cpf);
-    List<Account> findByNameStartingWithIgnoreCaseAndVerified(String name, boolean verified);
+    List<Account> findByNameStartingWithIgnoreCaseAndStatus(String name, AccountStatus status);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Account a where a.id = :id")
     Optional<Account> findByIdWithPessimisticLock(UUID id);

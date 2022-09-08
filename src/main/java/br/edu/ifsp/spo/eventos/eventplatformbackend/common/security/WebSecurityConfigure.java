@@ -29,6 +29,7 @@ public class WebSecurityConfigure {
             "/api/v1/accounts/login",
             "/api/v1/accounts/refresh-token-rotation",
             "/api/v1/accounts/password/forgot",
+            "/api/v1/accounts/password/reset",
             "/api/v1/accounts/password/forgot/resend-email",
             "/api/v1/accounts/password/reset"
         );

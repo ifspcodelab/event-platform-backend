@@ -29,9 +29,11 @@ public class Account implements Diffable<Account> {
     private Boolean agreed;
     @Enumerated(EnumType.STRING)
     private AccountRole role;
-    private Boolean verified;
     private Boolean allowEmail;
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
     private Instant registrationTimestamp;
+    private boolean verified;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
         this.id = UUID.randomUUID();
@@ -41,9 +43,10 @@ public class Account implements Diffable<Account> {
         this.password = password;
         this.agreed = agreed;
         this.role = AccountRole.ATTENDANT;
-        this.verified = false;
+        this.status = AccountStatus.UNVERIFIED;
         this.allowEmail = true;
         this.registrationTimestamp = Instant.now();
+        this.verified = true;
     }
 
     @Override

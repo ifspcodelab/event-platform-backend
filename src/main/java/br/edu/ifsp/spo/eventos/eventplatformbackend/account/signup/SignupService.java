@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
@@ -94,7 +95,7 @@ public class SignupService {
         }
 
         Account account = verificationToken.getAccount();
-        account.setVerified(true);
+        account.setStatus(AccountStatus.VERIFIED);
         accountRepository.save(account);
         log.info("Account with email {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
@@ -103,8 +104,8 @@ public class SignupService {
         return account;
     }
 
-    public List<Account> search(String name, Boolean verified) {
-        return accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
+    public List<Account> search(String name, AccountStatus status) {
+        return accountRepository.findByNameStartingWithIgnoreCaseAndStatus(name.trim(), status);
     }
 
     @Transactional

@@ -122,4 +122,10 @@ public class RegistrationController {
         Registration registration = registrationService.denySessionSeat(jwtUserDetails.getId(), registrationId);
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
+
+    @GetMapping("accounts/events")
+    public List<AccountEventQueryDto> findAllEventsByAccount(Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        return registrationService.findAllEventsByAccount(jwtUserDetails.getId());
+    }
 }

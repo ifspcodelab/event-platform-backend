@@ -25,4 +25,17 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     List<Registration> findAllBySessionId(UUID sessionId);
     Optional<Registration> getFirstBySessionIdAndRegistrationStatusOrderByDate(UUID sessionId, RegistrationStatus registrationStatus);
     List<Registration> findAllByAccountIdAndSessionIdIn(UUID accountId, List<UUID> sessionsId);
+    List<Registration> findAllByAccountId(UUID accountId);
+
+    @Query("SELECT DISTINCT new br.edu.ifsp.spo.eventos.eventplatformbackend.registration.AccountEventQueryDto(evt.id, evt.title, sub.id, sub.title) \n" +
+        "FROM Event evt " +
+        "INNER JOIN Activity act ON act.event = evt " +
+        "LEFT JOIN Subevent sub ON act.subevent = sub " +
+        "INNER JOIN Session ses ON act = ses.activity " +
+        "INNER JOIN Registration reg ON ses = reg.session " +
+        "INNER JOIN Account acc ON reg.account = acc " +
+        "WHERE acc.id = ?1")
+    List<AccountEventQueryDto> findEventsByAccount(UUID accountId);
+
+
 }

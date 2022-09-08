@@ -9,7 +9,6 @@ import org.apache.commons.lang3.builder.DiffBuilder;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.apache.commons.lang3.builder.Diffable;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
 import javax.persistence.*;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +24,7 @@ public class Session implements Diffable<Session> {
     private UUID id;
     private String title;
     private Integer seats;
+    private Integer confirmedSeats;
     private String cancellationMessage;
     private boolean canceled;
     @ManyToOne
@@ -37,10 +37,23 @@ public class Session implements Diffable<Session> {
         this.id = UUID.randomUUID();
         this.title = title;
         this.seats = seats;
+        this.confirmedSeats = 0;
         this.cancellationMessage = null;
         this.activity = activity;
         this.sessionSchedules = sessionSchedules;
         this.sessionSchedules.forEach(sessionSchedule -> sessionSchedule.setSession(this));
+    }
+
+    public boolean isFull() {
+        return this.getSeats().equals(this.getConfirmedSeats());
+    }
+
+    public void incrementNumberOfConfirmedSeats() {
+        this.confirmedSeats++;
+    }
+
+    public void decrementNumberOfConfirmedSeats() {
+        this.confirmedSeats--;
     }
 
     @Override

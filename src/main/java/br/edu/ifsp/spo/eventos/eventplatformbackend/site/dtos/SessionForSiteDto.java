@@ -7,5 +7,6 @@ public record SessionForSiteDto(
     UUID id,
     String title,
     Integer seats,
+    Integer confirmedSeats,
     Set<SessionScheduleForSiteDto> sessionSchedules
 ) {}

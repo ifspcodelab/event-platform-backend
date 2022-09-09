@@ -10,11 +10,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/events/{eventId}")
 @AllArgsConstructor
+@CrossOrigin ( "*" )
 public class AttendanceController {
     private final AttendanceService attendanceService;
     private final AttendanceMapper attendanceMapper;
 
-    @PostMapping("/activities/{activityId}/sessions/{sessionId}/sessions-schedules/{sessionScheduleId}/attendance")
+    @PostMapping("/activities/{activityId}/sessions/{sessionId}/sessions-schedules/{sessionScheduleId}/attendances")
     public ResponseEntity<AttendanceDto> create(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID sessionScheduleId, @RequestBody AttendanceCreateDto attendanceCreateDto) {
         Attendance attendance = attendanceService.create(eventId, activityId, sessionId, sessionScheduleId, attendanceCreateDto);
         AttendanceDto attendanceDto = attendanceMapper.to(attendance);

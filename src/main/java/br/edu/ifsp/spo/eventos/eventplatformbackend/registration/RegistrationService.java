@@ -356,7 +356,7 @@ public class RegistrationService {
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
             registrationRepository.save(firstRegistrationInWaitList);
-            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
+            sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), firstRegistrationInWaitList);
         }
 
         else {
@@ -392,7 +392,7 @@ public class RegistrationService {
                     firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
                     firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
                     registrationRepository.save(firstRegistrationInWaitList);
-                    sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), registration);
+                    sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), firstRegistrationInWaitList);
                 }
 
                 else {

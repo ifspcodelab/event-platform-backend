@@ -23,6 +23,16 @@ public class AttendanceService {
         return attendanceRepository.save(attendance);
     }
 
+    public void delete(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
+        Attendance attendance = getAttendance(attendanceId);
+        attendanceRepository.delete(attendance);
+    }
+
+    private Attendance getAttendance(UUID attendanceId) {
+        return attendanceRepository.findById(attendanceId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ATTENDANCE, attendanceId));
+    }
+
     private Registration getRegistration(UUID registrationId) {
         return registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, registrationId));
@@ -30,6 +40,6 @@ public class AttendanceService {
 
     private SessionSchedule getSessionSchedule(UUID sessionScheduleId) {
         return sessionScheduleRepository.findById(sessionScheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionScheduleId)); // mudar reso name
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION_SCHEDULE, sessionScheduleId)); // mudar reso name
     }
 }

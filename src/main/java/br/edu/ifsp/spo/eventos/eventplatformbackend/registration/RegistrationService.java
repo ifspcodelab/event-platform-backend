@@ -256,8 +256,8 @@ public class RegistrationService {
         checksIfAccountIsAssociateToRegistration(accountId, registration);
 
         if(registration.getRegistrationStatus().equals(RegistrationStatus.WAITING_LIST)) {
-            registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
-            log.info("Registration in wait list cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
+            registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_USER);
+            log.info("Registration in wait list cancelled by user: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());
             return registrationRepository.save(registration);
         }
 

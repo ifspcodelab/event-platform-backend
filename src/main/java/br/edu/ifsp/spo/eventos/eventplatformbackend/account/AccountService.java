@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,14 +73,35 @@ public class AccountService {
     public Account update(UUID accountId, AccountUpdateDto dto) {
         Account account = getAccount(accountId);
 
+        if (accountRepository.existsByCpfAndIdNot(dto.getCpf(), accountId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "cpf", dto.getCpf());
+        }
+
+        if (accountRepository.existsByEmailAndIdNot(dto.getEmail(), accountId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "email", dto.getCpf());
+        }
+
+        Account currentAccount = new Account();
+        currentAccount.setName(account.getName());
+        currentAccount.setEmail(account.getEmail());
+        currentAccount.setCpf(account.getCpf());
+        currentAccount.setRole(account.getRole());
+        currentAccount.setStatus(account.getStatus());
+        currentAccount.setAllowEmail(account.getAllowEmail());
+
         account.setName(dto.getName());
         account.setEmail(dto.getEmail());
         account.setCpf(dto.getCpf());
         account.setRole(AccountRole.valueOf(dto.getRole()));
         account.setStatus(AccountStatus.valueOf(dto.getStatus()));
-        log.info("Account with name={} and email={} was updated", account.getName(), account.getEmail());
 
-        return accountRepository.save(account);
+        accountRepository.save(account);
+
+        DiffResult<?> diffResult = currentAccount.diff(account);
+        auditService.logAdminUpdate(ResourceName.ACCOUNT, diffResult.getDiffs().toString(), accountId);
+        log.info("Account with name={} and email={} was updated by ADMIN", account.getName(), account.getEmail());
+
+        return account;
     }
 
 
@@ -118,7 +142,7 @@ public class AccountService {
 
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data. {}", account.getEmail(), diffResult.getDiffs().toString());
+        log.info("Account with email={} updated data bu USER. {}", account.getEmail(), diffResult.getDiffs().toString());
 
         auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()), accountId);
 

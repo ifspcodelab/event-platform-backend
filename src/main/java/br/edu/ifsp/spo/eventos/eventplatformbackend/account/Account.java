@@ -44,7 +44,7 @@ public class Account implements Diffable<Account> {
         this.agreed = agreed;
         this.role = AccountRole.ATTENDANT;
         this.status = AccountStatus.UNVERIFIED;
-        this.allowEmail = true;
+        this.allowEmail = Boolean.TRUE;
         this.registrationTimestamp = Instant.now();
         this.verified = true;
     }
@@ -54,6 +54,9 @@ public class Account implements Diffable<Account> {
         return new DiffBuilder<>(this, updatedAccount, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("Nome", this.name, updatedAccount.name)
                 .append("CPF", this.cpf, updatedAccount.cpf)
+                .append("E-mail", this.email, updatedAccount.email)
+                .append("Perfil", this.role, updatedAccount.role)
+                .append("Status", this.status, updatedAccount.status)
                 .append("Permite comunicação por email", this.allowEmail, updatedAccount.allowEmail)
                 .build();
     }

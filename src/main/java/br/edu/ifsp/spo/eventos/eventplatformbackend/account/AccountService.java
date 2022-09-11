@@ -78,7 +78,7 @@ public class AccountService {
         }
 
         if (accountRepository.existsByEmailAndIdNot(dto.getEmail(), accountId)) {
-            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "email", dto.getCpf());
+            throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "email", dto.getEmail());
         }
 
         Account currentAccount = new Account();
@@ -142,7 +142,7 @@ public class AccountService {
 
         accountRepository.save(account);
 
-        log.info("Account with email={} updated data bu USER. {}", account.getEmail(), diffResult.getDiffs().toString());
+        log.info("Account with email={} updated data by USER. {}", account.getEmail(), diffResult.getDiffs().toString());
 
         auditService.logUpdate(account, ResourceName.ACCOUNT, String.format("Edição em 'Meus dados': %s", diffResult.getDiffs().toString()), accountId);
 

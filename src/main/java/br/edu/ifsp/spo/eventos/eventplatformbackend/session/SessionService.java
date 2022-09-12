@@ -11,6 +11,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final SessionScheduleRepository sessionScheduleRepository;
+    private final RegistrationRepository registrationRepository;
     private final ActivityRepository activityRepository;
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
@@ -116,6 +118,11 @@ public class SessionService {
         checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
         checkIfSessionIsNotCanceled(session);
         checkIfRegistrationPeriodNotStarted(session);
+
+        if(registrationRepository.existsBySessionId(sessionId)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_REGISTRATIONS);
+        }
+
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
         auditService.logAdminDelete(ResourceName.SESSION, sessionId);
@@ -129,6 +136,11 @@ public class SessionService {
         checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
         checkIfSessionIsNotCanceled(session);
         checkIfRegistrationPeriodNotStarted(session);
+
+        if(registrationRepository.existsBySessionId(sessionId)) {
+            throw new BusinessRuleException(BusinessRuleType.SESSION_DELETE_WITH_REGISTRATIONS);
+        }
+
         sessionRepository.delete(session);
         log.info("Session deleted: id={}, title={}", sessionId, session.getTitle());
         auditService.logAdminDelete(ResourceName.SESSION, sessionId);

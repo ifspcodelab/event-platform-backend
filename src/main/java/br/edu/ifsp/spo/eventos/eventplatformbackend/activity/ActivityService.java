@@ -526,6 +526,12 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SESSIONS);
         }
 
+        log.info(Boolean.toString(activitySpeakerRepository.existsByActivityId(activityId)));
+
+        if(activitySpeakerRepository.existsByActivityId(activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SPEAKERS);
+        }
+
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
         auditService.logAdminDelete(ResourceName.ACTIVITY, activityId);
@@ -564,6 +570,12 @@ public class ActivityService {
 
         if(sessionRepository.existsByActivityId(activityId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SESSIONS);
+        }
+
+        log.info(Boolean.toString(activitySpeakerRepository.existsByActivityId(activityId)));
+
+        if(activitySpeakerRepository.existsByActivityId(activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SPEAKERS);
         }
 
         activityRepository.delete(activity);

@@ -37,5 +37,5 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
         "WHERE acc.id = ?1")
     List<AccountEventQueryDto> findEventsByAccount(UUID accountId);
 
-
+    boolean existsBySessionId(UUID sessionId);
 }

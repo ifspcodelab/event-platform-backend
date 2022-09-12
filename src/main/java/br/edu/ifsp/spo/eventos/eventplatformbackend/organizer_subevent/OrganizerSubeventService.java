@@ -11,6 +11,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNo
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
@@ -122,5 +123,9 @@ public class OrganizerSubeventService {
 
     public List<Subevent> findAllSubevents(UUID accountId) {
         return organizerSubeventRepository.findAllSubeventsByAccountId(accountId);
+    }
+
+    public List<Session> findAllSessions(UUID accountId) {
+        return organizerSubeventRepository.findAllSessionsByAccountId(accountId);
     }
 }

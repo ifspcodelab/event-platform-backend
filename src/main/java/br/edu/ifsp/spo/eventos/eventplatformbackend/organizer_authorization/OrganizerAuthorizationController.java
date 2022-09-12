@@ -50,7 +50,6 @@ public class OrganizerAuthorizationController {
         return ResponseEntity.ok(subeventMapper.to(subevents));
     }
 
-    //TODO: get sessions
     @GetMapping("events/sessions")
     public ResponseEntity<List<SessionDto>> eventsSessionsIndex (Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
@@ -59,6 +58,13 @@ public class OrganizerAuthorizationController {
 
         return ResponseEntity.ok(sessionMapper.to(sessions));
     }
-//
-//    @GetMapping("subevents/sessions") {}
+
+    @GetMapping("subevents/sessions")
+    public ResponseEntity<List<SessionDto>> subeventsSessionsIndex (Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        UUID accountId = jwtUserDetails.getId();
+        List<Session> sessions = organizerSubeventService.findAllSessions(accountId);
+
+        return ResponseEntity.ok(sessionMapper.to(sessions));
+    }
 }

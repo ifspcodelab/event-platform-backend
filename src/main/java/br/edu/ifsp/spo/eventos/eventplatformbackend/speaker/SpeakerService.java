@@ -3,9 +3,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivitySpeakerRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
@@ -23,6 +22,7 @@ import java.util.UUID;
 public class SpeakerService {
     private final SpeakerRepository speakerRepository;
     private final AccountRepository accountRepository;
+    private final ActivitySpeakerRepository activitySpeakerRepository;
     private final AuditService auditService;
 
     public Speaker create(SpeakerCreateDto dto) {
@@ -115,6 +115,11 @@ public class SpeakerService {
 
     public void delete(UUID speakerId) {
         Speaker speaker = getSpeaker(speakerId);
+
+        if(activitySpeakerRepository.existsBySpeakerId(speakerId)) {
+            throw new BusinessRuleException(BusinessRuleType.SPEAKER_DELETE_WITH_ACTIVITY);
+        }
+
         speakerRepository.deleteById(speakerId);
         log.info("Delete speaker id={}, name={}, email={}", speaker.getId(), speaker.getName(), speaker.getEmail());
         auditService.logAdminDelete(ResourceName.SPEAKER, speakerId);

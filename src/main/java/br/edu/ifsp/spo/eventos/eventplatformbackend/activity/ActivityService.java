@@ -526,8 +526,6 @@ public class ActivityService {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SESSIONS);
         }
 
-        log.info(Boolean.toString(activitySpeakerRepository.existsByActivityId(activityId)));
-
         if(activitySpeakerRepository.existsByActivityId(activityId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SPEAKERS);
         }
@@ -571,8 +569,6 @@ public class ActivityService {
         if(sessionRepository.existsByActivityId(activityId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SESSIONS);
         }
-
-        log.info(Boolean.toString(activitySpeakerRepository.existsByActivityId(activityId)));
 
         if(activitySpeakerRepository.existsByActivityId(activityId)) {
             throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SPEAKERS);

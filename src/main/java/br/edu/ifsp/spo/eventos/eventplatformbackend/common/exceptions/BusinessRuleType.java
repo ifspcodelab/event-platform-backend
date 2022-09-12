@@ -107,6 +107,7 @@ public enum BusinessRuleType {
     SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um subevento cancelado"),
     SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada"),
     SPEAKER_ADD_ALREADY_EXISTS("O ministrante já está associado a atividade"),
+    SPEAKER_DELETE_WITH_ACTIVITY("Não é possível excluir um organizador que está associado a uma atividade"),
     SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
     SESSION_DELETE_WITH_REGISTRATIONS("Não é possível excluir uma sessão com inscrições associadas"),
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),

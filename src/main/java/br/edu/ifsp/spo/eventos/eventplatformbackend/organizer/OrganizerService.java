@@ -11,6 +11,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNo
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -97,5 +98,9 @@ public class OrganizerService {
 
     public List<Event> findAllEvents(UUID accountId) {
         return organizerRepository.findAllEventsByAccountId(accountId);
+    }
+
+    public List<Session> findAllSessions(UUID accountId) {
+        return organizerRepository.findAllSessionsByAccountId(accountId);
     }
 }

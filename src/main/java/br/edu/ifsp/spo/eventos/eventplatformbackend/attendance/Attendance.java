@@ -22,6 +22,7 @@ import java.util.UUID;
 public class Attendance {
     @Id
     private UUID id;
+    //TODO - Quando foi criado a presença
     @ManyToOne
     private Registration registration;
     @ManyToOne

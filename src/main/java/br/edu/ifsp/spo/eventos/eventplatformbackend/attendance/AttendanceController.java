@@ -15,14 +15,14 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
     private final AttendanceMapper attendanceMapper;
 
-    @PostMapping("/activities/{activityId}/sessions/{sessionId}/sessions-schedules/{sessionScheduleId}/attendances")
+    @PostMapping("/activities/{activityId}/sessions/{sessionId}/session-schedules/{sessionScheduleId}/attendances")
     public ResponseEntity<AttendanceDto> create(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID sessionScheduleId, @RequestBody AttendanceCreateDto attendanceCreateDto) {
         Attendance attendance = attendanceService.create(eventId, activityId, sessionId, sessionScheduleId, attendanceCreateDto);
         AttendanceDto attendanceDto = attendanceMapper.to(attendance);
         return new ResponseEntity<>(attendanceDto, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/activities/{activityId}/sessions/{sessionId}/sessions-schedules/{sessionScheduleId}/attendances/{attendanceId}")
+    @DeleteMapping("/activities/{activityId}/sessions/{sessionId}/session-schedules/{sessionScheduleId}/attendances/{attendanceId}")
     public ResponseEntity<Void> delete (@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID sessionScheduleId, @PathVariable UUID attendanceId) {
         attendanceService.delete(eventId, activityId, sessionId, sessionScheduleId, attendanceId);
         return ResponseEntity.noContent().build();

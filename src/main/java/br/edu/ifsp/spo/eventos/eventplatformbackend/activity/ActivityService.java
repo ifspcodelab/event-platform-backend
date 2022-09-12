@@ -621,7 +621,6 @@ public class ActivityService {
     }
 
     public void deleteActivityEventSpeaker(UUID eventId, UUID activityId, UUID activitySpeakerId) {
-        Event event = getEvent(eventId);
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         activitySpeakerRepository.deleteById(activitySpeakerId);
@@ -630,10 +629,8 @@ public class ActivityService {
     }
 
     public void deleteActivitySubEventSpeaker(UUID eventId, UUID subeventId, UUID activityId, UUID activitySpeakerId) {
-        Event event = getEvent(eventId);
-        Subevent subevent = getSubEvent(subeventId);
         Activity activity = getActivity(activityId);
-        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checkIfEventIsAssociateToSubevent(eventId, activity.getSubevent());
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
         activitySpeakerRepository.deleteById(activitySpeakerId);
         log.info("Activity Speaker deleted: id={}, title={}", activityId, activity.getTitle());

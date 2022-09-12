@@ -35,14 +35,10 @@ public class RegistrationController {
     }
 
     @PostMapping("sessions/{sessionId}/registrations")
-    public ResponseEntity<RegistrationDto> create(@PathVariable UUID sessionId, @RequestBody RegistrationCreateDto registrationCreateDto, Authentication authentication) {
+    public ResponseEntity<RegistrationDto> create(@PathVariable UUID sessionId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
 
-        if(!jwtUserDetails.getId().equals(registrationCreateDto.getAccountId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        var registration = registrationService.create(registrationCreateDto, sessionId);
+        var registration = registrationService.create(new RegistrationCreateDto(jwtUserDetails.getId()), sessionId);
 
         return new ResponseEntity<>(registrationMapper.to(registration), HttpStatus.CREATED);
     }
@@ -62,14 +58,10 @@ public class RegistrationController {
     }
 
     @PostMapping("sessions/{sessionId}/registrations/wait-list")
-    public ResponseEntity<RegistrationDto> createRegistrationInWaitList(@PathVariable UUID sessionId, @RequestBody RegistrationCreateDto registrationCreateDto, Authentication authentication) {
+    public ResponseEntity<RegistrationDto> createRegistrationInWaitList(@PathVariable UUID sessionId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
 
-        if(!jwtUserDetails.getId().equals(registrationCreateDto.getAccountId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        var registration = registrationService.createRegistrationInWaitList(registrationCreateDto, sessionId);
+        var registration = registrationService.createRegistrationInWaitList(new RegistrationCreateDto(jwtUserDetails.getId()), sessionId);
 
         return new ResponseEntity<>(registrationMapper.to(registration), HttpStatus.CREATED);
     }
@@ -130,5 +122,11 @@ public class RegistrationController {
 
         Registration registration = registrationService.denySessionSeat(jwtUserDetails.getId(), registrationId);
         return ResponseEntity.ok(registrationMapper.to(registration));
+    }
+
+    @GetMapping("accounts/events")
+    public List<AccountEventQueryDto> findAllEventsByAccount(Authentication authentication) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        return registrationService.findAllEventsByAccount(jwtUserDetails.getId());
     }
 }

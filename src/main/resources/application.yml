@@ -31,7 +31,8 @@ spring:
             enabled: true
 
 support:
-  mail: ${SUPPORT_EMAIL}
+  mail: ${SUPPORT_EMAIL:}
+  event: ${EVENT_EMAIL:eventos.spo@ifsp.edu.br}
   name: ${SUPPORT_NAME:Eventos IFSP SPO}
 
 frontend:
@@ -40,6 +41,7 @@ frontend:
 account:
   verification-token-expires-in: 900
   password-reset-token-expires-in: 900
+  account-deletion-token-expires-in: 900
 
 jwt:
   issuer: event-platform
@@ -64,7 +66,7 @@ scheduler:
 
 app:
   cache:
-    expireTimeInSeconds: ${APP_CACHE_EXPIRE_TIME_IN_SECONDS:60}
+    expireTimeInSeconds: ${APP_CACHE_EXPIRE_TIME_IN_SECONDS:30}
 
 logging:
   level:

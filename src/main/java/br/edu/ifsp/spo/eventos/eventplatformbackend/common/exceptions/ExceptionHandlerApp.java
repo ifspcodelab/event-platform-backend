@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordE
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.MyDataResetPasswordExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.AuthenticationExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.SignupException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRuleException;
@@ -223,13 +224,26 @@ public class ExceptionHandlerApp {
         ProblemDetail problemDetail = new ProblemDetail("", List.of());
         if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.UNVERIFIED_ACCOUNT)) {
             problemDetail = new ProblemDetail(
-                    String.format("The account for this email is not yet verified"),
+                    "The account for this email is not yet verified",
                     List.of()
             );
         }
-        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.INCORRECT_PASSWORD)) {
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.BLOCKED_BY_ADMIN_ACCOUNT)) {
             problemDetail = new ProblemDetail(
-                    String.format("Incorrect email or password", ex.getEmail()),
+                    "The account for this email is blocked by admin",
+                    List.of()
+            );
+        }
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.WAITING_FOR_EXCLUSION_ACCOUNT)) {
+            problemDetail = new ProblemDetail(
+                    "The account for this email is waiting for exclusion",
+                    List.of()
+            );
+        }
+        if (ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.INCORRECT_PASSWORD) ||
+                ex.getAuthenticationExceptionType().equals(AuthenticationExceptionType.NONEXISTENT_ACCOUNT_BY_EMAIL)) {
+            problemDetail = new ProblemDetail(
+                    "Incorrect email or password",
                     List.of()
             );
         }
@@ -293,6 +307,16 @@ public class ExceptionHandlerApp {
             );
         }
         log.warn(String.format(ex.getMyDataResetPasswordExceptionType().getMessage(), ex.getEmail()));
+        return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AccountDeletionException.class)
+    public ResponseEntity<ProblemDetail> handlerAccountDeletion(AccountDeletionException ex) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "Password invalid",
+                List.of());
+        log.warn("Password incorrect for account deletion attempt for email={}: ", ex.getEmail());
+
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
     }
 }

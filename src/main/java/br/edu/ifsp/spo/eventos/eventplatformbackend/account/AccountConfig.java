@@ -11,4 +11,5 @@ import org.springframework.stereotype.Component;
 public class AccountConfig {
     private Integer verificationTokenExpiresIn;
     private Integer passwordResetTokenExpiresIn;
+    private Integer accountDeletionTokenExpiresIn;
 }

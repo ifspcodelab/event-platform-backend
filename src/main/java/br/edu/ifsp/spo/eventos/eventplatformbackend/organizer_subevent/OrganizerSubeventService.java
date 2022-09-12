@@ -119,4 +119,8 @@ public class OrganizerSubeventService {
             throw new ResourceNotFoundException(ResourceName.SUBEVENT, subeventId);
         }
     }
+
+    public List<Subevent> findAllSubevents(UUID accountId) {
+        return organizerSubeventRepository.findAllSubeventsByAccountId(accountId);
+    }
 }

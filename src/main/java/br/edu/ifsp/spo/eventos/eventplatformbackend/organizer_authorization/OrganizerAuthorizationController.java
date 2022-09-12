@@ -4,6 +4,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetai
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventMapper;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventMapper;
@@ -18,10 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/organizers/authorization")
+@RequestMapping("api/v1/organizers")
 @AllArgsConstructor
 public class OrganizerAuthorizationController {
-    private final OrganizerAuthorizationService organizerAuthorizationService;
+    private final OrganizerService organizerService;
+    private final OrganizerSubeventService organizerSubeventService;
     private final EventMapper eventMapper;
     private final SubeventMapper subeventMapper;
 
@@ -29,7 +32,7 @@ public class OrganizerAuthorizationController {
     public ResponseEntity<List<EventDto>> eventsIndex (Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
         UUID accountId = jwtUserDetails.getId();
-        List<Event> events = organizerAuthorizationService.findAllOrganizerEvents(accountId);
+        List<Event> events = organizerService.findAllEvents(accountId);
 
         return ResponseEntity.ok(eventMapper.to(events));
     }
@@ -38,8 +41,13 @@ public class OrganizerAuthorizationController {
     public ResponseEntity<List<SubeventDto>> subeventsIndex (Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
         UUID accountId = jwtUserDetails.getId();
-        List<Subevent> subevents = organizerAuthorizationService.findAllSubeventOrganizerSubevents(accountId);
+        List<Subevent> subevents = organizerSubeventService.findAllSubevents(accountId);
 
         return ResponseEntity.ok(subeventMapper.to(subevents));
     }
+
+    //TODO: get sessions
+//    @GetMapping("events/sessions") {}
+//
+//    @GetMapping("subevents/sessions") {}
 }

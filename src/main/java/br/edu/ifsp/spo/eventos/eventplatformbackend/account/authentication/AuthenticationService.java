@@ -9,7 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerRepository;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationService {
     private final AccountRepository accountRepository;
-    private final OrganizerAuthorizationRepository organizerAuthorizationRepository;
+    private final OrganizerRepository organizerRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -52,8 +52,8 @@ public class AuthenticationService {
 
         String accessTokenString;
 
-        if (organizerAuthorizationRepository.existsOrganizerByAccountId(account.getId())) {
-            var organizerEventIds = organizerAuthorizationRepository.findAllEventIdByAccountId(account.getId());
+        if (organizerRepository.existsByAccountId(account.getId())) {
+            var organizerEventIds = organizerRepository.findAllEventIdByAccountId(account.getId());
             accessTokenString = jwtService.generateOrganizerAccessToken(account, organizerEventIds);
         } else {
             accessTokenString = jwtService.generateAccessToken(account);

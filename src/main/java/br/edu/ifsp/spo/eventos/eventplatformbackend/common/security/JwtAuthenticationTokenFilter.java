@@ -60,6 +60,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         var accountId = decodeToken.getSubject();
         var accountEmail = decodeToken.getClaim("email").asString();
         var accountRole = decodeToken.getClaim("role").asString();
+        //TODO: organizer claims:
+//        var organizerCoordinator = decodeToken.getClaim("organizerCoordinator").asList(String.class);
+//        var organizerCollaborator = decodeToken.getClaim("organizerCollaborator").asList(String.class);
 
         if(!StringUtils.hasText(accountId) || !StringUtils.hasText(accountEmail) || !StringUtils.hasText(accountRole)) {
             log.error("Invalid token: id, email or role not defined");

@@ -1,7 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.OrganizerSubEventSiteDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,4 +23,7 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
         "WHERE se.id = ?1\n" +
         "ORDER BY a.name")
     List<OrganizerSubEventSiteDto> findAllOrganizerBySubEventId(UUID subeventId);
+
+    @Query("select distinct (se) from Subevent se join OrganizerSubevent as os on os.subevent = se.id where os.account.id = :accountId")
+    List<Subevent> findAllSubeventsByAccountId(UUID accountId);
 }

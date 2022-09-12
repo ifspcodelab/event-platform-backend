@@ -94,4 +94,8 @@ public class OrganizerService {
             throw new ResourceNotFoundException(ResourceName.EVENT, eventId);
         }
     }
+
+    public List<Event> findAllEvents(UUID accountId) {
+        return organizerRepository.findAllEventsByAccountId(accountId);
+    }
 }

@@ -46,6 +46,7 @@ public class JwtService {
         builder.withClaim("email", account.getEmail());
         builder.withClaim("role", account.getRole().name());
         builder.withClaim("organizer", organizerEventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
+        //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
 
         return builder.sign(algorithm);
     }

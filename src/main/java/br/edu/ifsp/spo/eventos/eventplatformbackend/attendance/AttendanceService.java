@@ -4,11 +4,13 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.Registration;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,6 +28,10 @@ public class AttendanceService {
     public void delete(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
         Attendance attendance = getAttendance(attendanceId);
         attendanceRepository.delete(attendance);
+    }
+
+    public List<Attendance> findAll(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId) {
+        return attendanceRepository.findAllBySessionScheduleId(sessionScheduleId);
     }
 
     private Attendance getAttendance(UUID attendanceId) {

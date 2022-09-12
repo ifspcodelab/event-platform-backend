@@ -111,8 +111,26 @@ public class AuthenticationService {
             throw new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_TOKEN, account.getEmail());
         }
 
+        //TODO: refactor into a 'generateAccessToken' private method and call it in 'rotate...' and 'login' methods
+        String newAccessTokenString;
+
+        boolean isEventOrganizer = organizerRepository.existsByAccountId(account.getId());
+        boolean isSubeventOrganizer = organizerSubeventRepository.existsByAccountId(account.getId());
+        if (isEventOrganizer && isSubeventOrganizer) {
+            var organizerEventIds = organizerRepository.findAllEventIdByAccountId(account.getId());
+            var organizerSubeventIds = organizerSubeventRepository.findAllSubeventIdByAccountId(account.getId());
+            newAccessTokenString = jwtService.generateOrganizerEventSubeventAccessToken(account, organizerEventIds, organizerSubeventIds);
+        } else if (isEventOrganizer) {
+            var organizerEventIds = organizerRepository.findAllEventIdByAccountId(account.getId());
+            newAccessTokenString = jwtService.generateOrganizerAccessToken(account, organizerEventIds);
+        } else if (isSubeventOrganizer) {
+            var organizerSubeventIds = organizerSubeventRepository.findAllSubeventIdByAccountId(account.getId());
+            newAccessTokenString = jwtService.generateOrganizerSubeventAccessToken(account, organizerSubeventIds);
+        } else {
+            newAccessTokenString = jwtService.generateAccessToken(account);
+        }
+
         UUID refreshTokenId = UUID.randomUUID();
-        String newAccessTokenString = jwtService.generateAccessToken(account);
         String newRefreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
 
         refreshTokenRepository.updateTokenByAccountId(refreshTokenId, newRefreshTokenString, account);

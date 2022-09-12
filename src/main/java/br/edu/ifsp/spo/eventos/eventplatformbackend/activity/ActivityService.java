@@ -7,6 +7,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
@@ -33,6 +34,7 @@ public class ActivityService {
     private final SubeventRepository subeventRepository;
     private final ActivitySpeakerRepository activitySpeakerRepository;
     private final SpeakerRepository speakerRepository;
+    private final SessionRepository sessionRepository;
     private final SessionService sessionService;
     private final AuditService auditService;
 
@@ -520,6 +522,10 @@ public class ActivityService {
             }
         }
 
+        if(sessionRepository.existsByActivityId(activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SESSIONS);
+        }
+
         activityRepository.delete(activity);
         log.info("Activity deleted: id={}, title={}", activityId, activity.getTitle());
         auditService.logAdminDelete(ResourceName.ACTIVITY, activityId);
@@ -554,6 +560,10 @@ public class ActivityService {
             if (subevent.getExecutionPeriod().getEndDate().isBefore(LocalDate.now())) {
                 throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD);
             }
+        }
+
+        if(sessionRepository.existsByActivityId(activityId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACTIVITY_DELETE_WITH_SESSIONS);
         }
 
         activityRepository.delete(activity);

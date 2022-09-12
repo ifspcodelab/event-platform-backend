@@ -21,6 +21,8 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     boolean existsBySlugAndSubeventId(String slug, UUID subeventId);
     boolean existsBySlugAndEventIdAndIdNot(String Slug, UUID eventId, UUID activityId);
     boolean existsBySlugAndSubeventIdAndIdNot(String Slug, UUID subeventId, UUID activityId);
+    boolean existsBySubeventId(UUID subeventId);
+    boolean existsByEventId(UUID eventId);
 
     @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.ActivitySiteDto(act.event.id, act.subevent.id, act.id, act.title, act.slug, act.type, act.modality, act.description, spe.name, ses.id, ses.title, sch.id, sch.executionStart, sch.executionEnd) \n" +
            "FROM Activity act\n" +

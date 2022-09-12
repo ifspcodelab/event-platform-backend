@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
@@ -8,6 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
@@ -25,8 +27,10 @@ import java.util.UUID;
 public class SubeventService {
     private final SubeventRepository subeventRepository;
     private final EventRepository eventRepository;
+    private final ActivityRepository activityRepository;
     private final ActivityService activityService;
     private final AuditService auditService;
+    private final OrganizerSubeventRepository organizerSubeventRepository;
 
     public Subevent create(SubeventCreateDto dto, UUID eventId) {
         Event event = getEvent(eventId);
@@ -101,6 +105,14 @@ public class SubeventService {
             ) {
                 throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START);
             }
+        }
+
+        if(activityRepository.existsBySubeventId(subeventId)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_ACTIVITIES);
+        }
+
+        if(organizerSubeventRepository.existsBySubeventId(subeventId)) {
+            throw new BusinessRuleException(BusinessRuleType.SUBEVENT_DELETE_WITH_ORGANIZERS);
         }
 
         subeventRepository.deleteById(subeventId);

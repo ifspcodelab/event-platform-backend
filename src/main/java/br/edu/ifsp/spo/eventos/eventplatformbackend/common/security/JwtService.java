@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class JwtService {
     private JwtConfig jwtConfig;
+    //TODO: refactor all "generate...token" methods in order to simplify code reading and optimize code of the whole class in general
 
     public String generateAccessToken(Account account) {
         Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
@@ -46,6 +47,41 @@ public class JwtService {
         builder.withClaim("email", account.getEmail());
         builder.withClaim("role", account.getRole().name());
         builder.withClaim("organizer", organizerEventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
+        //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
+
+        return builder.sign(algorithm);
+    }
+
+    public String generateOrganizerSubeventAccessToken(Account account, List<UUID> organizerSubeventIds) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
+        Instant now = Instant.now();
+
+        JWTCreator.Builder builder = JWT.create();
+        builder.withIssuer(jwtConfig.getIssuer());
+        builder.withSubject(account.getId().toString());
+        builder.withIssuedAt(now);
+        builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
+        builder.withClaim("email", account.getEmail());
+        builder.withClaim("role", account.getRole().name());
+        builder.withClaim("organizer_subevent", organizerSubeventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
+        //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
+
+        return builder.sign(algorithm);
+    }
+
+    public String generateOrganizerEventSubeventAccessToken(Account account, List<UUID> organizerEventIds, List<UUID> organizerSubeventIds) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
+        Instant now = Instant.now();
+
+        JWTCreator.Builder builder = JWT.create();
+        builder.withIssuer(jwtConfig.getIssuer());
+        builder.withSubject(account.getId().toString());
+        builder.withIssuedAt(now);
+        builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
+        builder.withClaim("email", account.getEmail());
+        builder.withClaim("role", account.getRole().name());
+        builder.withClaim("organizer", organizerEventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
+        builder.withClaim("organizer_subevent", organizerSubeventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
         //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
 
         return builder.sign(algorithm);

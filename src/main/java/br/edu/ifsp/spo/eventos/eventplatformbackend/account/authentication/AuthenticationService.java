@@ -10,6 +10,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaSe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class AuthenticationService {
     private final AccountRepository accountRepository;
     private final OrganizerRepository organizerRepository;
+    private final OrganizerSubeventRepository organizerSubeventRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -39,7 +42,6 @@ public class AuthenticationService {
 
         Account account = getAccount(loginCreateDto.getEmail());
 
-
         if (!account.getVerified()) {
             throw new AuthenticationException(AuthenticationExceptionType.UNVERIFIED_ACCOUNT, account.getEmail());
         }
@@ -52,24 +54,30 @@ public class AuthenticationService {
 
         String accessTokenString;
 
-        if (organizerRepository.existsByAccountId(account.getId())) {
+        boolean isEventOrganizer = organizerRepository.existsByAccountId(account.getId());
+        boolean isSubeventOrganizer = organizerSubeventRepository.existsByAccountId(account.getId());
+        if (isEventOrganizer && isSubeventOrganizer) {
+            var organizerEventIds = organizerRepository.findAllEventIdByAccountId(account.getId());
+            var organizerSubeventIds = organizerSubeventRepository.findAllSubeventIdByAccountId(account.getId());
+            accessTokenString = jwtService.generateOrganizerEventSubeventAccessToken(account, organizerEventIds, organizerSubeventIds);
+        } else if (isEventOrganizer) {
             var organizerEventIds = organizerRepository.findAllEventIdByAccountId(account.getId());
             accessTokenString = jwtService.generateOrganizerAccessToken(account, organizerEventIds);
+        } else if (isSubeventOrganizer) {
+            var organizerSubeventIds = organizerSubeventRepository.findAllSubeventIdByAccountId(account.getId());
+            accessTokenString = jwtService.generateOrganizerSubeventAccessToken(account, organizerSubeventIds);
         } else {
             accessTokenString = jwtService.generateAccessToken(account);
         }
 
         UUID refreshTokenId = UUID.randomUUID();
         String refreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
-
         RefreshToken refreshToken = new RefreshToken(refreshTokenId, refreshTokenString, account);
-
         refreshTokenRepository.save(refreshToken);
 
         TokensDto tokensDto = new TokensDto(accessTokenString, refreshTokenString);
 
         log.info("Successful login for the email {}", account.getEmail());
-
         auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login", refreshToken.getId());
 
         return tokensDto;

@@ -14,6 +14,7 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
     List<OrganizerSubevent> findAllBySubeventId(UUID subeventId);
     boolean existsByAccountAndSubeventId(Account account, UUID subeventId);
     boolean existsBySubeventId(UUID eventId);
+    boolean existsByAccountId(UUID accountId);
 
     @Query("SELECT new br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.OrganizerSubEventSiteDto(o.id, a.name, o.type)\n" +
         "FROM Subevent se\n" +

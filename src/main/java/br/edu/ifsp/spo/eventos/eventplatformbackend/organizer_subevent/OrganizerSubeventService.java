@@ -125,7 +125,7 @@ public class OrganizerSubeventService {
         return organizerSubeventRepository.findAllSubeventsByAccountId(accountId);
     }
 
-    public List<Session> findAllSessions(UUID accountId) {
-        return organizerSubeventRepository.findAllSessionsByAccountId(accountId);
+    public List<Session> findAllSessions(UUID subeventId, UUID accountId) {
+        return organizerSubeventRepository.findAllSessionsByAccountIdAndSubeventId(accountId, subeventId);
     }
 }

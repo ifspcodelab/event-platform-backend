@@ -1,7 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.site.dtos.OrganizerSubEventSiteDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
@@ -40,6 +39,7 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
             "join fetch schedules.space \n" +
             "join Activity a on s.activity.id = a.id \n" +
             "join OrganizerSubevent os on a.subevent.id = os.subevent.id \n" +
-            "where os.account.id = :accountId")
-    List<Session> findAllSessionsByAccountId(UUID accountId);
+            "where os.account.id = :accountId \n" +
+            "and a.subevent.id = :subeventId")
+    List<Session> findAllSessionsByAccountIdAndSubeventId(UUID accountId, UUID subeventId);
 }

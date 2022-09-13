@@ -106,6 +106,25 @@ public class AttendanceService {
     }
 
     public List<Attendance> findAll(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId) {
+        SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
+        checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
+        checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
+        checksIfEventIsAssociateToActivity(eventId, sessionSchedule.getSession().getActivity());
+        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
+        checkIfSessionIsCancelled(sessionSchedule.getSession());
+
+        return attendanceRepository.findAllBySessionScheduleId(sessionScheduleId);
+    }
+
+    public List<Attendance> findAll(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId) {
+        SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
+        checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
+        checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
+        checksIfSubeventIsAssociateToActivity(subeventId, sessionSchedule.getSession().getActivity());
+        checkIfEventIsAssociateToSubevent(eventId, sessionSchedule.getSession().getActivity().getSubevent());
+        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
+        checkIfSessionIsCancelled(sessionSchedule.getSession());
+
         return attendanceRepository.findAllBySessionScheduleId(sessionScheduleId);
     }
 
@@ -121,7 +140,7 @@ public class AttendanceService {
 
     private SessionSchedule getSessionSchedule(UUID sessionScheduleId) {
         return sessionScheduleRepository.findById(sessionScheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION_SCHEDULE, sessionScheduleId)); // mudar reso name
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION_SCHEDULE, sessionScheduleId));
     }
 
     private void checkIfEventIsAssociateToSubevent(UUID eventId, Subevent subevent) {

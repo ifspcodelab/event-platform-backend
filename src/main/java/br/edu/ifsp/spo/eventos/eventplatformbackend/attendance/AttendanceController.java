@@ -47,4 +47,10 @@ public class AttendanceController {
         List<Attendance> attendances = attendanceService.findAll(eventId, activityId, sessionId, sessionScheduleId);
         return ResponseEntity.ok(attendanceMapper.to(attendances));
     }
+
+    @GetMapping("sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}/session-schedules/{sessionScheduleId}/attendances")
+    public ResponseEntity<List<AttendanceDto>> index(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID sessionScheduleId) {
+        List<Attendance> attendances = attendanceService.findAll(eventId, subeventId, activityId, sessionId, sessionScheduleId);
+        return ResponseEntity.ok(attendanceMapper.to(attendances));
+    }
 }

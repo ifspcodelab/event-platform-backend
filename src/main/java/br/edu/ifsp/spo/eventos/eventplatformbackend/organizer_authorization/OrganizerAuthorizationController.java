@@ -75,4 +75,11 @@ public class OrganizerAuthorizationController {
 
         return ResponseEntity.ok(sessionMapper.to(session));
     }
+
+    @GetMapping("sub-events/{subeventId}/sessions/{sessionId}")
+    public ResponseEntity<SessionDto> showSubeventSession (@PathVariable UUID subeventId, @PathVariable UUID sessionId) {
+        Session session = organizerSubeventService.findSessionById(subeventId, sessionId);
+
+        return ResponseEntity.ok(sessionMapper.to(session));
+    }
 }

@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -22,7 +23,7 @@ import java.util.UUID;
 public class Attendance {
     @Id
     private UUID id;
-    //TODO - Quando foi criado a presença
+    private Instant registrationTimestamp;
     @ManyToOne
     private Registration registration;
     @ManyToOne
@@ -30,6 +31,7 @@ public class Attendance {
 
     public Attendance(Registration registration, SessionSchedule sessionSchedule) {
         this.id = UUID.randomUUID();
+        this.registrationTimestamp = Instant.now();
         this.registration = registration;
         this.sessionSchedule = sessionSchedule;
     }

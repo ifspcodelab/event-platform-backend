@@ -5,6 +5,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionScheduleDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -12,5 +13,6 @@ import java.util.UUID;
 public class AttendanceDto {
     UUID id;
     RegistrationDto registration;
+    Instant registrationTimestamp;
     SessionScheduleDto sessionSchedule;
 }

@@ -11,11 +11,15 @@ public class JwtUserDetails implements UserDetails {
     private final UUID id;
     private final String username;
     private final Collection<? extends GrantedAuthority> authorities;
+    private final Collection<String> organizer;
+    private final Collection<String> organizerSubevent;
 
-    public JwtUserDetails(UUID id, String username, List<GrantedAuthority> grantedAuthorities) {
+    public JwtUserDetails(UUID id, String username, List<GrantedAuthority> grantedAuthorities, List<String> organizer, List<String> organizerSubevent) {
         this.id = id;
         this.username = username;
         this.authorities = grantedAuthorities;
+        this.organizer = organizer;
+        this.organizerSubevent = organizerSubevent;
     }
 
     @Override
@@ -55,6 +59,14 @@ public class JwtUserDetails implements UserDetails {
 
     public UUID getId() {
         return id;
+    }
+
+    public Collection<String> getOrganizer() {
+        return organizer;
+    }
+
+    public Collection<String> getOrganizerSubevent() {
+        return organizerSubevent;
     }
 
     @Override

@@ -61,6 +61,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         var accountEmail = decodeToken.getClaim("email").asString();
         var accountRole = decodeToken.getClaim("role").asString();
         //TODO: organizer claims:
+        var organizer = decodeToken.getClaim("organizer").asList(String.class);
+        var organizerSubevent = decodeToken.getClaim("organizer_subevent").asList(String.class);
 //        var organizerCoordinator = decodeToken.getClaim("organizerCoordinator").asList(String.class);
 //        var organizerCollaborator = decodeToken.getClaim("organizerCollaborator").asList(String.class);
 
@@ -69,7 +71,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + accountRole));
-        var userDetails = new JwtUserDetails(UUID.fromString(accountId), accountEmail, authorities);
+        var userDetails = new JwtUserDetails(UUID.fromString(accountId), accountEmail, authorities, organizer, organizerSubevent);
         var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

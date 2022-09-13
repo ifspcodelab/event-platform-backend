@@ -138,8 +138,8 @@ public enum BusinessRuleType {
     REGISTRATION_CREATE_ACCOUNT_ALREADY_HAS_REGISTRATION_IN_ACTIVITY("Não é possível se inscrever em mais de uma sessão da mesma atividade"),
     REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já passou do prazo especificado no e-mail"),
-    REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada");
-
+    REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada"),
+    SPACE_DELETE_WITH_SESSIONS_SCHEDULE("Não é possível excluir um espaço que está associado a um horário de uma sessão");
     String message;
 
     BusinessRuleType(String message) {

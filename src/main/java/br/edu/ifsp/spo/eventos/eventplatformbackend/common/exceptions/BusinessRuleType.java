@@ -134,7 +134,8 @@ public enum BusinessRuleType {
     ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED("Não é possível adicionar presença em uma inscrição não confirmada"),
     ATTENDANCE_CREATE_WITH_CANCELED_SESSION("Não é possível adicionar presença em uma sessão cancelada"),
     ATTENDANCE_CREATE_WITH_ACTIVITY_CANCELED("Não é possível adicionar presença em uma sessão com atividade cancelada"),
-    ATTENDANCE_ALREADY_EXISTS("Já existe presença para essa inscrição");
+    ATTENDANCE_ALREADY_EXISTS("Já existe presença para essa inscrição"),
+    ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END("Não é possível retirar uma presença após o período de execução do evento");
 
     String message;
 

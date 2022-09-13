@@ -71,7 +71,19 @@ public class AttendanceService {
     }
 
     public void delete(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
+        SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         Attendance attendance = getAttendance(attendanceId);
+        checksIfSessionIsAssociateToRegistration(sessionId, attendance.getRegistration());
+        checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
+        checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
+        checksIfEventIsAssociateToActivity(eventId, sessionSchedule.getSession().getActivity());
+        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
+        checkIfSessionIsCancelled(sessionSchedule.getSession());
+
+        if(sessionSchedule.getSession().getActivity().getEvent().isExecutionPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
+        }
+
         attendanceRepository.delete(attendance);
     }
 

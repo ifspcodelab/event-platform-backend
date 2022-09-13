@@ -11,6 +11,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionScheduleRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AttendanceService {
     private final RegistrationRepository registrationRepository;
     private final SessionScheduleRepository sessionScheduleRepository;
@@ -84,6 +86,7 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
         }
 
+        log.info("Attendance removed: id={}, account name{}", attendanceId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
     }
 
@@ -102,6 +105,7 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);
         }
 
+        log.info("Attendance removed: id={}, account name={}", attendanceId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
     }
 

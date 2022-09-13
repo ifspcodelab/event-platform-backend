@@ -25,13 +25,38 @@ public class AttendanceService {
 
     public Attendance create(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
+        Registration registration = getRegistration(dto.registrationId);
+        checksIfSessionIsAssociateToRegistration(sessionId, registration);
         checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
         checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
         checksIfEventIsAssociateToActivity(eventId, sessionSchedule.getSession().getActivity());
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
+        if(attendanceRepository.existsByRegistrationIdAndSessionScheduleId(registration.getId(), sessionScheduleId)) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_ALREADY_EXISTS); // mudar para uma exception ?
+        }
+
+        if(registration.getRegistrationStatus() != RegistrationStatus.CONFIRMED) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
+        }
+
+        // TODO - Se o periodo de execução da sessão acabou não pode adicionar presença ??
+
+        Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
+        return attendanceRepository.save(attendance);
+    }
+
+    public Attendance create(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
+        SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         Registration registration = getRegistration(dto.registrationId);
+        checksIfSessionIsAssociateToRegistration(sessionId, registration);
+        checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
+        checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
+        checksIfSubeventIsAssociateToActivity(subeventId, sessionSchedule.getSession().getActivity());
+        checkIfEventIsAssociateToSubevent(eventId, sessionSchedule.getSession().getActivity().getSubevent());
+        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
+        checkIfSessionIsCancelled(sessionSchedule.getSession());
 
         if(attendanceRepository.existsByRegistrationIdAndSessionScheduleId(registration.getId(), sessionScheduleId)) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_ALREADY_EXISTS); // mudar para uma exception ?
@@ -93,9 +118,15 @@ public class AttendanceService {
         }
     }
 
-    private void checksIfSessionIsAssociateToSessionSchedules(UUID sessionId, SessionSchedule sessionScheduleId) {
-        if (!sessionScheduleId.getSession().getId().equals(sessionId)) {
+    private void checksIfSessionIsAssociateToSessionSchedules(UUID sessionId, SessionSchedule sessionSchedule) {
+        if (!sessionSchedule.getSession().getId().equals(sessionId)) {
             throw new BusinessRuleException(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY); // mudar business rule
+        }
+    }
+
+    private void checksIfSessionIsAssociateToRegistration(UUID sessionId, Registration registration) {
+        if (!registration.getSession().getId().equals(sessionId)) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_SESSION);
         }
     }
 

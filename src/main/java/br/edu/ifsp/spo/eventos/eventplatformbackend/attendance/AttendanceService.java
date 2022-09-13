@@ -81,7 +81,25 @@ public class AttendanceService {
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
         if(sessionSchedule.getSession().getActivity().getEvent().isExecutionPeriodEnded()) {
-            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
+        }
+
+        attendanceRepository.delete(attendance);
+    }
+
+    public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
+        SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
+        Attendance attendance = getAttendance(attendanceId);
+        checksIfSessionIsAssociateToRegistration(sessionId, attendance.getRegistration());
+        checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
+        checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
+        checksIfSubeventIsAssociateToActivity(subeventId, sessionSchedule.getSession().getActivity());
+        checkIfEventIsAssociateToSubevent(eventId, sessionSchedule.getSession().getActivity().getSubevent());
+        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
+        checkIfSessionIsCancelled(sessionSchedule.getSession());
+
+        if(sessionSchedule.getSession().getActivity().getSubevent().isExecutionPeriodEnded()) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);
         }
 
         attendanceRepository.delete(attendance);

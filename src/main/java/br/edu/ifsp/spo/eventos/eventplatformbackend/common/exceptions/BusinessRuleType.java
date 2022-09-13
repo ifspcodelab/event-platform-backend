@@ -139,7 +139,8 @@ public enum BusinessRuleType {
     REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada"),
-    SPACE_DELETE_WITH_SESSIONS_SCHEDULE("Não é possível excluir um espaço que está associado a um horário de uma sessão");
+    SPACE_DELETE_WITH_SESSIONS_SCHEDULE("Não é possível excluir um espaço que está associado a um horário de uma sessão"),
+    ACCOUNT_DELETE_WITH_REGISTRATIONS("Não é possível excluir uma conta que está associada a uma inscrição");
     String message;
 
     BusinessRuleType(String message) {

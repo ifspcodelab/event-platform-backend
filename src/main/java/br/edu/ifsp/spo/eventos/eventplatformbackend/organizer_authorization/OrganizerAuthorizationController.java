@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,11 +51,11 @@ public class OrganizerAuthorizationController {
         return ResponseEntity.ok(subeventMapper.to(subevents));
     }
 
-    @GetMapping("events/sessions")
-    public ResponseEntity<List<SessionDto>> eventsSessionsIndex (Authentication authentication) {
+    @GetMapping("events/{eventId}/sessions")
+    public ResponseEntity<List<SessionDto>> eventSessionsIndex (@PathVariable UUID eventId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
         UUID accountId = jwtUserDetails.getId();
-        List<Session> sessions = organizerService.findAllSessions(accountId);
+        List<Session> sessions = organizerService.findAllSessions(eventId, accountId);
 
         return ResponseEntity.ok(sessionMapper.to(sessions));
     }

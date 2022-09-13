@@ -40,6 +40,7 @@ public interface OrganizerRepository extends JpaRepository<Organizer, UUID> {
             "join Activity a on s.activity.id = a.id \n" +
             "join Organizer o on a.event.id = o.event.id \n" +
             "where o.account.id = :accountId \n" +
+            "and a.event.id = :eventId \n" +
             "and a.subevent.id is null")
-    List<Session> findAllSessionsByAccountId(UUID accountId);
+    List<Session> findAllSessionsByAccountIdAndEventId(UUID accountId, UUID eventId);
 }

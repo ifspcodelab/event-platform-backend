@@ -100,7 +100,7 @@ public class OrganizerService {
         return organizerRepository.findAllEventsByAccountId(accountId);
     }
 
-    public List<Session> findAllSessions(UUID accountId) {
-        return organizerRepository.findAllSessionsByAccountId(accountId);
+    public List<Session> findAllSessions(UUID eventId, UUID accountId) {
+        return organizerRepository.findAllSessionsByAccountIdAndEventId(accountId, eventId);
     }
 }

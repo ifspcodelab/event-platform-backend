@@ -60,7 +60,7 @@ public class SiteController {
     @GetMapping("events/{eventSlug}/sub-events")
     public ResponseEntity<List<SubeventSiteDto>> subEventList(@PathVariable String eventSlug) {
         return ResponseEntity.ok(
-            subeventSiteMapper.to(subeventRepository.findAllByEventSlugAndStatus(eventSlug, EventStatus.PUBLISHED))
+            subeventSiteMapper.to(subeventRepository.findAllByEventSlugAndStatusOrderByTitle(eventSlug, EventStatus.PUBLISHED))
         );
     }
 

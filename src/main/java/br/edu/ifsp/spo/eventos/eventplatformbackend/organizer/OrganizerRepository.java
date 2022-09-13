@@ -32,6 +32,14 @@ public interface OrganizerRepository extends JpaRepository<Organizer, UUID> {
     @Query("select distinct (o.event.id) from Organizer o where o.account.id = :accountId")
     List<UUID> findAllEventIdByAccountId(UUID accountId);
 
-    @Query("select distinct (s) from Session s join Organizer as o on s.activity.event.id = o.event.id where o.account.id = :accountId and s.activity.subevent.id is null")
+    @Query("select distinct (s) from Session s \n" +
+            "join fetch s.sessionSchedules schedules \n" +
+            "join fetch schedules.location \n" +
+            "join fetch schedules.area \n" +
+            "join fetch schedules.space \n" +
+            "join Activity a on s.activity.id = a.id \n" +
+            "join Organizer o on a.event.id = o.event.id \n" +
+            "where o.account.id = :accountId \n" +
+            "and a.subevent.id is null")
     List<Session> findAllSessionsByAccountId(UUID accountId);
 }

@@ -33,6 +33,13 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
     @Query("select distinct (os.subevent.id) from OrganizerSubevent os where os.account.id = :accountId")
     List<UUID> findAllSubeventIdByAccountId(UUID accountId);
 
-    @Query("select distinct (s) from Session s join OrganizerSubevent as os on s.activity.subevent.id = os.subevent.id where os.account.id = :accountId")
+    @Query("select distinct (s) from Session s \n" +
+            "join fetch s.sessionSchedules schedules \n" +
+            "join fetch schedules.location \n" +
+            "join fetch schedules.area \n" +
+            "join fetch schedules.space \n" +
+            "join Activity a on s.activity.id = a.id \n" +
+            "join OrganizerSubevent os on a.subevent.id = os.subevent.id \n" +
+            "where os.account.id = :accountId")
     List<Session> findAllSessionsByAccountId(UUID accountId);
 }

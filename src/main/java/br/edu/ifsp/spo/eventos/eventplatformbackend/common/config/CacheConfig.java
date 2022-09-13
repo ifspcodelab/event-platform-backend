@@ -11,17 +11,35 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class CacheConfig {
-    @Value("${app.cache.expireTimeInSeconds}")
-    private Integer expireTimeInSeconds;
+    @Value("${app.cache.siteExpireTimeInSeconds}")
+    private Integer siteExpireTimeInSeconds;
+
+    @Value("${app.cache.activityExpireTimeInSeconds}")
+    private Integer activityExpireTimeInSeconds;
+
+    public static final String SITE_ACTIVITY_EVENT_CACHE = "SITE_ACTIVITY_CACHE";
+    public static final String SITE_ACTIVITY_SUBEVENT_CACHE = "SITE_ACTIVITY_SUBEVENT_CACHE";
+
 
     @Bean
     public Caffeine caffeineConfig() {
-        return Caffeine.newBuilder().expireAfterWrite(expireTimeInSeconds, TimeUnit.SECONDS);
+        return Caffeine.newBuilder().expireAfterWrite(siteExpireTimeInSeconds, TimeUnit.SECONDS);
     }
 
     @Bean
     public CacheManager cacheManager(Caffeine caffeine) {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+
+        caffeineCacheManager.registerCustomCache(
+            SITE_ACTIVITY_EVENT_CACHE,
+            Caffeine.newBuilder().expireAfterWrite(activityExpireTimeInSeconds, TimeUnit.SECONDS).build()
+        );
+
+        caffeineCacheManager.registerCustomCache(
+            SITE_ACTIVITY_SUBEVENT_CACHE,
+            Caffeine.newBuilder().expireAfterWrite(activityExpireTimeInSeconds, TimeUnit.SECONDS).build()
+        );
+
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
     }

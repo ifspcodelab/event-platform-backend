@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.site;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityModality;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.config.CacheConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -186,7 +187,7 @@ public class SiteController {
     }
 
 
-    @Cacheable(value = "event_activity", key = "#activitySlug")
+    @Cacheable(value = CacheConfig.SITE_ACTIVITY_EVENT_CACHE, key = "#activitySlug")
     @GetMapping("events/{eventId}/activities/{activitySlug}")
     public ResponseEntity<?> eventActivity(@PathVariable UUID eventId, @PathVariable String activitySlug) {
         List<SessionSiteQueryDto> sessions = activityRepository.findByEventIdAndSlugForSite(eventId, activitySlug);
@@ -204,7 +205,7 @@ public class SiteController {
         return ResponseEntity.ok(activity);
     }
 
-    @Cacheable(value = "subevent_activity", key = "#activitySlug")
+    @Cacheable(value = CacheConfig.SITE_ACTIVITY_SUBEVENT_CACHE, key = "#activitySlug")
     @GetMapping("events/{eventId}/sub-events/{subeventId}/activities/{activitySlug}")
     public ResponseEntity<?> subeventActivity(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable String activitySlug) {
         List<SessionSiteQueryDto> sessions = activityRepository.findBySubEventIdAndSlugForSite(eventId, subeventId, activitySlug);

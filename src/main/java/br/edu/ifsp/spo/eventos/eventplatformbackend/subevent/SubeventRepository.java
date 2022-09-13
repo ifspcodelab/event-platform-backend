@@ -17,6 +17,6 @@ public interface SubeventRepository extends JpaRepository<Subevent, UUID> {
     boolean existsBySlugAndEventIdAndIdNot(String Slug, UUID eventId, UUID subeventId);
     List<Subevent> findAllByEventId(UUID eventId);
     boolean existsByEventId(UUID eventId);
-    List<Subevent> findAllByEventSlugAndStatusOrderByTitle(String eventSlug,EventStatus status);
+    List<Subevent> findAllByEventSlugAndStatusOrderByOrdenationDescTitleAsc(String eventSlug,EventStatus status);
     Optional<Subevent> findByEventSlugAndSlugAndStatus(String eventSlug, String subeventSlug, EventStatus status);
 }

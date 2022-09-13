@@ -43,6 +43,7 @@ public class Subevent implements Diffable<Subevent> {
     private Event event;
     @Enumerated(EnumType.STRING)
     private EventStatus status;
+    private Integer ordenation;
 
     public Subevent(
         String title,
@@ -67,6 +68,7 @@ public class Subevent implements Diffable<Subevent> {
         this.status = EventStatus.DRAFT;
         this.event = event;
         this.cancellationMessage = null;
+        this.ordenation = 0;
     }
 
     public boolean isExecutionPeriodEnded() {

@@ -81,7 +81,7 @@ public class SpaceService {
         checkIfSpaceIsAssociateToArea(space, areaId);
 
         if(sessionScheduleRepository.existsBySpaceId(spaceId)) {
-            throw new BusinessRuleException(BusinessRuleType.SPACE_DELETE_WITH_SESSIONS_SCHEDULE);
+            throw new BusinessRuleException(BusinessRuleType.SPACE_DELETE_WITH_SESSION_SCHEDULES);
         }
 
         spaceRepository.deleteById(spaceId);

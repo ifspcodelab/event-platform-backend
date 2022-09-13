@@ -2,10 +2,8 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.location;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceReferentialIntegrityException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionScheduleRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
@@ -20,6 +18,7 @@ import java.util.UUID;
 public class LocationService {
     private final LocationRepository locationRepository;
     private final AreaRepository areaRepository;
+    private final SessionScheduleRepository sessionScheduleRepository;
     private final AuditService auditService;
 
     public Location create(LocationCreateDto dto) {
@@ -64,6 +63,11 @@ public class LocationService {
     public void delete(UUID locationId) {
         Location location = getLocation(locationId);
         checkAreaExistsByLocationId(locationId);
+
+        if(sessionScheduleRepository.existsByLocationId(locationId)) {
+            throw new BusinessRuleException(BusinessRuleType.LOCATION_DELETE_WITH_SESSION_SCHEDULES);
+        }
+
         locationRepository.deleteById(locationId);
         log.info("Delete location id={}, name={}", locationId, location.getName());
         auditService.logAdminDelete(ResourceName.LOCATION, locationId);

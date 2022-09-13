@@ -23,4 +23,5 @@ public interface OrganizerRepository extends JpaRepository<Organizer, UUID> {
     List<OrganizerSiteDto> findAllOrganizerByEventId(UUID eventId);
 
     boolean existsByEventId(UUID eventId);
+    boolean existsByAccountId(UUID accountId);
 }

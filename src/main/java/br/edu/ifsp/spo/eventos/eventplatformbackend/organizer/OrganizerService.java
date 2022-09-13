@@ -4,14 +4,12 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +25,7 @@ public class OrganizerService {
     private AccountRepository accountRepository;
     private EventRepository eventRepository;
     private final AuditService auditService;
+    private final SessionRepository sessionRepository;
 
     public Organizer create(UUID eventId, OrganizerCreateDto organizerDto) {
         Account account = getAccount(organizerDto.getAccountId());
@@ -102,5 +101,23 @@ public class OrganizerService {
 
     public List<Session> findAllSessions(UUID eventId, UUID accountId) {
         return organizerRepository.findAllSessionsByAccountIdAndEventId(accountId, eventId);
+    }
+
+    public Session findSessionById(UUID eventId, UUID sessionId) {
+        Session session = getSession(sessionId);
+        checksIfEventIsAssociatedToSession(eventId, session);
+
+        return session;
+    }
+
+    private Session getSession(UUID sessionId) {
+        return sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+    }
+
+    private void checksIfEventIsAssociatedToSession(UUID eventId, Session session) {
+        if(!session.getActivity().getEvent().getId().equals(eventId)) {
+            throw new ResourceNotExistsAssociationException(ResourceName.SESSION, ResourceName.EVENT);
+        }
     }
 }

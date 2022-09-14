@@ -104,17 +104,7 @@ public class OrganizerService {
     }
 
     public List<Session> findAllSessions(UUID eventId, UUID accountId) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organizerEvents = jwtUserDetails.getOrganizer();
-        var existsEvent = organizerEvents.contains(eventId.toString());
-
-        if (!existsEvent) {
-            throw new OrganizerAuthorizationException(
-                    OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT,
-                    jwtUserDetails.getUsername(),
-                    eventId
-            );
-        }
+        checksOrganizerAccess(eventId);
 
         return organizerRepository.findAllSessionsByAccountIdAndEventId(accountId, eventId);
     }
@@ -122,6 +112,7 @@ public class OrganizerService {
     public Session findSessionById(UUID eventId, UUID sessionId) {
         Session session = getSession(sessionId);
         checksIfEventIsAssociatedToSession(eventId, session);
+        checksOrganizerAccess(eventId);
 
         return session;
     }
@@ -134,6 +125,20 @@ public class OrganizerService {
     private void checksIfEventIsAssociatedToSession(UUID eventId, Session session) {
         if(!session.getActivity().getEvent().getId().equals(eventId)) {
             throw new ResourceNotExistsAssociationException(ResourceName.SESSION, ResourceName.EVENT);
+        }
+    }
+
+    private void checksOrganizerAccess(UUID eventId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var organizerEvents = jwtUserDetails.getOrganizer();
+        var existsEvent = organizerEvents.contains(eventId.toString());
+
+        if (!existsEvent) {
+            throw new OrganizerAuthorizationException(
+                    OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT,
+                    jwtUserDetails.getUsername(),
+                    eventId
+            );
         }
     }
 }

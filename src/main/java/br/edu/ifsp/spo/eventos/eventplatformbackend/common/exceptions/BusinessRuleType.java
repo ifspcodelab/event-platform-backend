@@ -130,7 +130,7 @@ public enum BusinessRuleType {
     REGISTRATION_CREATE_WITH_CANCELED_SESSION("Não é possível se inscrever em uma sessão cancelada"),
     REGISTRATION_CREATE_WITH_ACTIVITY_CANCELED("Não é se possível se inscrever em uma sessão com atividade cancelada"),
     REGISTRATION_CREATE_WITH_EVENT_OUT_OF_REGISTRATION_PERIOD("Não é possível se inscrever fora do período de inscrições do evento"),
-    REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT("Não é possível se inscrever, pois já existe uma inscrição confirmada ou esperando confirmação para outra sessão neste mesmo horário"),
+    REGISTRATION_CREATE_HAS_SCHEDULE_CONFLICT("Você já está inscrito ou possui uma inscrição esperando confirmação em outra atividade neste mesmo horário. Não é possivel se inscrever em várias atividades no mesmo horário."),
     REGISTRATION_CREATE_WITH_NO_SEATS_AVAILABLE("Não é possível se inscrever em uma sessão sem vagas abertas"),
     REGISTRATION_CREATE_IN_WAIT_LIST_WITH_SEATS_VAILABLE("Não é possível criar uma inscrição na lista de espera em uma sessão que ainda possui vagas abertas"),
     REGISTRATION_CREATE_WITH_EXISTING_WAIT_LIST("Não é possível criar uma inscrição confirmada, pois há pessoas na lista de espera"),

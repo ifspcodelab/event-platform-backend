@@ -1,6 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.speaker;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
+
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivitySpeakerRepository;
@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,21 +34,6 @@ public class SpeakerService {
         }
 
         Speaker speaker = dtoToSpeaker(dto);
-
-        Optional<Account> optionalAccount = accountRepository.findByCpf(dto.getCpf());
-        if(optionalAccount.isPresent()) {
-            Account account = optionalAccount.get();
-            speaker.setAccount(account);
-            speakerRepository.save(speaker);
-
-            log.info(
-                "Speaker with name={}, email={} and accountId={} was created",
-                speaker.getName(), speaker.getEmail(), account.getId()
-            );
-
-            return speaker;
-        }
-
         speakerRepository.save(speaker);
 
         log.info("Speaker with name={} and email={} was created", speaker.getName(), speaker.getEmail());
@@ -99,12 +83,6 @@ public class SpeakerService {
         speaker.setPhoneNumber(dto.getPhoneNumber());
 
         DiffResult<?> diffResult = currentSpeaker.diff(speaker);
-
-        Optional<Account> optionalAccount = accountRepository.findByCpf(dto.getCpf());
-        if(optionalAccount.isPresent()) {
-            Account account = optionalAccount.get();
-            speaker.setAccount(account);
-        }
 
         speaker = speakerRepository.save(speaker);
         log.info("Speaker with name={} and email={} was updated", speaker.getName(), speaker.getEmail());

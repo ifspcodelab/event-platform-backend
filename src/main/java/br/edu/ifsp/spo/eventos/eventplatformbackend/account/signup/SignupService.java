@@ -4,15 +4,13 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,7 +31,6 @@ public class SignupService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
-    private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
     private final AuditService auditService;
     private final LogRepository logRepository;
@@ -62,17 +58,6 @@ public class SignupService {
                     new VerificationToken(account,accountConfig.getVerificationTokenExpiresIn());
             verificationTokenRepository.save(verificationToken);
             log.debug("Verification token {} for email {} was created", verificationToken.getToken(), account.getEmail());
-
-            Optional<Speaker> optionalSpeaker = speakerRepository.findByCpf(account.getCpf());
-            if (optionalSpeaker.isPresent()) {
-                Speaker speaker = optionalSpeaker.get();
-                speaker.setAccount(account);
-                speakerRepository.save(speaker);
-                log.info(
-                    "Speaker with name={} and email={} was associated with account with id {}",
-                    speaker.getName(), speaker.getEmail(), account.getId()
-                );
-            }
 
             emailService.sendVerificationEmail(account, verificationToken);
             log.info("Verification email was sent to {}", account.getEmail());

@@ -2,9 +2,11 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.event;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventService;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,8 @@ public class EventService {
     private final EventRepository eventRepository;
     private final SubeventRepository subeventRepository;
     private final SubeventService subeventService;
+    private final ActivityRepository activityRepository;
+    private final OrganizerRepository organizerRepository;
     private final ActivityService activityService;
     private final AuditService auditService;
 
@@ -94,6 +98,14 @@ public class EventService {
 
         if(subeventRepository.existsByEventId(eventId)) {
             throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_SUBEVENTS);
+        }
+
+        if(activityRepository.existsByEventId(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_ACTIVITIES);
+        }
+
+        if(organizerRepository.existsByEventId(eventId)) {
+            throw new BusinessRuleException(BusinessRuleType.EVENT_DELETE_WITH_ORGANIZERS);
         }
 
         eventRepository.deleteById(eventId);

@@ -8,11 +8,15 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.VerificationTokenRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +39,9 @@ import java.util.UUID;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final RegistrationRepository registrationRepository;
+    private final OrganizerRepository organizerRepository;
+    private final OrganizerSubeventRepository organizerSubeventRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
@@ -52,6 +59,19 @@ public class AccountService {
 
     public void delete(UUID accountId) {
         Account account = getAccount(accountId);
+
+        if(registrationRepository.existsByAccountId(accountId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACCOUNT_DELETE_WITH_REGISTRATIONS);
+        }
+
+        if(organizerRepository.existsByAccountId(accountId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACCOUNT_DELETE_WITH_ORGANIZERS);
+        }
+
+        if(organizerSubeventRepository.existsByAccountId(accountId)) {
+            throw new BusinessRuleException(BusinessRuleType.ACCOUNT_DELETE_WITH_ORGANIZERS_SUBEVENT);
+        }
+
         accountRepository.deleteById(accountId);
         log.info("Delete account id={}, name={}, email={}", account.getId(), account.getName(), account.getEmail());
     }

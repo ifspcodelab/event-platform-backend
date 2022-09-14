@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionScheduleRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.DiffResult;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final AreaRepository areaRepository;
+    private final SessionScheduleRepository sessionScheduleRepository;
     private final AuditService auditService;
 
     public Space create(UUID locationId, UUID areaId, SpaceCreateDto dto) {
@@ -77,6 +79,11 @@ public class SpaceService {
         Space space = getSpace(spaceId);
         checkIfAreaIsAssociateToLocation(getArea(areaId), locationId);
         checkIfSpaceIsAssociateToArea(space, areaId);
+
+        if(sessionScheduleRepository.existsBySpaceId(spaceId)) {
+            throw new BusinessRuleException(BusinessRuleType.SPACE_DELETE_WITH_SESSION_SCHEDULES);
+        }
+
         spaceRepository.deleteById(spaceId);
         log.info("Delete space id={}, name={}", spaceId, space.getName());
         auditService.logAdminDelete(ResourceName.SPACE, spaceId);

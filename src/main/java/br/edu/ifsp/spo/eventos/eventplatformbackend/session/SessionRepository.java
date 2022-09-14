@@ -16,4 +16,5 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Session s where s.id = :id")
     Optional<Session> findByIdWithPessimisticLock(UUID id);
+    boolean existsByActivityId(UUID activityId);
 }

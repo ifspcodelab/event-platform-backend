@@ -13,6 +13,8 @@ public enum BusinessRuleType {
     EVENT_DELETE_WITH_CANCELED_STATUS("Não é possível excluir um evento cancelado"),
     EVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START("Não é possível excluir um evento publicado que o seu período de inscrições já tenha iniciado"),
     EVENT_DELETE_WITH_SUBEVENTS("Não é possível excluir um evento com subeventos associados"),
+    EVENT_DELETE_WITH_ACTIVITIES("Não é possível excluir um evento com atividades associadas"),
+    EVENT_DELETE_WITH_ORGANIZERS("Não é possível excluir um evento com organizadores associados"),
     EVENT_UPDATE_WITH_CANCELED_STATUS("Não é possivel editar um evento cancelado"),
     EVENT_UPDATE_WITH_PUBLISHED_STATUS_AFTER_EXECUTION_PERIOD("Não é possível editar um evento publicado que tenha sido finalizado"),
     EVENT_UPDATE_WITH_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START("Não é possível editar O slug de um evento publicado que o seu período de inscrições já tenha iniciado"),
@@ -33,6 +35,8 @@ public enum BusinessRuleType {
     SUBEVENT_BEFORE_EVENT("Data de início do subevento é anterior à data de início do evento"),
     SUBEVENT_AFTER_EVENT("A data de fim do subevento é posterior à data de fim do evento"),
     SUBEVENT_IS_NOT_ASSOCIATED_EVENT("Subevento não está associado ao evento"),
+    SUBEVENT_DELETE_WITH_ACTIVITIES("Não é possível excluir um subevento com atividades associadas"),
+    SUBEVENT_DELETE_WITH_ORGANIZERS("Não é possível excluir um subevento com organizadores associados"),
     SUBEVENT_DELETE_WITH_PUBLISHED_STATUS_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar um subevento publicado que o seu período de inscrições já tenha iniciado"),
     SUBEVENT_DELETE_WITH_STATUS_CANCELED("Não é possível deletar um subevento cancelado"),
     SUBEVENT_UPDATE_WITH_CANCELED_STATUS("Não é possível editar um subevento cancelado"),
@@ -71,6 +75,8 @@ public enum BusinessRuleType {
     ACTIVITY_UPDATE_WITH_EVENT_REGISTRATION_PERIOD_BEFORE_TODAY("Não é possível atualizar uma atividade em que o período de inscrição do evento é antes de hoje"),
     ACTIVITY_UPDATE_WITH_SUBEVENT_EXECUTION_PERIOD_BEFORE_TODAY("Não é possível atualizar uma atividade em que o período de execução do subevento é antes de hoje"),
     ACTIVITY_UPDATE_WITH_EVENT_PUBLISHED_STATUS_AND_MODIFIED_SLUG_AFTER_RERISTRATION_PERIOD_START("Não é possível editar o slug de uma atividade em um evento publicado em que o seu período de inscrições já tenha iniciado"),
+    ACTIVITY_DELETE_WITH_SESSIONS("Não é possível excluir uma atividade com sessões associadas"),
+    ACTIVITY_DELETE_WITH_SPEAKERS("Não é possível excluir uma atividade com ministrantes associados"),
     ACTIVITY_DELETE_WITH_PUBLISHED_STATUS_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível excluir uma atividade com status publicado após o período de execução do subevento"),
     ACTIVITY_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma atividade com status cancelado"),
     ACTIVITY_DELETE_WITH_EVENT_CANCELED_STATUS("Não é possível excluir uma atividade com um evento cancelado"),
@@ -101,7 +107,9 @@ public enum BusinessRuleType {
     SPEAKER_ADD_WITH_SUBEVENT_CANCELED_STATUS("Não é possível adicionar um ministrante em um subevento cancelado"),
     SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada"),
     SPEAKER_ADD_ALREADY_EXISTS("O ministrante já está associado a atividade"),
+    SPEAKER_DELETE_WITH_ACTIVITY("Não é possível excluir um organizador que está associado a uma atividade"),
     SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
+    SESSION_DELETE_WITH_REGISTRATIONS("Não é possível excluir uma sessão com inscrições associadas"),
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
     SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
@@ -130,8 +138,14 @@ public enum BusinessRuleType {
     REGISTRATION_CREATE_ACCOUNT_ALREADY_HAS_REGISTRATION_IN_ACTIVITY("Não é possível se inscrever em mais de uma sessão da mesma atividade"),
     REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já passou do prazo especificado no e-mail"),
-    REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada");
-
+    REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada"),
+    LOCATION_DELETE_WITH_SESSION_SCHEDULES("Não é possível excluir um local que está associado a um horário de uma sessão"),
+    AREA_DELETE_WITH_SESSION_SCHEDULES("Não é possível excluir uma área que está associada a um horário de uma sessão"),
+    SPACE_DELETE_WITH_SESSION_SCHEDULES("Não é possível excluir um espaço que está associado a um horário de uma sessão"),
+    ACCOUNT_DELETE_WITH_REGISTRATIONS("Não é possível excluir uma conta que está associada a uma inscrição"),
+    ACCOUNT_DELETE_WITH_ORGANIZERS("Não é possível excluir uma conta que está associada a um organizador"),
+    ACCOUNT_DELETE_WITH_ORGANIZERS_SUBEVENT("Não é possível excluir uma conta que está associada a um organizador de subevento"),
+    ACCOUNT_DELETE_WITH_VERIFICATION_TOKENS("Não é possível excluir uma conta que está associada a um token de verificação");
     String message;
 
     BusinessRuleType(String message) {

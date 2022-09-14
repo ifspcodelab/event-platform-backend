@@ -8,5 +8,8 @@ import java.util.UUID;
 
 @Repository
 public interface SessionScheduleRepository extends JpaRepository<SessionSchedule, UUID> {
+    boolean existsBySpaceId(UUID spaceId);
+    boolean existsByAreaId(UUID areaId);
+    boolean existsByLocationId(UUID locationId);
     List<SessionSchedule> findAllBySpaceIdAndExecutionStartGreaterThanEqual(UUID spaceId, LocalDateTime now);
 }

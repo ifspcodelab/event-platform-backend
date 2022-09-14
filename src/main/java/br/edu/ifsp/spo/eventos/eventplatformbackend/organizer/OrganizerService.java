@@ -110,9 +110,9 @@ public class OrganizerService {
     }
 
     public Session findSessionById(UUID eventId, UUID sessionId) {
+        checksOrganizerAccess(eventId);
         Session session = getSession(sessionId);
         checksIfEventIsAssociatedToSession(eventId, session);
-        checksOrganizerAccess(eventId);
 
         return session;
     }

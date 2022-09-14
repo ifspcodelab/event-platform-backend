@@ -135,9 +135,9 @@ public class OrganizerSubeventService {
     }
 
     public Session findSessionById(UUID subeventId, UUID sessionId) {
+        checksSubeventOrganizerAccess(subeventId);
         Session session = getSession(sessionId);
         checksIfSubeventIsAssociatedToSession(subeventId, session);
-        checksSubeventOrganizerAccess(subeventId);
 
         return session;
     }

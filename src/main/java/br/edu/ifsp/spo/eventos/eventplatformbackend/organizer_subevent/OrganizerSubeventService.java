@@ -129,17 +129,7 @@ public class OrganizerSubeventService {
     }
 
     public List<Session> findAllSessions(UUID subeventId, UUID accountId) {
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organizerSubevents = jwtUserDetails.getOrganizerSubevent();
-        var existsEvent = organizerSubevents.contains(subeventId.toString());
-
-        if (!existsEvent) {
-            throw new OrganizerAuthorizationException(
-                    OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT,
-                    jwtUserDetails.getUsername(),
-                    subeventId
-            );
-        }
+        checksSubeventOrganizerAccess(subeventId);
 
         return organizerSubeventRepository.findAllSessionsByAccountIdAndSubeventId(accountId, subeventId);
     }
@@ -147,6 +137,7 @@ public class OrganizerSubeventService {
     public Session findSessionById(UUID subeventId, UUID sessionId) {
         Session session = getSession(sessionId);
         checksIfSubeventIsAssociatedToSession(subeventId, session);
+        checksSubeventOrganizerAccess(subeventId);
 
         return session;
     }
@@ -159,6 +150,20 @@ public class OrganizerSubeventService {
     private void checksIfSubeventIsAssociatedToSession(UUID subeventId, Session session) {
         if(!session.getActivity().getSubevent().getId().equals(subeventId)) {
             throw new ResourceNotExistsAssociationException(ResourceName.SESSION, ResourceName.SUBEVENT);
+        }
+    }
+
+    private void checksSubeventOrganizerAccess(UUID subeventId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var organizerSubevents = jwtUserDetails.getOrganizerSubevent();
+        var existsEvent = organizerSubevents.contains(subeventId.toString());
+
+        if (!existsEvent) {
+            throw new OrganizerAuthorizationException(
+                    OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT,
+                    jwtUserDetails.getUsername(),
+                    subeventId
+            );
         }
     }
 }

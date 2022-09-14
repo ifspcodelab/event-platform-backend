@@ -309,6 +309,13 @@ public class ExceptionHandlerApp {
             );
         }
 
+        if (ex.getOrganizerAuthorizationExceptionType().equals(OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT)) {
+            problemDetail = new ProblemDetail(
+                    String.format("The organizer does not have access to the specified subevent"),
+                    List.of()
+            );
+        }
+
         log.warn(String.format(ex.getOrganizerAuthorizationExceptionType().getMessage(), ex.getUsername(), ex.getResourceId().toString()));
         return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }

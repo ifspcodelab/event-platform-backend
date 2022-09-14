@@ -5,15 +5,19 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.SubeventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -125,6 +129,18 @@ public class OrganizerSubeventService {
     }
 
     public List<Session> findAllSessions(UUID subeventId, UUID accountId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var organizerSubevents = jwtUserDetails.getOrganizerSubevent();
+        var existsEvent = organizerSubevents.contains(subeventId.toString());
+
+        if (!existsEvent) {
+            throw new OrganizerAuthorizationException(
+                    OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT,
+                    jwtUserDetails.getUsername(),
+                    subeventId
+            );
+        }
+
         return organizerSubeventRepository.findAllSessionsByAccountIdAndSubeventId(accountId, subeventId);
     }
 

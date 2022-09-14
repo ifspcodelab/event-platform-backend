@@ -60,18 +60,25 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         var accountId = decodeToken.getSubject();
         var accountEmail = decodeToken.getClaim("email").asString();
         var accountRole = decodeToken.getClaim("role").asString();
-        //TODO: organizer claims:
-        var organizer = decodeToken.getClaim("organizer").asList(String.class);
-        var organizerSubevent = decodeToken.getClaim("organizer_subevent").asList(String.class);
-//        var organizerCoordinator = decodeToken.getClaim("organizerCoordinator").asList(String.class);
-//        var organizerCollaborator = decodeToken.getClaim("organizerCollaborator").asList(String.class);
+        var coordinatorEvent = decodeToken.getClaim("coordinatorEvent").asList(String.class);
+        var coordinatorSubevent = decodeToken.getClaim("coordinatorSubevent").asList(String.class);
+        var collaboratorEvent = decodeToken.getClaim("collaboratorEvent").asList(String.class);
+        var collaboratorSubevent = decodeToken.getClaim("collaboratorSubevent").asList(String.class);
 
         if(!StringUtils.hasText(accountId) || !StringUtils.hasText(accountEmail) || !StringUtils.hasText(accountRole)) {
             log.error("Invalid token: id, email or role not defined");
         }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + accountRole));
-        var userDetails = new JwtUserDetails(UUID.fromString(accountId), accountEmail, authorities, organizer, organizerSubevent);
+        var userDetails = new JwtUserDetails(
+                UUID.fromString(accountId),
+                accountEmail,
+                authorities,
+                coordinatorEvent,
+                coordinatorSubevent,
+                collaboratorEvent,
+                collaboratorSubevent
+        );
         var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

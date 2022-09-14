@@ -12,15 +12,19 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
 public class JwtService {
     private JwtConfig jwtConfig;
-    //TODO: refactor all "generate...token" methods in order to simplify code reading and optimize code of the whole class in general
 
-    public String generateAccessToken(Account account) {
+    public String generateAccessToken(
+        Account account,
+        List<String> collaboratorEventIds,
+        List<String> collaboratorSubEventIds,
+        List<String> coordinatorEventIds,
+        List<String> ccoordinatorSubEventIds
+    ) {
         Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
         Instant now = Instant.now();
 
@@ -31,58 +35,10 @@ public class JwtService {
         builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
         builder.withClaim("email", account.getEmail());
         builder.withClaim("role", account.getRole().name());
-
-        return builder.sign(algorithm);
-    }
-
-    public String generateOrganizerAccessToken(Account account, List<UUID> organizerEventIds) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
-        Instant now = Instant.now();
-
-        JWTCreator.Builder builder = JWT.create();
-        builder.withIssuer(jwtConfig.getIssuer());
-        builder.withSubject(account.getId().toString());
-        builder.withIssuedAt(now);
-        builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
-        builder.withClaim("email", account.getEmail());
-        builder.withClaim("role", account.getRole().name());
-        builder.withClaim("organizer", organizerEventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
-        //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
-
-        return builder.sign(algorithm);
-    }
-
-    public String generateOrganizerSubeventAccessToken(Account account, List<UUID> organizerSubeventIds) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
-        Instant now = Instant.now();
-
-        JWTCreator.Builder builder = JWT.create();
-        builder.withIssuer(jwtConfig.getIssuer());
-        builder.withSubject(account.getId().toString());
-        builder.withIssuedAt(now);
-        builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
-        builder.withClaim("email", account.getEmail());
-        builder.withClaim("role", account.getRole().name());
-        builder.withClaim("organizer_subevent", organizerSubeventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
-        //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
-
-        return builder.sign(algorithm);
-    }
-
-    public String generateOrganizerEventSubeventAccessToken(Account account, List<UUID> organizerEventIds, List<UUID> organizerSubeventIds) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
-        Instant now = Instant.now();
-
-        JWTCreator.Builder builder = JWT.create();
-        builder.withIssuer(jwtConfig.getIssuer());
-        builder.withSubject(account.getId().toString());
-        builder.withIssuedAt(now);
-        builder.withExpiresAt(now.plusSeconds(jwtConfig.getAccessTokenExpiresIn()));
-        builder.withClaim("email", account.getEmail());
-        builder.withClaim("role", account.getRole().name());
-        builder.withClaim("organizer", organizerEventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
-        builder.withClaim("organizer_subevent", organizerSubeventIds.stream().map(UUID::toString).collect(Collectors.toUnmodifiableList()));
-        //TODO: claims "Collaborator", "Coordinator" ou arrayclaim
+        builder.withClaim("collaboratorEvent", collaboratorEventIds);
+        builder.withClaim("collaboratorSubevent", collaboratorSubEventIds);
+        builder.withClaim("coordinatorEvent", coordinatorEventIds);
+        builder.withClaim("coordinatorSubevent", ccoordinatorSubEventIds);
 
         return builder.sign(algorithm);
     }

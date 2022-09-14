@@ -11,15 +11,19 @@ public class JwtUserDetails implements UserDetails {
     private final UUID id;
     private final String username;
     private final Collection<? extends GrantedAuthority> authorities;
-    private final Collection<String> organizer;
-    private final Collection<String> organizerSubevent;
+    private final Collection<String> coordinatorEvent;
+    private final Collection<String> coordinatorSubevent;
+    private final Collection<String> collaboratorEvent;
+    private final Collection<String> collaboratorSubevent;
 
-    public JwtUserDetails(UUID id, String username, List<GrantedAuthority> grantedAuthorities, List<String> organizer, List<String> organizerSubevent) {
+    public JwtUserDetails(UUID id, String username, List<GrantedAuthority> grantedAuthorities, List<String> coordinatorEvent, List<String> coordinatorSubevent, List<String> collaboratorEvent, List<String> collaboratorSubevent) {
         this.id = id;
         this.username = username;
         this.authorities = grantedAuthorities;
-        this.organizer = organizer;
-        this.organizerSubevent = organizerSubevent;
+        this.coordinatorEvent = coordinatorEvent;
+        this.coordinatorSubevent = coordinatorSubevent;
+        this.collaboratorEvent = collaboratorEvent;
+        this.collaboratorSubevent = collaboratorSubevent;
     }
 
     @Override
@@ -61,12 +65,20 @@ public class JwtUserDetails implements UserDetails {
         return id;
     }
 
-    public Collection<String> getOrganizer() {
-        return organizer;
+    public Collection<String> getCoordinatorEvent() {
+        return coordinatorEvent;
     }
 
-    public Collection<String> getOrganizerSubevent() {
-        return organizerSubevent;
+    public Collection<String> getCoordinatorSubevent() {
+        return coordinatorSubevent;
+    }
+
+    public Collection<String> getCollaboratorEvent() {
+        return collaboratorEvent;
+    }
+
+    public Collection<String> getCollaboratorSubevent() {
+        return collaboratorSubevent;
     }
 
     @Override

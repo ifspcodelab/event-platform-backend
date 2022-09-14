@@ -27,10 +27,8 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
     @Query("select distinct (se) from Subevent se join OrganizerSubevent as os on os.subevent = se.id where os.account.id = :accountId")
     List<Subevent> findAllSubeventsByAccountId(UUID accountId);
 
-    boolean existsByAccountId(UUID id);
-
-    @Query("select distinct (os.subevent.id) from OrganizerSubevent os where os.account.id = :accountId")
-    List<UUID> findAllSubeventIdByAccountId(UUID accountId);
+    @Query("select os.subevent.id from OrganizerSubevent os where os.account.id = :accountId and os.type = :organizerType")
+    List<String> findAllSubEventIdsByAccountIdAndOrganizerType(UUID accountId, OrganizerSubeventType organizerType);
 
     @Query("select distinct (s) from Session s \n" +
             "join fetch s.sessionSchedules schedules \n" +

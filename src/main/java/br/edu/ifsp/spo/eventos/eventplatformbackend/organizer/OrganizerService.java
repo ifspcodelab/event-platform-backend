@@ -18,8 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -130,8 +132,12 @@ public class OrganizerService {
 
     private void checksOrganizerAccess(UUID eventId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organizerEvents = jwtUserDetails.getOrganizer();
-        var existsEvent = organizerEvents.contains(eventId.toString());
+
+        var organizerEvents = Stream.concat(
+                jwtUserDetails.getCoordinatorEvent().stream(),
+                jwtUserDetails.getCollaboratorEvent().stream()
+        );
+        var existsEvent = organizerEvents.anyMatch(e -> e.equals(eventId.toString()));
 
         if (!existsEvent) {
             throw new OrganizerAuthorizationException(

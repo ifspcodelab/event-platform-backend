@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -155,10 +156,13 @@ public class OrganizerSubeventService {
 
     private void checksSubeventOrganizerAccess(UUID subeventId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organizerSubevents = jwtUserDetails.getOrganizerSubevent();
-        var existsEvent = organizerSubevents.contains(subeventId.toString());
+        var organizerEvents = Stream.concat(
+                jwtUserDetails.getCoordinatorSubevent().stream(),
+                jwtUserDetails.getCollaboratorSubevent().stream()
+        );
+        var existsSubevent = organizerEvents.anyMatch(e -> e.equals(subeventId.toString()));
 
-        if (!existsEvent) {
+        if (!existsSubevent) {
             throw new OrganizerAuthorizationException(
                     OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT,
                     jwtUserDetails.getUsername(),

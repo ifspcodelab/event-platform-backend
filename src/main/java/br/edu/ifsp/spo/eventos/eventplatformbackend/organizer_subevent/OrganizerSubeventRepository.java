@@ -35,8 +35,10 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
             "join fetch schedules.location \n" +
             "join fetch schedules.area \n" +
             "join fetch schedules.space \n" +
-            "join Activity a on s.activity.id = a.id \n" +
-            "join OrganizerSubevent os on a.subevent.id = os.subevent.id \n" +
+            "join fetch s.activity a \n" +
+            "join fetch a.event \n" +
+            "join fetch a.subevent se \n" +
+            "join OrganizerSubevent os on se.id = os.subevent.id \n" +
             "where os.account.id = :accountId \n" +
             "and a.subevent.id = :subeventId")
     List<Session> findAllSessionsByAccountIdAndSubeventId(UUID accountId, UUID subeventId);

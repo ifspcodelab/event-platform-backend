@@ -35,7 +35,8 @@ public interface OrganizerRepository extends JpaRepository<Organizer, UUID> {
             "join fetch schedules.location \n" +
             "join fetch schedules.area \n" +
             "join fetch schedules.space \n" +
-            "join Activity a on s.activity.id = a.id \n" +
+            "join fetch s.activity a \n" +
+            "join fetch a.event \n" +
             "join Organizer o on a.event.id = o.event.id \n" +
             "where o.account.id = :accountId \n" +
             "and a.event.id = :eventId \n" +

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 import javax.persistence.LockModeType;
+import javax.persistence.NamedQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,4 +30,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Page<Account> findUsersWithPartOfEmail(Pageable pageable, String email);
     @Query("SELECT a FROM Account a WHERE a.cpf LIKE CONCAT('%',:cpf,'%')")
     Page<Account> findUsersWithPartOfCpf(Pageable pageable, String cpf);
+    @Query("SELECT a FROM Account a WHERE a.cpf = :cpf AND a.status = br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus.UNVERIFIED")
+    Optional<Account> findByCpfAndStatusUnverified(String cpf);
+    @Query("SELECT a FROM Account a WHERE a.email = :email AND a.status = br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus.UNVERIFIED")
+    Optional<Account> findByEmailAndStatusUnverified(String email);
 }

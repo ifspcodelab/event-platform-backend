@@ -211,7 +211,7 @@ public class ExceptionHandlerApp {
     
     @ExceptionHandler(SignupException.class)
     public ResponseEntity<ProblemDetail> handlerRegistrationException(SignupException ex) {
-        String message = String.format(ex.getSignupRuleType().getMessage(), ex.getEmail());
+        String message = String.format(ex.getSignupRuleType().getMessage(), ex.getEmail(), ex.getCpf());
         ProblemDetail problemDetail = new ProblemDetail(ex.getSignupRuleType().name(), List.of());
 
         log.warn(message);

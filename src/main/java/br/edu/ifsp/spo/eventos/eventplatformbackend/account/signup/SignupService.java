@@ -41,6 +41,14 @@ public class SignupService {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
         }
 
+        if (accountRepository.findByCpfAndStatusUnverified(dto.getCpf()).isPresent()) {
+            throw new SignupException(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_CPF_NOT_VERIFIED, dto.getCpf(), dto.getEmail());
+        }
+
+        if (accountRepository.findByEmailAndStatusUnverified(dto.getEmail()).isPresent()) {
+            throw new SignupException(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_EMAIL_NOT_VERIFIED, dto.getEmail(), dto.getCpf());
+        }
+
         if(accountRepository.existsByEmail(dto.getEmail())) {
             throw new ResourceAlreadyExistsException(ResourceName.ACCOUNT, "email", dto.getEmail());
         }

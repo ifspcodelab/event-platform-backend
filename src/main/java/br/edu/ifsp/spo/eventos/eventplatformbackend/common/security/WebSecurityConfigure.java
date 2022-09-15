@@ -49,6 +49,7 @@ public class WebSecurityConfigure {
                 .antMatchers("/api/v1/accounts/registrations/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/my-data/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/logout").hasAnyRole("ADMIN", "ATTENDANT")
+                .antMatchers("/api/v1/organizers/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

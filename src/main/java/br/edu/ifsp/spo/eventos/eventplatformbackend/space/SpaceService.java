@@ -79,10 +79,7 @@ public class SpaceService {
         Space space = getSpace(spaceId);
         checkIfAreaIsAssociateToLocation(getArea(areaId), locationId);
         checkIfSpaceIsAssociateToArea(space, areaId);
-
-        if(sessionScheduleRepository.existsBySpaceId(spaceId)) {
-            throw new BusinessRuleException(BusinessRuleType.SPACE_DELETE_WITH_SESSION_SCHEDULES);
-        }
+        checkIfSpaceHasAssociationWithSessionSchedule(spaceId);
 
         spaceRepository.deleteById(spaceId);
         log.info("Delete space id={}, name={}", spaceId, space.getName());
@@ -108,6 +105,12 @@ public class SpaceService {
     private void checkIfAreaIsAssociateToLocation(Area area, UUID locationId) {
         if (!area.getLocation().getId().equals(locationId)) {
             throw new ResourceNotExistsAssociationException(ResourceName.AREA, ResourceName.LOCATION);
+        }
+    }
+
+    private void checkIfSpaceHasAssociationWithSessionSchedule(UUID spaceId) {
+        if(sessionScheduleRepository.existsBySpaceId(spaceId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.SPACE, ResourceName.SESSION_SCHEDULE);
         }
     }
 }

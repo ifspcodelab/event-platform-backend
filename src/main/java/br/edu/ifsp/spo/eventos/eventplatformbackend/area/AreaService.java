@@ -73,10 +73,8 @@ public class AreaService {
         Area area = getArea(areaId);
         checkAreaExistsByLocationId(area, locationId);
         checkSpaceExistsByAreaId(areaId);
+        checkIfAreaHasAssociationWithSessionSchedule(areaId);
 
-        if(sessionScheduleRepository.existsByAreaId(areaId)) {
-            throw new BusinessRuleException(BusinessRuleType.AREA_DELETE_WITH_SESSION_SCHEDULES);
-        }
         areaRepository.deleteById(areaId);
         log.info("Delete area id={}, name={}", areaId, area.getName());
         auditService.logAdminDelete(ResourceName.AREA, areaId);
@@ -107,6 +105,12 @@ public class AreaService {
     private void checkAreaExistsByLocationId(Area area, UUID locationId) {
         if (!area.getLocation().getId().equals(locationId)) {
             throw new ResourceNotExistsAssociationException(ResourceName.AREA, ResourceName.LOCATION);
+        }
+    }
+
+    private void checkIfAreaHasAssociationWithSessionSchedule(UUID areaId) {
+        if(sessionScheduleRepository.existsByAreaId(areaId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.AREA, ResourceName.SESSION_SCHEDULE);
         }
     }
 }

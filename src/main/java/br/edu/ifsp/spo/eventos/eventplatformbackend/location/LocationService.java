@@ -63,10 +63,7 @@ public class LocationService {
     public void delete(UUID locationId) {
         Location location = getLocation(locationId);
         checkAreaExistsByLocationId(locationId);
-
-        if(sessionScheduleRepository.existsByLocationId(locationId)) {
-            throw new BusinessRuleException(BusinessRuleType.LOCATION_DELETE_WITH_SESSION_SCHEDULES);
-        }
+        checkIfLocationHasAssociationWithSessionSchedule(locationId);
 
         locationRepository.deleteById(locationId);
         log.info("Delete location id={}, name={}", locationId, location.getName());
@@ -81,6 +78,12 @@ public class LocationService {
     private void checkAreaExistsByLocationId(UUID locationId) {
         if(areaRepository.existsByLocationId(locationId)) {
             throw new ResourceReferentialIntegrityException(ResourceName.LOCATION, ResourceName.AREA);
+        }
+    }
+
+    private void checkIfLocationHasAssociationWithSessionSchedule(UUID locationId) {
+        if(sessionScheduleRepository.existsByLocationId(locationId)) {
+            throw new ResourceReferentialIntegrityException(ResourceName.LOCATION, ResourceName.SESSION_SCHEDULE);
         }
     }
 }

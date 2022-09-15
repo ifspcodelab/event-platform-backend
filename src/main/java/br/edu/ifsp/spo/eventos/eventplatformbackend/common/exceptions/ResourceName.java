@@ -20,6 +20,7 @@ public enum ResourceName {
     ACTIVITY("Activity"),
     DELETION_TOKEN("Deletion token"),
     SESSION("Session"),
+    SESSION_SCHEDULE("Session schedule"),
     PASSWORD_RESET_TOKEN("Password reset token"),
     ACTIVITY_SPEAKER("Activity Speaker"),
     REFRESH_TOKEN("Refresh token"),

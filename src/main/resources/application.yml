@@ -56,6 +56,9 @@ recaptcha:
 registration:
   email-confirmation-time: 12
 
+attendance:
+  period-in-days-to-register-attendance: ${PERIOD_IN_DAYS_TO_REGISTER_ATTENDANCE:30}
+
 scheduler:
   signup:
     interval: ${SCHEDULER_SIGNUP_INTERVAL:300000}

@@ -26,6 +26,7 @@ public class AttendanceService {
     private final RegistrationRepository registrationRepository;
     private final SessionScheduleRepository sessionScheduleRepository;
     private final AttendanceRepository attendanceRepository;
+    private final AttendanceConfig attendanceConfig;
 
     public Attendance create(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
@@ -49,7 +50,7 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
         }
 
-        if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
+        if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
@@ -76,11 +77,11 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
-        if(sessionSchedule.getExecutionStart().minusHours(2).isBefore(LocalDateTime.now())) {
+        if(sessionSchedule.getExecutionStart().toLocalDate().isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
         }
 
-        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
+        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_SUBEVENT_EXECUTION_PERIOD);
         }
 
@@ -98,7 +99,7 @@ public class AttendanceService {
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
-        if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
+        if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
         }
 
@@ -117,7 +118,7 @@ public class AttendanceService {
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
-        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
+        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);
         }
 

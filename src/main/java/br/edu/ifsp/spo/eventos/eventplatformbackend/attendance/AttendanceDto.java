@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 public class AttendanceDto {
     UUID id;
-    RegistrationDto registration;
     Instant registrationTimestamp;
+    RegistrationDto registration;
     SessionScheduleDto sessionSchedule;
 }

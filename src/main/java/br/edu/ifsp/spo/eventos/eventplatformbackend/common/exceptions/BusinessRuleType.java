@@ -102,6 +102,7 @@ public enum BusinessRuleType {
     SPEAKER_ADD_WITH_ACTIVITY_CANCELED_STATUS("Não é possível adicionar um ministrante em uma atividade cancelada"),
     SPEAKER_ADD_ALREADY_EXISTS("O ministrante já está associado a atividade"),
     SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY("Sessão não está associada a atividade"),
+    SESSION_IS_NOT_ASSOCIATED_TO_SESSION_SCHEDULE("Horário de sessão não está associada a sessão"),
     SESSION_DELETE_WITH_STATUS_CANCELED("Não é possível excluir uma sessão com status cancelado"),
     SESSION_DELETE_WITH_ACTIVITY_STATUS_CANCELED("Não é possível excluir uma sessão com uma atividade cancelada"),
     SESSION_DELETE_WITH_ACTIVITY_PUBLISHED_STATUS_AND_AFTER_REGISTRATION_PERIOD_START("Não é possível deletar uma sessão em uma atividade publicada e que o período de inscrições já tenha iniciado"),
@@ -134,7 +135,7 @@ public enum BusinessRuleType {
     ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED("Não é possível adicionar presença em uma inscrição não confirmada"),
     ATTENDANCE_CREATE_WITH_CANCELED_SESSION("Não é possível adicionar presença em uma sessão cancelada"),
     ATTENDANCE_CREATE_WITH_ACTIVITY_CANCELED("Não é possível adicionar presença em uma sessão com atividade cancelada"),
-    ATTENDANCE_ALREADY_EXISTS("Já existe presença para essa inscrição"),
+    ATTENDANCE_ALREADY_EXISTS("Já foi adicionado presença para essa inscrição"),
     ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END("Não é possível retirar uma presença após o período de execução do evento"),
     ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END("Não é possível retirar uma presença após o período de execução do subevento");
 

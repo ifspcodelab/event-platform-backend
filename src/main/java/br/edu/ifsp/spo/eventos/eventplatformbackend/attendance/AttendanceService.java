@@ -36,7 +36,7 @@ public class AttendanceService {
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
         if(attendanceRepository.existsByRegistrationIdAndSessionScheduleId(registration.getId(), sessionScheduleId)) {
-            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_ALREADY_EXISTS); // mudar para uma exception ?
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_ALREADY_EXISTS);
         }
 
         if(registration.getRegistrationStatus() != RegistrationStatus.CONFIRMED) {
@@ -61,7 +61,7 @@ public class AttendanceService {
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
         if(attendanceRepository.existsByRegistrationIdAndSessionScheduleId(registration.getId(), sessionScheduleId)) {
-            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_ALREADY_EXISTS); // mudar para uma exception ?
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_ALREADY_EXISTS);
         }
 
         if(registration.getRegistrationStatus() != RegistrationStatus.CONFIRMED) {
@@ -86,7 +86,7 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
         }
 
-        log.info("Attendance removed: id={}, account name{}", attendanceId, attendance.getRegistration().getAccount().getName());
+        log.info("Attendance removed: id={}, account name={}", attendanceId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
     }
 
@@ -173,7 +173,7 @@ public class AttendanceService {
 
     private void checksIfSessionIsAssociateToSessionSchedules(UUID sessionId, SessionSchedule sessionSchedule) {
         if (!sessionSchedule.getSession().getId().equals(sessionId)) {
-            throw new BusinessRuleException(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY); // mudar business rule
+            throw new BusinessRuleException(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_SESSION_SCHEDULE);
         }
     }
 

@@ -11,6 +11,9 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.Registration;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
@@ -36,6 +39,7 @@ public class SessionService {
     private final AreaRepository areaRepository;
     private final SpaceRepository spaceRepository;
     private final AuditService auditService;
+    private final RegistrationRepository registrationRepository;
 
     public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
         Activity activity = getActivity(activityId);
@@ -76,15 +80,23 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
+    @Transactional
     public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Session session = getSession(sessionId);
+        Session session = getSessionWithLock(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
         checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
         checkIfSessionIsNotCanceled(session);
 
-        //TODO: Send email verify session time
+        registrationRepository.findAllBySessionId(sessionId).stream()
+            .filter(Registration::canBeCanceled)
+            .forEach(registration -> {
+                registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
+                registrationRepository.save(registration);
+                log.info("Registration canceled by admin: id={}, email={}", registration.getId(), registration.getAccount().getEmail());
+        });
 
+        session.setConfirmedSeats(0);
         session.setCanceled(true);
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
@@ -92,16 +104,24 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
+    @Transactional
     public Session cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
-        Session session = getSession(sessionId);
+        Session session = getSessionWithLock(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfSubeventIsAssociateToSession(subeventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
         checkIfEventSubEventActivityIsNotCancelled(session.getActivity());
         checkIfSessionIsNotCanceled(session);
 
-        //TODO: Send email verify session time
+        registrationRepository.findAllBySessionId(sessionId).stream()
+            .filter(Registration::canBeCanceled)
+            .forEach(registration -> {
+                registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
+                registrationRepository.save(registration);
+                log.info("Registration canceled by admin: id={}, email={}", registration.getId(), registration.getAccount().getEmail());
+            });
 
+        session.setConfirmedSeats(0);
         session.setCanceled(true);
         session.setCancellationMessage(cancellationMessageCreateDto.getReason());
         log.info("Session canceled: id={}, title={}", sessionId, session.getTitle());
@@ -421,6 +441,11 @@ public class SessionService {
     private Session getSession(UUID sessionId) {
         return sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
+    }
+
+    private Session getSessionWithLock(UUID sessionId) {
+        return sessionRepository.findByIdWithPessimisticLock(sessionId)
+            .orElseThrow(() -> new ResourceNotFoundException(ResourceName.SESSION, sessionId));
     }
 
     private void checksIfSessionTitleExists(SessionCreateDto dto, UUID activityId) {

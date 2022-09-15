@@ -133,11 +133,14 @@ public enum BusinessRuleType {
     REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada"),
     ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED("Não é possível adicionar presença em uma inscrição não confirmada"),
+    ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED("Não é possível adicionar presença duas horas ou mais antes do período de início da sessão"),
+    ATTENDANCE_CREATE_AFTER_EVENT_EXECUTION_PERIOD("Não é possível adicionar presença depois de dois dias ou mais que o evento tenha finalizado"),
+    ATTENDANCE_CREATE_AFTER_SUBEVENT_EXECUTION_PERIOD("Não é possível adicionar presença depois de dois dias ou mais que o subevento tenha finalizado"),
     ATTENDANCE_CREATE_WITH_CANCELED_SESSION("Não é possível adicionar presença em uma sessão cancelada"),
     ATTENDANCE_CREATE_WITH_ACTIVITY_CANCELED("Não é possível adicionar presença em uma sessão com atividade cancelada"),
     ATTENDANCE_ALREADY_EXISTS("Já foi adicionado presença para essa inscrição"),
-    ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END("Não é possível retirar uma presença após o período de execução do evento"),
-    ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END("Não é possível retirar uma presença após o período de execução do subevento");
+    ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END("Não é possível retirar uma presença após dois dias ou mais do período de execução do evento"),
+    ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END("Não é possível retirar uma presença após dois dias ou mais do período de execução do subevento");
 
     String message;
 

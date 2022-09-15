@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +45,13 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
-        // TODO - Se o periodo de execução da sessão acabou não pode adicionar presença ??
+        if(sessionSchedule.getExecutionStart().minusHours(2).isBefore(LocalDateTime.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
+        }
+
+        if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_EVENT_EXECUTION_PERIOD);
+        }
 
         Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
         return attendanceRepository.save(attendance);
@@ -68,6 +76,14 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
+        if(sessionSchedule.getExecutionStart().minusHours(2).isBefore(LocalDateTime.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
+        }
+
+        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_SUBEVENT_EXECUTION_PERIOD);
+        }
+
         Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
         return attendanceRepository.save(attendance);
     }
@@ -82,7 +98,7 @@ public class AttendanceService {
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
-        if(sessionSchedule.getSession().getActivity().getEvent().isExecutionPeriodEnded()) {
+        if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
         }
 
@@ -101,7 +117,7 @@ public class AttendanceService {
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
-        if(sessionSchedule.getSession().getActivity().getSubevent().isExecutionPeriodEnded()) {
+        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(2).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);
         }
 

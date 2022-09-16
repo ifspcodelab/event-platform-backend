@@ -175,8 +175,8 @@ public class AccountService {
         auditService.logUpdate(account, ResourceName.ACCOUNT, "Alteração de senha via edição em 'Meus dados'", accountId);
     }
 
-    public List<Log> findAllLogsByAccountId(UUID accountId) {
-        return logRepository.findAllByAccountIdAndResourceNameInOrderByCreatedAtDesc(accountId, List.of(ResourceName.ACCOUNT, ResourceName.REFRESH_TOKEN));
+    public Page<Log> findAllLogsByAccountId(UUID accountId, Pageable pageable) {
+        return logRepository.findAllByAccountIdAndResourceNameInOrderByCreatedAtDesc(pageable, accountId, List.of(ResourceName.ACCOUNT, ResourceName.REFRESH_TOKEN));
     }
 
     @Transactional

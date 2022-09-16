@@ -26,6 +26,9 @@ public class EmailService {
     @Value("${support.name}")
     private String supportName;
 
+    @Value("${support.event}")
+    private String eventEmail;
+
     @Value("${frontend.url}/")
     private String url;
 
@@ -113,5 +116,39 @@ public class EmailService {
         }
 
         mailSender.send(mail);
+    }
+
+    public void sendAccountDeletionEmail(Account account) throws MessagingException {
+        var name = account.getName().split(" ")[0];
+
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Pedido de exclus&atilde;o de conta confirmado</h1>\n" +
+                "<p>Ol&aacute;, "+ name + ".</p>\n" +
+                "<p>Agora basta aguardar a resposta do administrador do sistema.:</p>\n" +
+                "<p>Por seguran&ccedil;a seu acesso ao site foi bloqueado.</p>\n" +
+                "<p>Atenciosamente,</p>\n" +
+                "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
+
+        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", account.getEmail(), content);
+    }
+
+    public void sendAccountDeletionEmailToAdmin(Account account) throws MessagingException {
+
+        var name = account.getName();
+        var email = account.getEmail();
+        var id = account.getId();
+        var cpf = account.getCpf();
+        var role = account.getRole();
+
+        var content = "<div style=\"text-align: center;\"><div style=\"padding: 10px; text-align: left\"><h1>Pedido de exclus&atilde;o de conta</h1>\n" +
+                "<p>O(A) usu&aacute;rio(a) , "+ name + " solicitou a exclusão de sua conta.</p>\n" +
+                "<p>Informações do(a) usuário(a):</p>\n" +
+                "<p>Email: "+ email + ".</p>\n" +
+                "<p>Id: "+ id + ".</p>\n" +
+                "<p>Cpf: "+ cpf + ".</p>\n" +
+                "<p>Perfil: "+ role + ".</p>\n" +
+                "<p>Atenciosamente,</p>\n" +
+                "<p>Organiza&ccedil;&atilde;o Eventos IFSP SPO</p></div></div>";
+
+        sendEmailToClient("Solicitação de Exclusão de Conta da Plataforma de Eventos IFSP SPO", eventEmail, content);
     }
 }

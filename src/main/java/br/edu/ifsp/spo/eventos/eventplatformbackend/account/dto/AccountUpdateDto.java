@@ -22,7 +22,7 @@ public class AccountUpdateDto {
     @CPF
     String cpf;
     @NotNull
-    Boolean verified;
+    String status;
     @NotNull
     @NotBlank
     String role;

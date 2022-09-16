@@ -29,9 +29,11 @@ public class Account implements Diffable<Account> {
     private Boolean agreed;
     @Enumerated(EnumType.STRING)
     private AccountRole role;
-    private Boolean verified;
     private Boolean allowEmail;
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
     private Instant registrationTimestamp;
+    private boolean verified;
 
     public Account(String name, String email, String cpf, String password, Boolean agreed) {
         this.id = UUID.randomUUID();
@@ -41,9 +43,10 @@ public class Account implements Diffable<Account> {
         this.password = password;
         this.agreed = agreed;
         this.role = AccountRole.ATTENDANT;
-        this.verified = false;
-        this.allowEmail = true;
+        this.status = AccountStatus.UNVERIFIED;
+        this.allowEmail = Boolean.TRUE;
         this.registrationTimestamp = Instant.now();
+        this.verified = true;
     }
 
     @Override
@@ -51,7 +54,17 @@ public class Account implements Diffable<Account> {
         return new DiffBuilder<>(this, updatedAccount, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("Nome", this.name, updatedAccount.name)
                 .append("CPF", this.cpf, updatedAccount.cpf)
+                .append("E-mail", this.email, updatedAccount.email)
+                .append("Perfil", this.role, updatedAccount.role)
+                .append("Status", this.status, updatedAccount.status)
                 .append("Permite comunicação por email", this.allowEmail, updatedAccount.allowEmail)
                 .build();
+    }
+
+    public String toLog() {
+        return "Account{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            '}';
     }
 }

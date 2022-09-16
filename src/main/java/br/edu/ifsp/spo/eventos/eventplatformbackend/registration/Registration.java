@@ -49,4 +49,19 @@ public class Registration {
     public static Registration createWithWaitingListdStatus(Account account, Session session) {
         return new Registration(account, session, RegistrationStatus.WAITING_LIST);
     }
+
+    public boolean canBeCanceled() {
+        return
+            this.registrationStatus == RegistrationStatus.CONFIRMED ||
+            this.registrationStatus == RegistrationStatus.WAITING_LIST ||
+            this.registrationStatus == RegistrationStatus.WAITING_CONFIRMATION;
+    }
+
+    public String toLog() {
+        return "Registration{" +
+            "id=" + id +
+            ", account=" + account.toLog() +
+            ", session=" + session.toLog() +
+            '}';
+    }
 }

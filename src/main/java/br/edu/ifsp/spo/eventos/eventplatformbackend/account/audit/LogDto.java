@@ -13,7 +13,7 @@ import java.util.UUID;
 public class LogDto {
     UUID id;
     Instant createdAt;
-    AccountDto account;
+//    AccountDto account;
     Action action;
     ResourceName resourceName;
     String resourceData;

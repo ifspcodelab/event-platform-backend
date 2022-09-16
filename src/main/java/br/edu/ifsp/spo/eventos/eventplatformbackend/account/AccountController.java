@@ -6,12 +6,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountUpdateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdateDto;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.MyDataUpdatePasswordDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +25,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @CrossOrigin(origins = "*")
 public class AccountController {
+
     private final AccountService accountService;
     private final AccountMapper accountMapper;
     private final LogMapper logMapper;
@@ -40,12 +40,14 @@ public class AccountController {
         return ResponseEntity.ok(accounts.map(accountMapper::to));
     }
 
+
     @GetMapping("{accountId}")
         public ResponseEntity<AccountDto> show(@PathVariable UUID accountId) {
         Account account = accountService.findById(accountId);
         AccountDto accountDto = accountMapper.to(account);
         return ResponseEntity.ok(accountDto);
     }
+
 
     @PutMapping("{accountId}")
     public ResponseEntity<AccountDto> update(@PathVariable UUID accountId, @RequestBody @Valid AccountUpdateDto dto) {
@@ -94,4 +96,12 @@ public class AccountController {
 
         return ResponseEntity.ok(logMapper.to(logs));
     }
+
+    @PostMapping("my-data/account-deletion")
+    public ResponseEntity<Void> deleteAccountRequest(@RequestHeader("Authorization") String accessToken, @Valid @RequestBody AccountDeletionRequestDto accountDeletionRequestDto) {
+        accountService.sendAccountDeletionEmail(accessToken.replace("Bearer ", ""), accountDeletionRequestDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

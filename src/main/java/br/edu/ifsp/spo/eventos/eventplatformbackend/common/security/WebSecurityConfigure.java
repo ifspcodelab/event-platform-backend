@@ -29,6 +29,7 @@ public class WebSecurityConfigure {
             "/api/v1/accounts/login",
             "/api/v1/accounts/refresh-token-rotation",
             "/api/v1/accounts/password/forgot",
+            "/api/v1/accounts/password/reset",
             "/api/v1/accounts/password/forgot/resend-email",
             "/api/v1/accounts/password/reset"
         );
@@ -46,6 +47,7 @@ public class WebSecurityConfigure {
                 .antMatchers(accountOpenPaths.toArray(String[]::new)).permitAll()
                 .antMatchers(HttpMethod.GET, siteOpenPaths.toArray(String[]::new)).permitAll()
                 .antMatchers("/api/v1/sessions/**").hasAnyRole("ADMIN", "ATTENDANT")
+                .antMatchers("/api/v1/accounts/events/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/registrations/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/my-data/**").hasAnyRole("ADMIN", "ATTENDANT")
                 .antMatchers("/api/v1/accounts/logout").hasAnyRole("ADMIN", "ATTENDANT")

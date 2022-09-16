@@ -3,15 +3,15 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.invalidemail.InvalidEmailRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.Speaker;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.speaker.SpeakerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,15 +32,19 @@ public class SignupService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final RecaptchaService recaptchaService;
-    private final SpeakerRepository speakerRepository;
     private final EmailService emailService;
     private final AuditService auditService;
     private final LogRepository logRepository;
+    private final InvalidEmailRepository invalidEmailRepository;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
         if (!recaptchaService.isValid(dto.getUserRecaptcha())) {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
+        }
+
+        if(invalidEmailRepository.existsByEmail(dto.getEmail())) {
+            throw new BusinessRuleException(BusinessRuleType.INVALID_EMAIL);
         }
 
         if(accountRepository.existsByEmail(dto.getEmail())) {
@@ -61,17 +64,6 @@ public class SignupService {
                     new VerificationToken(account,accountConfig.getVerificationTokenExpiresIn());
             verificationTokenRepository.save(verificationToken);
             log.debug("Verification token {} for email {} was created", verificationToken.getToken(), account.getEmail());
-
-            Optional<Speaker> optionalSpeaker = speakerRepository.findByCpf(account.getCpf());
-            if (optionalSpeaker.isPresent()) {
-                Speaker speaker = optionalSpeaker.get();
-                speaker.setAccount(account);
-                speakerRepository.save(speaker);
-                log.info(
-                    "Speaker with name={} and email={} was associated with account with id {}",
-                    speaker.getName(), speaker.getEmail(), account.getId()
-                );
-            }
 
             emailService.sendVerificationEmail(account, verificationToken);
             log.info("Verification email was sent to {}", account.getEmail());
@@ -94,7 +86,7 @@ public class SignupService {
         }
 
         Account account = verificationToken.getAccount();
-        account.setVerified(true);
+        account.setStatus(AccountStatus.VERIFIED);
         accountRepository.save(account);
         log.info("Account with email {} was verified", account.getEmail());
         verificationTokenRepository.delete(verificationToken);
@@ -103,8 +95,8 @@ public class SignupService {
         return account;
     }
 
-    public List<Account> search(String name, Boolean verified) {
-        return accountRepository.findByNameStartingWithIgnoreCaseAndVerified(name.trim(), verified);
+    public List<Account> search(String name, AccountStatus status) {
+        return accountRepository.findByNameStartingWithIgnoreCaseAndStatus(name.trim(), status);
     }
 
     @Transactional

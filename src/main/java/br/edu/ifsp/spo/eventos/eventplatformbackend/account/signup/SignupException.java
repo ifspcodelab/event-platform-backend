@@ -4,9 +4,17 @@ import lombok.Getter;
 
 @Getter
 public class SignupException extends RuntimeException{
-    private SignupRuleType signupRuleType;
+    private final SignupRuleType signupRuleType;
     private String email;
+    private String cpf;
 
+    public SignupException(SignupRuleType signupRuleType, String email, String cpf) {
+        super();
+        this.signupRuleType = signupRuleType;
+        this.email = email;
+        this.cpf = cpf;
+
+    }
     public SignupException(SignupRuleType signupRuleType, String email) {
         super();
         this.signupRuleType = signupRuleType;

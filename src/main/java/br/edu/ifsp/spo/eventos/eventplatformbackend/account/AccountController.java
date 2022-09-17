@@ -87,12 +87,14 @@ public class AccountController {
     }
 
     @GetMapping("my-data/logs")
-    public ResponseEntity<List<LogDto>> index(Authentication authentication) {
+    public ResponseEntity<Page<LogDto>> index(
+            Authentication authentication,
+            @PageableDefault(page = 0, size = 20) Pageable pageable) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
         var accountId = jwtUserDetails.getId();
-        List<Log> logs = accountService.findAllLogsByAccountId(accountId);
+        Page<Log> logs = accountService.findAllLogsByAccountId(accountId, pageable);
 
-        return ResponseEntity.ok(logMapper.to(logs));
+        return ResponseEntity.ok(logs.map(logMapper::to));
     }
 
     @PostMapping("my-data/account-deletion")

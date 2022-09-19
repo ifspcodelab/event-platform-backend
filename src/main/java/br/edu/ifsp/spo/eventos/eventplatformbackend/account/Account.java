@@ -60,4 +60,11 @@ public class Account implements Diffable<Account> {
                 .append("Permite comunicação por email", this.allowEmail, updatedAccount.allowEmail)
                 .build();
     }
+
+    public String toLog() {
+        return "Account{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            '}';
+    }
 }

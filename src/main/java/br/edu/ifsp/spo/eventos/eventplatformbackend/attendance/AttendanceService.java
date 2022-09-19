@@ -1,5 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.attendance;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
@@ -26,6 +27,7 @@ public class AttendanceService {
     private final SessionScheduleRepository sessionScheduleRepository;
     private final AttendanceRepository attendanceRepository;
     private final AttendanceConfig attendanceConfig;
+    private final AuditService auditService;
 
     public Attendance create(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
@@ -53,8 +55,9 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-        Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
-        return attendanceRepository.save(attendance);
+        Attendance attendance = attendanceRepository.save(new Attendance(registration, getSessionSchedule(sessionScheduleId)));
+        auditService.logAdminCreate(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
+        return attendance;
     }
 
     public Attendance create(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
@@ -84,8 +87,9 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_SUBEVENT_EXECUTION_PERIOD);
         }
 
-        Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
-        return attendanceRepository.save(attendance);
+        Attendance attendance = attendanceRepository.save(new Attendance(registration, getSessionSchedule(sessionScheduleId)));
+        auditService.logAdminCreate(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
+        return attendance;
     }
 
     public void delete(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
@@ -106,8 +110,9 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
         }
 
-        log.info("Attendance removed: id={}, account name={}", attendanceId, attendance.getRegistration().getAccount().getName());
+        log.info("Attendance delete: id={}, sessionScheduleId={}, account name={}", attendanceId, sessionScheduleId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
+        auditService.logAdminDelete(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
@@ -129,8 +134,9 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);
         }
 
-        log.info("Attendance removed: id={}, account name={}", attendanceId, attendance.getRegistration().getAccount().getName());
+        log.info("Attendance delete: id={}, sessionScheduleId={}, account name={}", attendanceId, sessionScheduleId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
+        auditService.logAdminDelete(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
     }
 
     public List<Attendance> findAll(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId) {

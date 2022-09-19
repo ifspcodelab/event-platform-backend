@@ -35,6 +35,15 @@ public class Attendance {
         this.registration = registration;
         this.sessionSchedule = sessionSchedule;
     }
+
+    public String toLog() {
+        return "Attendance{" +
+            "id=" + id +
+            ", createdAt=" + createdAt +
+            ", registration=" + registration.toLog() +
+            ", sessionSchedule=" + sessionSchedule.toLog() +
+            '}';
+    }
 }
 
 

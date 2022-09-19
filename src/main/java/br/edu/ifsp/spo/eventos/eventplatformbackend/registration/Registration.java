@@ -56,4 +56,12 @@ public class Registration {
             this.registrationStatus == RegistrationStatus.WAITING_LIST ||
             this.registrationStatus == RegistrationStatus.WAITING_CONFIRMATION;
     }
+
+    public String toLog() {
+        return "Registration{" +
+            "id=" + id +
+            ", account=" + account.toLog() +
+            ", session=" + session.toLog() +
+            '}';
+    }
 }

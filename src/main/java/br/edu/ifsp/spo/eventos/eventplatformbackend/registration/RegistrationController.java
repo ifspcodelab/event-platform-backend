@@ -99,6 +99,18 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
 
+    @PatchMapping("events/{eventId}/activities/{activityId}/sessions/{sessionId}/registrations/{registrationId}/confirm")
+    public ResponseEntity<RegistrationDto> confirmWaitingList(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID registrationId) {
+        Registration registration = registrationService.confirmWaitingList(eventId, activityId, sessionId, registrationId);
+        return ResponseEntity.ok(registrationMapper.to(registration));
+    }
+
+    @PatchMapping("events/{eventId}/sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}/registrations/{registrationId}/confirm")
+    public ResponseEntity<RegistrationDto> confirmWaitingList(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID registrationId) {
+        Registration registration = registrationService.confirmWaitingList(eventId, subeventId, activityId, sessionId, registrationId);
+        return ResponseEntity.ok(registrationMapper.to(registration));
+    }
+
     @PatchMapping("accounts/registrations/{registrationId}/cancel")
     public ResponseEntity<RegistrationDto> cancel(@PathVariable UUID registrationId, Authentication authentication) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();

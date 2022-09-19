@@ -284,6 +284,51 @@ public class RegistrationService {
     }
 
     @Transactional
+    public Registration confirmWaitingList(UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
+        checkUserEventPermission(eventId);
+        var registration = getRegistration(registrationId);
+        Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+        var activity = session.getActivity();
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checksIfSessionIsAssociateToRegistration(sessionId, registration);
+        checksIfEmailWasAnswered(registration);
+        cancellAllRegistrationsInWaitListWithConflict(registration.getAccount(), session);
+        checkIfSessionLockIsFull(session);
+
+        registration.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+
+        session.incrementNumberOfConfirmedSeats();
+        sessionRepository.save(session);
+
+        return registrationRepository.save(registration);
+    }
+
+    @Transactional
+    public Registration confirmWaitingList(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID registrationId) {
+        checkUserSubEventPermission(subeventId);
+        var registration = getRegistration(registrationId);
+        Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
+        var activity = session.getActivity();
+        var subevent = activity.getSubevent();
+        checkIfEventIsAssociateToSubevent(eventId, subevent);
+        checksIfSubeventIsAssociateToActivity(subeventId, activity);
+        checksIfEventIsAssociateToActivity(eventId, activity);
+        checksIfActivityIsAssociateToSession(activityId, session);
+        checksIfSessionIsAssociateToRegistration(sessionId, registration);
+        checksIfEmailWasAnswered(registration);
+        cancellAllRegistrationsInWaitListWithConflict(registration.getAccount(), session);
+        checkIfSessionLockIsFull(session);
+
+        registration.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+
+        session.incrementNumberOfConfirmedSeats();
+        sessionRepository.save(session);
+
+        return registrationRepository.save(registration);
+    }
+
+    @Transactional
     public Registration cancel(UUID accountId, UUID registrationId) {
         var registration = getRegistration(registrationId);
         Session session = sessionRepository.findByIdWithPessimisticLock(registration.getSession().getId()).get();

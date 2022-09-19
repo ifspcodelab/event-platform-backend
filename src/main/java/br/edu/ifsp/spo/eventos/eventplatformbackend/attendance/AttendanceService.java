@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +45,7 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
-        if(sessionSchedule.getExecutionStart().minusHours(2).isBefore(LocalDateTime.now())) {
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
         }
 
@@ -77,11 +76,11 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
-        if(sessionSchedule.getExecutionStart().toLocalDate().isBefore(LocalDate.now())) {
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
         }
 
-        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
+         if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_SUBEVENT_EXECUTION_PERIOD);
         }
 
@@ -98,6 +97,10 @@ public class AttendanceService {
         checksIfEventIsAssociateToActivity(eventId, sessionSchedule.getSession().getActivity());
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
+
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
+        }
 
         if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
@@ -117,6 +120,10 @@ public class AttendanceService {
         checkIfEventIsAssociateToSubevent(eventId, sessionSchedule.getSession().getActivity().getSubevent());
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
+
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
+        }
 
         if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);

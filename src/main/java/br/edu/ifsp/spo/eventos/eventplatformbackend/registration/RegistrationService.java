@@ -5,8 +5,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.Session;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionSchedule;
@@ -14,6 +17,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
@@ -34,8 +38,33 @@ public class RegistrationService {
     @Value("${registration.email-confirmation-time}")
     private String emailConfirmationTime;
 
+    private void checkUserEventPermission(UUID eventId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(jwtUserDetails.isAdmin()){
+            return;
+        }
+
+        if(!jwtUserDetails.hasPermissionForEvent(eventId)) {
+            throw new OrganizerAuthorizationException(OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT, jwtUserDetails.getUsername(), eventId);
+        }
+    }
+
+    private void checkUserSubEventPermission(UUID subEventId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(jwtUserDetails.isAdmin()){
+            return;
+        }
+
+        if(!jwtUserDetails.hasPermissionForSubEvent(subEventId)) {
+            throw new OrganizerAuthorizationException(OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT, jwtUserDetails.getUsername(), subEventId);
+        }
+    }
+
     @Transactional
     public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID activityId, UUID sessionId) {
+        checkUserEventPermission(eventId);
         Account account = accountRepository.findByIdWithPessimisticLock(registrationCreateDto.getAccountId()).get();
         Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -58,6 +87,7 @@ public class RegistrationService {
 
     @Transactional
     public Registration create(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        checkUserSubEventPermission(subeventId);
         Account account = accountRepository.findByIdWithPessimisticLock(registrationCreateDto.getAccountId()).get();
         Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
 
@@ -108,6 +138,7 @@ public class RegistrationService {
 
     @Transactional
     public Registration createRegistrationInWaitList(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID activityId, UUID sessionId) {
+        checkUserEventPermission(eventId);
         Account account = accountRepository.findByIdWithPessimisticLock(registrationCreateDto.getAccountId()).get();
         Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
         var activity = session.getActivity();
@@ -127,6 +158,7 @@ public class RegistrationService {
 
     @Transactional
     public Registration createRegistrationInWaitList(RegistrationCreateDto registrationCreateDto, UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        checkUserSubEventPermission(subeventId);
         Account account = accountRepository.findByIdWithPessimisticLock(registrationCreateDto.getAccountId()).get();
         Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
         var activity = session.getActivity();
@@ -170,6 +202,7 @@ public class RegistrationService {
 
     @Transactional
     public Registration cancel(UUID eventId, UUID activityId, UUID sessionId, UUID registrationId) {
+        checkUserEventPermission(eventId);
         var registration = getRegistration(registrationId);
         Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
         var activity = session.getActivity();
@@ -207,6 +240,7 @@ public class RegistrationService {
 
     @Transactional
     public Registration cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID registrationId) {
+        checkUserSubEventPermission(subeventId);
         var registration = getRegistration(registrationId);
         Session session = sessionRepository.findByIdWithPessimisticLock(sessionId).get();
         var activity = session.getActivity();
@@ -285,6 +319,7 @@ public class RegistrationService {
     }
 
     public List<Registration> findAll(UUID eventId, UUID activityId, UUID sessionId) {
+        checkUserEventPermission(eventId);
         var session = getSession(sessionId);
         var activity = session.getActivity();
         checksIfEventIsAssociateToActivity(eventId, activity);
@@ -294,6 +329,7 @@ public class RegistrationService {
     }
 
     public List<Registration> findAll(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        checkUserSubEventPermission(subeventId);
         var session = getSession(sessionId);
         var activity = session.getActivity();
         var subevent = activity.getSubevent();
@@ -403,12 +439,6 @@ public class RegistrationService {
                 registrationRepository.save(registration);
             });
     }
-
-//    private void checksIfActivityDoesNotNeedRegistration(Activity activity) {
-//        if(activity.needRegistration) {
-//            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_CREATE_WITH_ACTIVITY_DOES_NOT_NEED_REGISTRATION);
-//        }
-//    }
 
     public List<AccountEventQueryDto> findAllEventsByAccount(UUID accountId) {
         return registrationRepository.findEventsByAccount(accountId);
@@ -582,11 +612,6 @@ public class RegistrationService {
         if (!registration.getAccount().getId().equals(accountId)) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT);
         }
-    }
-
-    private Account getAccount(UUID accountId) {
-        return accountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ACCOUNT, accountId));
     }
 
     private Session getSession(UUID sessionId) {

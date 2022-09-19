@@ -11,7 +11,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/events/{eventId}")
 @AllArgsConstructor
-@CrossOrigin ( "*" )
 public class AttendanceController {
     private final AttendanceService attendanceService;
     private final AttendanceMapper attendanceMapper;

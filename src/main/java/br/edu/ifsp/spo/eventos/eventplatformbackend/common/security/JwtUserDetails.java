@@ -1,11 +1,14 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.security;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class JwtUserDetails implements UserDetails {
     private final UUID id;
@@ -24,6 +27,20 @@ public class JwtUserDetails implements UserDetails {
         this.coordinatorSubevent = coordinatorSubevent;
         this.collaboratorEvent = collaboratorEvent;
         this.collaboratorSubevent = collaboratorSubevent;
+    }
+
+    public boolean isAdmin() {
+        return authorities.stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    public boolean hasPermissionForEvent(UUID eventId) {
+        var organizerEvents = Stream.concat(getCoordinatorEvent().stream(), getCollaboratorEvent().stream());
+        return organizerEvents.anyMatch(e -> e.equals(eventId.toString()));
+    }
+
+    public boolean hasPermissionForSubEvent(UUID subEventId) {
+        var organizerSubEvents = Stream.concat(getCoordinatorSubevent().stream(), getCollaboratorSubevent().stream());
+        return organizerSubEvents.anyMatch(e -> e.equals(subEventId.toString()));
     }
 
     @Override

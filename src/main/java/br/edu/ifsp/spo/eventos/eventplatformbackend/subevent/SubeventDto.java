@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.subevent;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
 import lombok.Data;
 import java.util.UUID;
@@ -18,4 +19,5 @@ public class SubeventDto {
     String biggerImage;
     EventStatus status;
     String cancellationMessage;
+    EventDto event;
 }

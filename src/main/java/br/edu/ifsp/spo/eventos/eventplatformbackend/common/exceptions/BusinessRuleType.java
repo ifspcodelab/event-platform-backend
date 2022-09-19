@@ -141,7 +141,8 @@ public enum BusinessRuleType {
     ATTENDANCE_ALREADY_EXISTS("Já foi adicionado presença para essa inscrição"),
     ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END("Não é possível retirar uma presença após dois dias ou mais do período de execução do evento"),
     ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END("Não é possível retirar uma presença após dois dias ou mais do período de execução do subevento"),
-    INVALID_EMAIL("Seu e-mail é inválido ou não foi digitado corretamente. Verifique com atenção e se possível acesse a caixa de entrada deste e-mail.");
+    INVALID_EMAIL("Seu e-mail é inválido ou não foi digitado corretamente. Verifique com atenção e se possível acesse a caixa de entrada deste e-mail."),
+    UNAUTHORIZED_ACTION("Apenas o admin pode executar a ação");
 
     String message;
 

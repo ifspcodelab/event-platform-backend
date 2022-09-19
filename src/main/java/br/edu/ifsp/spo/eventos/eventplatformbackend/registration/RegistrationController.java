@@ -15,7 +15,6 @@ import java.util.UUID;
 @RequestMapping("api/v1")
 @AllArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class RegistrationController {
     private final RegistrationService registrationService;
     private final RegistrationMapper registrationMapper;

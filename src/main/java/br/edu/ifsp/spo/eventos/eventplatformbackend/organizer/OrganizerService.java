@@ -137,17 +137,11 @@ public class OrganizerService {
     private void checksOrganizerAccess(UUID eventId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        var organizerEvents = Stream.concat(
-                jwtUserDetails.getCoordinatorEvent().stream(),
-                jwtUserDetails.getCollaboratorEvent().stream()
-        );
-        var existsEvent = organizerEvents.anyMatch(e -> e.equals(eventId.toString()));
-
-        if (!existsEvent) {
+        if (!jwtUserDetails.hasPermissionForEvent(eventId)) {
             throw new OrganizerAuthorizationException(
-                    OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT,
-                    jwtUserDetails.getUsername(),
-                    eventId
+                OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT,
+                jwtUserDetails.getUsername(),
+                eventId
             );
         }
     }

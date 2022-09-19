@@ -40,6 +40,7 @@ public interface OrganizerSubeventRepository extends JpaRepository<OrganizerSube
             "join fetch a.subevent se \n" +
             "join OrganizerSubevent os on se.id = os.subevent.id \n" +
             "where os.account.id = :accountId \n" +
-            "and a.subevent.id = :subeventId")
+            "and a.subevent.id = :subeventId " +
+            "and a.needRegistration = true")
     List<Session> findAllSessionsByAccountIdAndSubeventId(UUID accountId, UUID subeventId);
 }

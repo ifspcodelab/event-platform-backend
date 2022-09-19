@@ -8,9 +8,12 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.dto.CancellationMessageCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.Registration;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationStatus;
@@ -19,6 +22,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -42,6 +46,7 @@ public class SessionService {
     private final RegistrationRepository registrationRepository;
 
     public Session create(UUID eventId, UUID activityId, SessionCreateDto dto) {
+        checkUserIsAdmin();
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSessionTitleExists(dto, activityId);
@@ -61,6 +66,7 @@ public class SessionService {
     }
 
     public Session create(UUID eventId, UUID subeventId, UUID activityId, SessionCreateDto dto) {
+        checkUserIsAdmin();
         Activity activity = getActivity(activityId);
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfSubeventIsAssociateToActivity(subeventId, activity);
@@ -82,6 +88,7 @@ public class SessionService {
 
     @Transactional
     public Session cancel(UUID eventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+        checkUserIsAdmin();
         Session session = getSessionWithLock(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
@@ -106,6 +113,7 @@ public class SessionService {
 
     @Transactional
     public Session cancel(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, CancellationMessageCreateDto cancellationMessageCreateDto) {
+        checkUserIsAdmin();
         Session session = getSessionWithLock(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfSubeventIsAssociateToSession(subeventId, session);
@@ -130,6 +138,7 @@ public class SessionService {
     }
 
     public void delete(UUID eventId, UUID activityId, UUID sessionId) {
+        checkUserIsAdmin();
         Session session = getSession(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfActivityIsAssociateToSession(activityId, session);
@@ -142,6 +151,7 @@ public class SessionService {
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId) {
+        checkUserIsAdmin();
         Session session = getSession(sessionId);
         checksIfEventIsAssociateToSession(eventId, session);
         checksIfSubeventIsAssociateToSession(subeventId, session);
@@ -451,6 +461,13 @@ public class SessionService {
     private void checksIfSessionTitleExists(SessionCreateDto dto, UUID activityId) {
         if (sessionRepository.existsByTitleIgnoreCaseAndActivityId(dto.getTitle(), activityId)) {
             throw new ResourceAlreadyExistsException(ResourceName.SESSION, "title", dto.getTitle());
+        }
+    }
+
+    private void checkUserIsAdmin() {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!jwtUserDetails.isAdmin()) {
+            throw new BusinessRuleException(BusinessRuleType.UNAUTHORIZED_ACTION);
         }
     }
 }

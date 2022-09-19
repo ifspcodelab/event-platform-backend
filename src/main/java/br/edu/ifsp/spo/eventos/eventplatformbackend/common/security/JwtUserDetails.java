@@ -1,10 +1,9 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.common.security;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +40,15 @@ public class JwtUserDetails implements UserDetails {
     public boolean hasPermissionForSubEvent(UUID subEventId) {
         var organizerSubEvents = Stream.concat(getCoordinatorSubevent().stream(), getCollaboratorSubevent().stream());
         return organizerSubEvents.anyMatch(e -> e.equals(subEventId.toString()));
+    }
+
+    public boolean isOrganizer() {
+        var permissions = new ArrayList<String>();
+        permissions.addAll(getCollaboratorEvent());
+        permissions.addAll(getCoordinatorEvent());
+        permissions.addAll(getCollaboratorSubevent());
+        permissions.addAll(getCoordinatorSubevent());
+        return permissions.size() > 0;
     }
 
     @Override
@@ -104,6 +112,10 @@ public class JwtUserDetails implements UserDetails {
             "id=" + id +
             ", username='" + username + '\'' +
             ", authorities=" + authorities +
+            ", coordinatorEvent=" + coordinatorEvent +
+            ", coordinatorSubevent=" + coordinatorSubevent +
+            ", collaboratorEvent=" + collaboratorEvent +
+            ", collaboratorSubevent=" + collaboratorSubevent +
             '}';
     }
 }

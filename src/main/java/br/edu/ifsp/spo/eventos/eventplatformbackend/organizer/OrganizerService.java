@@ -137,6 +137,10 @@ public class OrganizerService {
     private void checksOrganizerAccess(UUID eventId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        if (jwtUserDetails.isAdmin()) {
+            return;
+        }
+
         if (!jwtUserDetails.hasPermissionForEvent(eventId)) {
             throw new OrganizerAuthorizationException(
                 OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT,

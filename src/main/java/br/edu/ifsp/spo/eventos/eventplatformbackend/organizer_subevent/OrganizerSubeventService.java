@@ -162,6 +162,11 @@ public class OrganizerSubeventService {
 
     private void checksSubeventOrganizerAccess(UUID subeventId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (jwtUserDetails.isAdmin()) {
+            return;
+        }
+
         var organizerEvents = Stream.concat(
                 jwtUserDetails.getCoordinatorSubevent().stream(),
                 jwtUserDetails.getCollaboratorSubevent().stream()

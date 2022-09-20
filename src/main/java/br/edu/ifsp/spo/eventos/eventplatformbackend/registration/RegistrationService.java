@@ -217,8 +217,10 @@ public class RegistrationService {
         }
 
         if(isSessionStarted(session)) {
-            session.decrementNumberOfConfirmedSeats();
-            sessionRepository.save(session);
+            if(registration.getRegistrationStatus() == RegistrationStatus.CONFIRMED || registration.getRegistrationStatus() == RegistrationStatus.WAITING_CONFIRMATION) {
+                session.decrementNumberOfConfirmedSeats();
+                sessionRepository.save(session);
+            }
         }
         else if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
             var firstRegistrationInWaitList = registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(sessionId, RegistrationStatus.WAITING_LIST).get();
@@ -228,8 +230,10 @@ public class RegistrationService {
             sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), firstRegistrationInWaitList);
         }
         else {
-            session.decrementNumberOfConfirmedSeats();
-            sessionRepository.save(session);
+            if(registration.getRegistrationStatus() == RegistrationStatus.CONFIRMED || registration.getRegistrationStatus() == RegistrationStatus.WAITING_CONFIRMATION) {
+                session.decrementNumberOfConfirmedSeats();
+                sessionRepository.save(session);
+            }
         }
 
         registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
@@ -258,8 +262,10 @@ public class RegistrationService {
         }
 
         if(isSessionStarted(session)) {
-            session.decrementNumberOfConfirmedSeats();
-            sessionRepository.save(session);
+            if(registration.getRegistrationStatus() == RegistrationStatus.CONFIRMED || registration.getRegistrationStatus() == RegistrationStatus.WAITING_CONFIRMATION) {
+                session.decrementNumberOfConfirmedSeats();
+                sessionRepository.save(session);
+            }
         }
 
         else if(checkIfExistAnyRegistrationInWaitListBySessionId(session.getId())) {
@@ -267,14 +273,14 @@ public class RegistrationService {
             firstRegistrationInWaitList.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
             firstRegistrationInWaitList.setTimeEmailWasSent(LocalDateTime.now());
             registrationRepository.save(firstRegistrationInWaitList);
-
-            // Verificar o horário da sessão antes de enviar o e-mail
             sendEmailToConfirmRegistration(firstRegistrationInWaitList.getAccount(), firstRegistrationInWaitList);
         }
 
         else {
-            session.decrementNumberOfConfirmedSeats();
-            sessionRepository.save(session);
+            if(registration.getRegistrationStatus() == RegistrationStatus.CONFIRMED || registration.getRegistrationStatus() == RegistrationStatus.WAITING_CONFIRMATION) {
+                session.decrementNumberOfConfirmedSeats();
+                sessionRepository.save(session);
+            }
         }
 
         registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
@@ -293,15 +299,22 @@ public class RegistrationService {
         checksIfActivityIsAssociateToSession(activityId, session);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
         checksIfEmailWasAnswered(registration);
-        cancellAllRegistrationsInWaitListWithConflict(registration.getAccount(), session);
-        checkIfSessionLockIsFull(session);
+
+        if(registration.getRegistrationStatus() == RegistrationStatus.WAITING_LIST) {
+            checkIfSessionLockIsFull(session);
+        }
+
+        if(registration.getRegistrationStatus() == RegistrationStatus.WAITING_LIST) {
+            session.incrementNumberOfConfirmedSeats();
+            sessionRepository.save(session);
+        }
 
         registration.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+        registrationRepository.save(registration);
 
-        session.incrementNumberOfConfirmedSeats();
-        sessionRepository.save(session);
+        cancellAllRegistrationsInWaitListWithConflict(registration.getAccount(), session);
 
-        return registrationRepository.save(registration);
+        return registration;
     }
 
     @Transactional
@@ -317,15 +330,22 @@ public class RegistrationService {
         checksIfActivityIsAssociateToSession(activityId, session);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
         checksIfEmailWasAnswered(registration);
-        cancellAllRegistrationsInWaitListWithConflict(registration.getAccount(), session);
-        checkIfSessionLockIsFull(session);
+
+        if(registration.getRegistrationStatus() == RegistrationStatus.WAITING_LIST) {
+            checkIfSessionLockIsFull(session);
+        }
+
+        if(registration.getRegistrationStatus() == RegistrationStatus.WAITING_LIST) {
+            session.incrementNumberOfConfirmedSeats();
+            sessionRepository.save(session);
+        }
 
         registration.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+        registrationRepository.save(registration);
 
-        session.incrementNumberOfConfirmedSeats();
-        sessionRepository.save(session);
+        cancellAllRegistrationsInWaitListWithConflict(registration.getAccount(), session);
 
-        return registrationRepository.save(registration);
+        return registration;
     }
 
     @Transactional

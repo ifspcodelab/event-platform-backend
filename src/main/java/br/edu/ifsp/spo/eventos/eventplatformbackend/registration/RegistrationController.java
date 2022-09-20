@@ -15,7 +15,6 @@ import java.util.UUID;
 @RequestMapping("api/v1")
 @AllArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class RegistrationController {
     private final RegistrationService registrationService;
     private final RegistrationMapper registrationMapper;
@@ -97,6 +96,18 @@ public class RegistrationController {
     @PatchMapping("events/{eventId}/sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}/registrations/{registrationId}/cancel")
     public ResponseEntity<RegistrationDto> cancel(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID registrationId) {
         Registration registration = registrationService.cancel(eventId, subeventId, activityId, sessionId, registrationId);
+        return ResponseEntity.ok(registrationMapper.to(registration));
+    }
+
+    @PatchMapping("events/{eventId}/activities/{activityId}/sessions/{sessionId}/registrations/{registrationId}/confirm")
+    public ResponseEntity<RegistrationDto> confirmWaitingList(@PathVariable UUID eventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID registrationId) {
+        Registration registration = registrationService.confirmWaitingList(eventId, activityId, sessionId, registrationId);
+        return ResponseEntity.ok(registrationMapper.to(registration));
+    }
+
+    @PatchMapping("events/{eventId}/sub-events/{subeventId}/activities/{activityId}/sessions/{sessionId}/registrations/{registrationId}/confirm")
+    public ResponseEntity<RegistrationDto> confirmWaitingList(@PathVariable UUID eventId, @PathVariable UUID subeventId, @PathVariable UUID activityId, @PathVariable UUID sessionId, @PathVariable UUID registrationId) {
+        Registration registration = registrationService.confirmWaitingList(eventId, subeventId, activityId, sessionId, registrationId);
         return ResponseEntity.ok(registrationMapper.to(registration));
     }
 

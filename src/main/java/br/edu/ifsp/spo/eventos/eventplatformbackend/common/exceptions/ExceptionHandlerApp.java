@@ -7,6 +7,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.authentication.Authe
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.deletion.AccountDeletionException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.password.PasswordResetException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup.SignupException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionRuleException;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
@@ -318,5 +320,27 @@ public class ExceptionHandlerApp {
         log.warn("Password incorrect for account deletion attempt for email={}: ", ex.getEmail());
 
         return new ResponseEntity(problemDetail, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(OrganizerAuthorizationException.class)
+    public ResponseEntity<Void> handlerOrganizersAuthorizationException(OrganizerAuthorizationException ex){
+        ProblemDetail problemDetail = new ProblemDetail("", List.of());
+
+        if (ex.getOrganizerAuthorizationExceptionType().equals(OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT)) {
+            problemDetail = new ProblemDetail(
+                    String.format("The organizer does not have access to the specified event"),
+                    List.of()
+            );
+        }
+
+        if (ex.getOrganizerAuthorizationExceptionType().equals(OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT)) {
+            problemDetail = new ProblemDetail(
+                    String.format("The organizer does not have access to the specified subevent"),
+                    List.of()
+            );
+        }
+
+        log.warn(String.format(ex.getOrganizerAuthorizationExceptionType().getMessage(), ex.getUsername(), ex.getResourceId().toString()));
+        return new ResponseEntity(problemDetail, HttpStatus.UNAUTHORIZED);
     }
 }

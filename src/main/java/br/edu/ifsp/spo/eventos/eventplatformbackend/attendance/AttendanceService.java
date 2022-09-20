@@ -1,8 +1,12 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.attendance;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_authorization.OrganizerAuthorizationExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.Registration;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationStatus;
@@ -12,10 +16,10 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.session.SessionScheduleRepos
 import br.edu.ifsp.spo.eventos.eventplatformbackend.subevent.Subevent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,8 +31,34 @@ public class AttendanceService {
     private final SessionScheduleRepository sessionScheduleRepository;
     private final AttendanceRepository attendanceRepository;
     private final AttendanceConfig attendanceConfig;
+    private final AuditService auditService;
+
+    private void checkUserEventPermission(UUID eventId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(jwtUserDetails.isAdmin()){
+            return;
+        }
+
+        if(!jwtUserDetails.hasPermissionForEvent(eventId)) {
+            throw new OrganizerAuthorizationException(OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT, jwtUserDetails.getUsername(), eventId);
+        }
+    }
+
+    private void checkUserSubEventPermission(UUID subEventId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(jwtUserDetails.isAdmin()){
+            return;
+        }
+
+        if(!jwtUserDetails.hasPermissionForSubEvent(subEventId)) {
+            throw new OrganizerAuthorizationException(OrganizerAuthorizationExceptionType.UNAUTHORIZED_SUBEVENT, jwtUserDetails.getUsername(), subEventId);
+        }
+    }
 
     public Attendance create(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
+        checkUserEventPermission(eventId);
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         Registration registration = getRegistration(dto.registrationId);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
@@ -46,7 +76,7 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
-        if(sessionSchedule.getExecutionStart().minusHours(2).isBefore(LocalDateTime.now())) {
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
         }
 
@@ -54,11 +84,13 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_EVENT_EXECUTION_PERIOD);
         }
 
-        Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
-        return attendanceRepository.save(attendance);
+        Attendance attendance = attendanceRepository.save(new Attendance(registration, getSessionSchedule(sessionScheduleId)));
+        auditService.logAdminCreate(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
+        return attendance;
     }
 
     public Attendance create(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, AttendanceCreateDto dto) {
+        checkUserSubEventPermission(subeventId);
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         Registration registration = getRegistration(dto.registrationId);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
@@ -77,19 +109,21 @@ public class AttendanceService {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED);
         }
 
-        if(sessionSchedule.getExecutionStart().toLocalDate().isBefore(LocalDate.now())) {
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
         }
 
-        if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
+         if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_AFTER_SUBEVENT_EXECUTION_PERIOD);
         }
 
-        Attendance attendance = new Attendance(registration, getSessionSchedule(sessionScheduleId));
-        return attendanceRepository.save(attendance);
+        Attendance attendance = attendanceRepository.save(new Attendance(registration, getSessionSchedule(sessionScheduleId)));
+        auditService.logAdminCreate(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
+        return attendance;
     }
 
     public void delete(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
+        checkUserEventPermission(eventId);
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         Attendance attendance = getAttendance(attendanceId);
         checksIfSessionIsAssociateToRegistration(sessionId, attendance.getRegistration());
@@ -98,16 +132,22 @@ public class AttendanceService {
         checksIfEventIsAssociateToActivity(eventId, sessionSchedule.getSession().getActivity());
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
+
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
+        }
 
         if(sessionSchedule.getSession().getActivity().getEvent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_EVENT_EXECUTION_END);
         }
 
-        log.info("Attendance removed: id={}, account name={}", attendanceId, attendance.getRegistration().getAccount().getName());
+        log.info("Attendance delete: id={}, sessionScheduleId={}, account name={}", attendanceId, sessionScheduleId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
+        auditService.logAdminDelete(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
     }
 
     public void delete(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId, UUID attendanceId) {
+        checkUserSubEventPermission(subeventId);
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         Attendance attendance = getAttendance(attendanceId);
         checksIfSessionIsAssociateToRegistration(sessionId, attendance.getRegistration());
@@ -118,33 +158,36 @@ public class AttendanceService {
         checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
         checkIfSessionIsCancelled(sessionSchedule.getSession());
 
+        if(sessionSchedule.getExecutionStart().toLocalDate().isAfter(LocalDate.now())) {
+            throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED);
+        }
+
         if(sessionSchedule.getSession().getActivity().getSubevent().getExecutionPeriod().getEndDate().plusDays(attendanceConfig.getPeriodInDaysToRegisterAttendance()).isBefore(LocalDate.now())) {
             throw new BusinessRuleException(BusinessRuleType.ATTENDANCE_DELETE_AFTER_SUBEVENT_EXECUTION_END);
         }
 
-        log.info("Attendance removed: id={}, account name={}", attendanceId, attendance.getRegistration().getAccount().getName());
+        log.info("Attendance delete: id={}, sessionScheduleId={}, account name={}", attendanceId, sessionScheduleId, attendance.getRegistration().getAccount().getName());
         attendanceRepository.delete(attendance);
+        auditService.logAdminDelete(ResourceName.ATTENDANCE, attendance.toLog(), sessionScheduleId);
     }
 
     public List<Attendance> findAll(UUID eventId, UUID activityId, UUID sessionId, UUID sessionScheduleId) {
+        checkUserEventPermission(eventId);
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
         checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
         checksIfEventIsAssociateToActivity(eventId, sessionSchedule.getSession().getActivity());
-        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
-        checkIfSessionIsCancelled(sessionSchedule.getSession());
 
         return attendanceRepository.findAllBySessionScheduleId(sessionScheduleId);
     }
 
     public List<Attendance> findAll(UUID eventId, UUID subeventId, UUID activityId, UUID sessionId, UUID sessionScheduleId) {
+        checkUserSubEventPermission(subeventId);
         SessionSchedule sessionSchedule = getSessionSchedule(sessionScheduleId);
         checksIfSessionIsAssociateToSessionSchedules(sessionId, sessionSchedule);
         checksIfActivityIsAssociateToSession(activityId, sessionSchedule.getSession());
         checksIfSubeventIsAssociateToActivity(subeventId, sessionSchedule.getSession().getActivity());
         checkIfEventIsAssociateToSubevent(eventId, sessionSchedule.getSession().getActivity().getSubevent());
-        checkIfActivityIsCanceled(sessionSchedule.getSession().getActivity());
-        checkIfSessionIsCancelled(sessionSchedule.getSession());
 
         return attendanceRepository.findAllBySessionScheduleId(sessionScheduleId);
     }

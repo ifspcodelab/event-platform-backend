@@ -23,9 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/accounts")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
 public class AccountController {
-
     private final AccountService accountService;
     private final AccountMapper accountMapper;
     private final LogMapper logMapper;

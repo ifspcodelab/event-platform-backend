@@ -65,4 +65,11 @@ public class SessionSchedule {
         return  executionStart.toLocalDate().isEqual(period.getStartDate()) || executionStart.toLocalDate().isAfter(period.getStartDate())
                 && executionEnd.toLocalDate().isEqual(period.getEndDate()) || executionEnd.toLocalDate().isBefore(period.getEndDate());
     }
+
+    public String toLog() {
+        return "SessionSchedule{" +
+            "id=" + id +
+            ", executionStart=" + executionStart +
+            '}';
+    }
 }

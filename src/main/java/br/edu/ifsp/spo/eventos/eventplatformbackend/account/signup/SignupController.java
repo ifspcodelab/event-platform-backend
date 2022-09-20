@@ -5,9 +5,13 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountMapper;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -17,7 +21,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/accounts")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
 public class SignupController {
     private final SignupService signupService;
     private final AccountMapper accountMapper;
@@ -46,6 +49,12 @@ public class SignupController {
 
     @GetMapping("searchName/{name}")
     public ResponseEntity<List<AccountDto>> findByName(@PathVariable String name) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(!jwtUserDetails.isAdmin() && !jwtUserDetails.isOrganizer()) {
+            throw new BusinessRuleException(BusinessRuleType.UNAUTHORIZED_ACTION);
+        }
+
         List<Account> results = signupService.search(name, AccountStatus.VERIFIED);
         return ResponseEntity.ok(accountMapper.to(results));
     }

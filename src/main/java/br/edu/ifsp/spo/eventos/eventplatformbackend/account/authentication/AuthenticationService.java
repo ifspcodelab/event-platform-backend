@@ -10,6 +10,10 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNa
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer.OrganizerType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.organizer_subevent.OrganizerSubeventType;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +28,8 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationService {
     private final AccountRepository accountRepository;
+    private final OrganizerRepository organizerRepository;
+    private final OrganizerSubeventRepository organizerSubeventRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -37,7 +43,6 @@ public class AuthenticationService {
         }
 
         Account account = getAccount(loginCreateDto.getEmail());
-
 
         if (account.getStatus().equals(AccountStatus.UNVERIFIED)) {
             throw new AuthenticationException(AuthenticationExceptionType.UNVERIFIED_ACCOUNT, account.getEmail());
@@ -57,18 +62,22 @@ public class AuthenticationService {
 
         refreshTokenRepository.deleteAllByAccountId(account.getId());
 
+        String accessTokenString = jwtService.generateAccessToken(
+            account,
+            organizerRepository.findAllEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerType.COLLABORATOR),
+            organizerSubeventRepository.findAllSubEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerSubeventType.COLLABORATOR),
+            organizerRepository.findAllEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerType.COORDINATOR),
+            organizerSubeventRepository.findAllSubEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerSubeventType.COORDINATOR)
+        );
+
         UUID refreshTokenId = UUID.randomUUID();
-        String accessTokenString = jwtService.generateAccessToken(account);
         String refreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
-
         RefreshToken refreshToken = new RefreshToken(refreshTokenId, refreshTokenString, account);
-
         refreshTokenRepository.save(refreshToken);
 
         TokensDto tokensDto = new TokensDto(accessTokenString, refreshTokenString);
 
         log.info("Successful login for the email {}", account.getEmail());
-
         auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login", refreshToken.getId());
 
         return tokensDto;
@@ -102,8 +111,17 @@ public class AuthenticationService {
             throw new AuthenticationException(AuthenticationExceptionType.NONEXISTENT_TOKEN, account.getEmail());
         }
 
+        //TODO: refactor into a 'generateAccessToken' private method and call it in 'rotate...' and 'login' methods
+
+        String newAccessTokenString = jwtService.generateAccessToken(
+            account,
+            organizerRepository.findAllEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerType.COLLABORATOR),
+            organizerSubeventRepository.findAllSubEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerSubeventType.COLLABORATOR),
+            organizerRepository.findAllEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerType.COORDINATOR),
+            organizerSubeventRepository.findAllSubEventIdsByAccountIdAndOrganizerType(account.getId(), OrganizerSubeventType.COORDINATOR)
+        );
+
         UUID refreshTokenId = UUID.randomUUID();
-        String newAccessTokenString = jwtService.generateAccessToken(account);
         String newRefreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
 
         refreshTokenRepository.updateTokenByAccountId(refreshTokenId, newRefreshTokenString, account);

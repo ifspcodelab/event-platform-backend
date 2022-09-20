@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.Diffable;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity

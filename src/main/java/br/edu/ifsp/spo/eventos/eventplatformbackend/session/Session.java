@@ -64,4 +64,11 @@ public class Session implements Diffable<Session> {
                 .append("Horários da sessão", this.sessionSchedules, updatedSession.sessionSchedules)
                 .build();
     }
+
+    public String toLog() {
+        return "Session{" +
+            "id=" + id +
+            ", title='" + title + '\'' +
+            '}';
+    }
 }

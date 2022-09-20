@@ -60,6 +60,12 @@ public class AuditService {
         log(getAccount(adminId), action, resourceName, resourceId);
     }
 
+    public void logAdminCreate(ResourceName resourceName, String resourceData, UUID resourceId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var adminId = jwtUserDetails.getId();
+        log(getAccount(adminId), Action.CREATE, resourceName, resourceData, resourceId);
+    }
+
     public void logAdminUpdate(ResourceName resourceName, String resourceData, UUID resourceId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var adminId = jwtUserDetails.getId();
@@ -70,6 +76,12 @@ public class AuditService {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var adminId = jwtUserDetails.getId();
         log(getAccount(adminId), Action.DELETE, resourceName, resourceId);
+    }
+
+    public void logAdminDelete(ResourceName resourceName, String resourceData, UUID resourceId) {
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var adminId = jwtUserDetails.getId();
+        log(getAccount(adminId), Action.DELETE, resourceName, resourceData, resourceId);
     }
 
     private Account getAccount(UUID id) {

@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class Attendance {
     @Id
     private UUID id;
-    private Instant registrationTimestamp;
+    private LocalDateTime createdAt;
     @ManyToOne
     private Registration registration;
     @ManyToOne
@@ -31,9 +31,18 @@ public class Attendance {
 
     public Attendance(Registration registration, SessionSchedule sessionSchedule) {
         this.id = UUID.randomUUID();
-        this.registrationTimestamp = Instant.now();
+        this.createdAt = LocalDateTime.now();
         this.registration = registration;
         this.sessionSchedule = sessionSchedule;
+    }
+
+    public String toLog() {
+        return "Attendance{" +
+            "id=" + id +
+            ", createdAt=" + createdAt +
+            ", registration=" + registration.toLog() +
+            ", sessionSchedule=" + sessionSchedule.toLog() +
+            '}';
     }
 }
 

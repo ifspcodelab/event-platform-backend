@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.invalidemail.InvalidEmailRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
@@ -34,11 +35,16 @@ public class SignupService {
     private final EmailService emailService;
     private final AuditService auditService;
     private final LogRepository logRepository;
+    private final InvalidEmailRepository invalidEmailRepository;
 
     @Transactional
     public Account create(AccountCreateDto dto) {
         if (!recaptchaService.isValid(dto.getUserRecaptcha())) {
             throw new RecaptchaException(RecaptchaExceptionType.INVALID_RECAPTCHA, dto.getEmail());
+        }
+
+        if(invalidEmailRepository.existsByEmail(dto.getEmail())) {
+            throw new BusinessRuleException(BusinessRuleType.INVALID_EMAIL);
         }
 
         if (accountRepository.findByCpfAndStatusUnverified(dto.getCpf()).isPresent()) {

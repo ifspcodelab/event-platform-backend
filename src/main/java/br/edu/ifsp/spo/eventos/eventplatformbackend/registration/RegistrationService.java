@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.registration;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.attendance.AttendanceRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
@@ -34,6 +35,7 @@ public class RegistrationService {
     private final SessionRepository sessionRepository;
     private final RegistrationRepository registrationRepository;
     private final AccountRepository accountRepository;
+    private final AttendanceRepository attendanceRepository;
     private final EmailService emailService;
     @Value("${registration.email-confirmation-time}")
     private String emailConfirmationTime;
@@ -209,6 +211,7 @@ public class RegistrationService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
+        checkIfRegistrationHasAttendanceAssociated(registrationId);
 
         if(registration.getRegistrationStatus().equals(RegistrationStatus.WAITING_LIST)) {
             registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
@@ -254,6 +257,7 @@ public class RegistrationService {
         checksIfEventIsAssociateToActivity(eventId, activity);
         checksIfActivityIsAssociateToSession(activityId, session);
         checksIfSessionIsAssociateToRegistration(sessionId, registration);
+        checkIfRegistrationHasAttendanceAssociated(registrationId);
 
         if(registration.getRegistrationStatus().equals(RegistrationStatus.WAITING_LIST)) {
             registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
@@ -353,6 +357,7 @@ public class RegistrationService {
         var registration = getRegistration(registrationId);
         Session session = sessionRepository.findByIdWithPessimisticLock(registration.getSession().getId()).get();
         checksIfAccountIsAssociateToRegistration(accountId, registration);
+        checkIfRegistrationHasAttendanceAssociated(registrationId);
 
         if(registration.getRegistrationStatus().equals(RegistrationStatus.WAITING_LIST)) {
             registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_USER);
@@ -687,5 +692,11 @@ public class RegistrationService {
     private Registration getRegistration(UUID registrationId) {
         return registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REGISTRATION, registrationId));
+    }
+
+    private void checkIfRegistrationHasAttendanceAssociated(UUID registrationId) {
+        if(attendanceRepository.existsByRegistrationId(registrationId)) {
+            throw new BusinessRuleException(BusinessRuleType.REGISTRATION_HAS_ATTENDANCE);
+        }
     }
 }

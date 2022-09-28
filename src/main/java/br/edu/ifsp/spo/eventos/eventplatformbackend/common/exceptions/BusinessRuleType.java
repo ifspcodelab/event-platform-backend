@@ -132,6 +132,7 @@ public enum BusinessRuleType {
     REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS("Não é mais possível aceitar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_DENY_WITH_EXPIRED_HOURS("Não é mais possível recusar a vaga, pois já passou do prazo especificado no e-mail"),
     REGISTRATION_ALREADY_WAS_ANSWERED("Não é possível aceitar ou negar mais de uma vez uma vaga liberada"),
+    REGISTRATION_HAS_ATTENDANCE("Não é possível cancelar uma inscrição que possui presença registrada"),
     ATTENDANCE_CREATE_WITH_REGISTRATION_STATUS_NOT_CONFIRMED("Não é possível adicionar presença em uma inscrição não confirmada"),
     ATTENDANCE_CREATE_WITH_SESSION_SCHEDULE_NOT_STARTED("Não é possível adicionar ou remover presença. O registro de presença inicia no dia do horário da sessão"),
     ATTENDANCE_CREATE_AFTER_EVENT_EXECUTION_PERIOD("Não é possível adicionar presença pois o período de registro de presença finalizou no evento"),

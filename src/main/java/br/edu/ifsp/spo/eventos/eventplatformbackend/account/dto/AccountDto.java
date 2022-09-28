@@ -1,6 +1,7 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountType;
 import lombok.Data;
 
 import java.time.Instant;
@@ -15,6 +16,7 @@ public class AccountDto {
     private Boolean agreed;
     private String role;
     private AccountStatus status;
+    private AccountType type;
     private Boolean allowEmail;
     private Instant registrationTimestamp;
 }

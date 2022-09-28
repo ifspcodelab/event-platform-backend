@@ -32,6 +32,8 @@ public class Account implements Diffable<Account> {
     private Boolean allowEmail;
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
+    @Enumerated(EnumType.STRING)
+    private AccountType type;
     private Instant registrationTimestamp;
     private boolean verified;
 
@@ -47,6 +49,7 @@ public class Account implements Diffable<Account> {
         this.allowEmail = Boolean.TRUE;
         this.registrationTimestamp = Instant.now();
         this.verified = true;
+        this.type = AccountType.EXTERNAL_AUDIENCE;
     }
 
     @Override

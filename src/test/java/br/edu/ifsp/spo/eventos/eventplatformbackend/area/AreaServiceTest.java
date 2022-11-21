@@ -152,4 +152,32 @@ public class AreaServiceTest {
         assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
                 .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
+
+    @Test
+    public void update_ThrowsException_WhenLocationAndGivenAreaAlreadyExist() {
+        AreaCreateDto areaCreateDto = new AreaCreateDto(
+                "Bloco C",
+                "Térreo"
+        );
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(area));
+        when(areaRepository.existsByNameAndLocationIdAndIdNot(anyString(), any(UUID.class), any(UUID.class)))
+                .thenReturn(Boolean.TRUE);
+
+        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
+                .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
 }

@@ -39,16 +39,17 @@ public class AreaServiceTest {
     }
 
     @Test
-    public void create_ThrowsException_WhenLocationDoesNotExists() {
+    public void create_ThrowsException_WhenLocationDoesNotExist() {
         AreaCreateDto areaCreateDto = new AreaCreateDto(
                 "Bloco A",
                 "Piso Superior"
         );
+        UUID locationId = UUID.randomUUID();
 
         when(locationRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> areaService.create(UUID.randomUUID(), areaCreateDto))
+        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -97,7 +98,8 @@ public class AreaServiceTest {
                 areaCreateDto.getName(),
                 location.getId())
         ).thenReturn(false);
-        when(areaRepository.save(any(Area.class))).thenReturn(area);
+        when(areaRepository.save(any(Area.class)))
+                .thenReturn(area);
 
         Area createdArea = areaService.create(location.getId(), areaCreateDto);
 
@@ -107,5 +109,20 @@ public class AreaServiceTest {
         assertThat(createdArea.getName()).isEqualTo(area.getName());
         assertThat(createdArea.getReference()).isEqualTo(area.getReference());
         assertThat(createdArea.getLocation()).isEqualTo(area.getLocation());
+    }
+
+    @Test
+    public void update_ThrowsException_WhenAreaDoesNotExist() {
+        AreaCreateDto areaCreateDto = new AreaCreateDto(
+                "Bloco A",
+                "Piso Superior"
+        );
+        UUID locationId = UUID.randomUUID();
+        UUID areaId = UUID.randomUUID();
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

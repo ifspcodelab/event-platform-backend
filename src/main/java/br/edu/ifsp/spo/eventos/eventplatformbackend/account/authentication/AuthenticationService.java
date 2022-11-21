@@ -73,12 +73,12 @@ public class AuthenticationService {
         UUID refreshTokenId = UUID.randomUUID();
         String refreshTokenString = jwtService.generateRefreshToken(account, refreshTokenId);
         RefreshToken refreshToken = new RefreshToken(refreshTokenId, refreshTokenString, account);
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.save(refreshToken);//verify
 
         TokensDto tokensDto = new TokensDto(accessTokenString, refreshTokenString);
 
         log.info("Successful login for the email {}", account.getEmail());
-        auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login", refreshToken.getId());
+        auditService.logCreate(account, ResourceName.REFRESH_TOKEN, "Login", refreshToken.getId());//verify
 
         return tokensDto;
     }

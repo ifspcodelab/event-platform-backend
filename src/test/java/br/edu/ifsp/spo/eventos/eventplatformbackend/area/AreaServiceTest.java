@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
@@ -35,6 +36,20 @@ public class AreaServiceTest {
     @Test
     public void areaServiceShouldNotBeNull() {
         assertThat(areaService).isNotNull();
+    }
+
+    @Test
+    public void create_ThrowsException_WhenLocationDoesNotExists() {
+        AreaCreateDto areaCreateDto = new AreaCreateDto(
+                "Bloco A",
+                "Piso Superior"
+        );
+
+        when(locationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> areaService.create(UUID.randomUUID(), areaCreateDto))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

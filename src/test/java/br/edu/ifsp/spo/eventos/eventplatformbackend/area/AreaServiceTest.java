@@ -17,7 +17,7 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AreaServiceTest {
@@ -58,5 +58,39 @@ public class AreaServiceTest {
 
         assertThatThrownBy(() -> areaService.create(location.getId(), areaCreateDto))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
+
+    @Test
+    public void create_ReturnsArea_WhenSuccessful() {
+        AreaCreateDto areaCreateDto = new AreaCreateDto(
+                "Bloco A",
+                "Piso Superior"
+        );
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                areaCreateDto.getName(),
+                areaCreateDto.getReference(),
+                location
+        );
+        when(locationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(location));
+        when(areaRepository.existsByNameAndLocationId(
+                areaCreateDto.getName(),
+                location.getId())
+        ).thenReturn(false);
+        when(areaRepository.save(any(Area.class))).thenReturn(area);
+
+        Area createdArea = areaService.create(location.getId(), areaCreateDto);
+
+        verify(areaRepository, times(1)).save(any(Area.class));
+        assertThat(createdArea).isNotNull();
+        assertThat(createdArea.getId()).isEqualTo(area.getId());
+        assertThat(createdArea.getName()).isEqualTo(area.getName());
+        assertThat(createdArea.getReference()).isEqualTo(area.getReference());
+        assertThat(createdArea.getLocation()).isEqualTo(area.getLocation());
     }
 }

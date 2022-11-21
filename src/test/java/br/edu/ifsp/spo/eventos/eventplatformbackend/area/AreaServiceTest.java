@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotExistsAssociationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
@@ -124,5 +125,31 @@ public class AreaServiceTest {
 
         assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void update_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
+        AreaCreateDto areaCreateDto = new AreaCreateDto(
+                "Bloco C",
+                "Térreo"
+        );
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = UUID.randomUUID();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(area));
+
+        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
+                .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
 }

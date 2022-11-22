@@ -233,4 +233,26 @@ public class AreaServiceTest {
         assertThatThrownBy(() -> areaService.delete(locationId, areaId))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
+
+    @Test
+    public void delete_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = UUID.randomUUID();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(area));
+
+        assertThatThrownBy(() -> areaService.delete(locationId, areaId))
+                .isInstanceOf(ResourceNotExistsAssociationException.class);
+    }
 }

@@ -107,4 +107,52 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.create(locationId, areaId, dto))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
     }
+
+    @Test
+    public void create_ReturnsArea_WhenSuccessful() {
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
+        UUID areaId = area.getId();
+
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        when(spaceRepository.existsByNameAndAreaId(dto.getName(), areaId)).thenReturn(Boolean.FALSE);
+
+        String name = dto.getName();
+        Integer capacity = dto.getCapacity();
+        SpaceType type = dto.getType();
+
+        Space space = new Space(name, capacity, type, area);
+
+        when(spaceRepository.save(any(Space.class))).thenReturn(space);
+
+        Space createdSpace = spaceService.create(locationId, areaId, dto);
+
+        verify(spaceRepository, times(1)).save(any(Space.class));
+        assertThat(createdSpace).isNotNull();
+        assertThat(createdSpace.getId()).isEqualTo(space.getId());
+        assertThat(createdSpace.getName()).isEqualTo(space.getName());
+        assertThat(createdSpace.getArea()).isEqualTo(space.getArea());
+        assertThat(createdSpace.getCapacity()).isEqualTo(space.getCapacity());
+        assertThat(createdSpace.getType()).isEqualTo(space.getType());
+    }
 }

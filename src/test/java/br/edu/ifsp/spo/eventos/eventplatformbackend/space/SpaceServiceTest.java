@@ -46,4 +46,32 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.create(randomLocationUuid, randomAreaUuid , dto))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
+
+    @Test
+    public void create_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        UUID locationId = UUID.randomUUID();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        assertThatThrownBy(() -> spaceService.create(locationId, areaId, dto))
+                .isInstanceOf(ResourceNotExistsAssociationException.class);
+    }
 }

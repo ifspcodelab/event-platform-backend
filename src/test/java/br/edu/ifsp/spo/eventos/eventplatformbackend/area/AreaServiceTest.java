@@ -364,4 +364,15 @@ public class AreaServiceTest {
         assertThat(foundArea.getId()).isEqualTo(areaId);
         assertThat(foundArea.getLocation().getId()).isEqualTo(locationId);
     }
+
+    @Test
+    public void findAll_ThrowsException_WhenLocationDoesNotExist() {
+        UUID locationId = UUID.randomUUID();
+
+        when(locationRepository.existsById(any(UUID.class)))
+                .thenReturn(Boolean.FALSE);
+
+        assertThatThrownBy(() -> areaService.findAll(locationId))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

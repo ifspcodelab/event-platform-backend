@@ -305,4 +305,16 @@ public class AreaServiceTest {
                 any(UUID.class)
         );
     }
+
+    @Test
+    public void findById_ThrowsException_WhenAreaDoesNotExist() {
+        UUID locationId = UUID.randomUUID();
+        UUID areaId = UUID.randomUUID();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> areaService.findById(locationId, areaId))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

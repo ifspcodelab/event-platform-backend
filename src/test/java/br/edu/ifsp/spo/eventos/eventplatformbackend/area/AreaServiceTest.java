@@ -339,4 +339,29 @@ public class AreaServiceTest {
         assertThatThrownBy(() -> areaService.findById(locationId, areaId))
                 .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
+
+    @Test
+    public void findById_ReturnsArea_WhenSuccessful() {
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(area));
+
+        Area foundArea = areaService.findById(locationId, areaId);
+
+        assertThat(foundArea).isNotNull();
+        assertThat(foundArea.getId()).isEqualTo(areaId);
+        assertThat(foundArea.getLocation().getId()).isEqualTo(locationId);
+    }
 }

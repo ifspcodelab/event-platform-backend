@@ -221,4 +221,16 @@ public class AreaServiceTest {
         assertThat(updatedArea.getReference()).isEqualTo(areaCreateDto.getReference());
         assertThat(updatedArea.getLocation()).isEqualTo(location);
     }
+
+    @Test
+    public void delete_ThrowsException_WhenAreaDoesNotExist() {
+        UUID locationId = UUID.randomUUID();
+        UUID areaId = UUID.randomUUID();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> areaService.delete(locationId, areaId))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

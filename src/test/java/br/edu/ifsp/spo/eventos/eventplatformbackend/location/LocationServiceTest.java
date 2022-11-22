@@ -2,9 +2,9 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.location;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-//import org.junit.jupiter.api.BeforeEach;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,11 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.UUID;
-//
+import java.util.Optional;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -28,7 +26,7 @@ public class LocationServiceTest {
     @Mock
     private AreaRepository areaRepository;
     @Mock
-    private AuditService AuditService;
+    private AuditService auditService;
     @InjectMocks
     private LocationService locationService;
 
@@ -66,5 +64,66 @@ public class LocationServiceTest {
         assertThat(locationCreated.getId()).isEqualTo(location.getId());
         assertThat(locationCreated.getName()).isEqualTo(location.getName());
         assertThat(locationCreated.getAddress()).isEqualTo(location.getAddress());
+    }
+
+    @Test
+    public void update_ThrowsException_WhenLocationDoesNotExists() {
+        LocationCreateDto locationCreateDto = new LocationCreateDto(
+                "Shopping D",
+                "Av. Cruzeiro do Sul"
+        );
+        UUID locationId = UUID.randomUUID();
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> locationService.update(locationId, locationCreateDto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .extracting("resourceName", InstanceOfAssertFactories.type(ResourceName.class))
+                .isEqualTo(ResourceName.LOCATION);
+    }
+    @Test
+    public void update_ThrowsException_WhenLocationNameAlreadyExistsExcludingTheProvided() {
+        LocationCreateDto locationCreateDto = new LocationCreateDto(
+                "Shopping D",
+                "Av. Cruzeiro do Sul"
+        );
+        Location location = new Location(
+                locationCreateDto.getName(),
+                locationCreateDto.getAddress()
+        );
+        UUID locationId = UUID.randomUUID();
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
+        when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(true);
+
+        assertThatThrownBy(() -> locationService.update(locationId, locationCreateDto))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .extracting("resourceName", InstanceOfAssertFactories.type(ResourceName.class))
+                .isEqualTo(ResourceName.LOCATION);
+    }
+
+    @Test
+    public void update_ReturnsLocation_WhenSuccessful() {
+        LocationCreateDto locationCreateDto = new LocationCreateDto(
+                "Shopping D",
+                "Av. Cruzeiro do Sul"
+        );
+        Location location = new Location(
+                locationCreateDto.getName(),
+                locationCreateDto.getAddress()
+        );
+        UUID locationId = UUID.randomUUID();
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
+        when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(false);
+
+        Location locationUpdated = locationService.update(locationId, locationCreateDto);
+
+        verify(locationRepository, times(1)).save(any(Location.class));
+        verify(auditService, times(1)).logAdminUpdate(
+                any(ResourceName.class),
+                any(String.class),
+                any(UUID.class));
+        assertThat(locationUpdated).isNotNull();
+        assertThat(locationUpdated.getId()).isEqualTo(location.getId());
+        assertThat(locationUpdated.getName()).isEqualTo(location.getName());
+        assertThat(locationUpdated.getAddress()).isEqualTo(location.getAddress());
     }
 }

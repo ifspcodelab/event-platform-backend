@@ -74,4 +74,37 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.create(locationId, areaId, dto))
                 .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
+
+    @Test
+    public void create_ThrowException_WhenThereIsAlreadyASpaceWithNameAndAreaId() {
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
+        UUID areaId = area.getId();
+
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        when(spaceRepository.existsByNameAndAreaId(dto.getName(), areaId)).thenReturn(Boolean.TRUE);
+
+        assertThatThrownBy(() -> spaceService.create(locationId, areaId, dto))
+                .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
 }

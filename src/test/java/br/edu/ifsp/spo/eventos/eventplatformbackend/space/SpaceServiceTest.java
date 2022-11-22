@@ -296,4 +296,47 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId, spaceId, dto))
                 .isInstanceOf(ResourceReferentialIntegrityException.class);
     }
+
+    @Test
+    public void update_ThrowsException_WhenThereIsAlreadyASpaceWithNameAreaIdAndNotSpaceId() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String name = dto.getName();
+        Integer capacity = dto.getCapacity();
+        SpaceType type = dto.getType();
+
+        Space space = new Space(name, capacity, type, area);
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID spaceId = space.getId();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        UUID spaceAreaId = space.getArea().getId();
+
+        assertThat(areaId.equals(spaceAreaId)).isTrue();
+
+        when(spaceRepository.existsByNameAndAreaIdAndIdNot(any(String.class), any(UUID.class), any(UUID.class))).thenReturn(Boolean.TRUE);
+
+        assertThatThrownBy(() -> spaceService.update(locationId, areaId, spaceId, dto))
+                .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
 }

@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotExistsAssociationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
@@ -179,5 +180,45 @@ public class AreaServiceTest {
 
         assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
+
+    @Test
+    public void update_ReturnsUpdatedArea_WhenSuccessful() {
+        AreaCreateDto areaCreateDto = new AreaCreateDto(
+                "Bloco C",
+                "Térreo"
+        );
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(area));
+        when(areaRepository.existsByNameAndLocationIdAndIdNot(anyString(), any(UUID.class), any(UUID.class)))
+                .thenReturn(Boolean.FALSE);
+        when(areaRepository.save(any(Area.class)))
+                .thenReturn(any(Area.class));
+
+        Area updatedArea = areaService.update(locationId, areaId, areaCreateDto);
+
+        verify(areaRepository, times(1)).save(any(Area.class));
+        verify(auditService, times(1)).logAdminUpdate(
+                any(ResourceName.class),
+                anyString(),
+                any(UUID.class)
+        );
+        assertThat(updatedArea).isNotNull();
+        assertThat(updatedArea.getName()).isEqualTo(areaCreateDto.getName());
+        assertThat(updatedArea.getReference()).isEqualTo(areaCreateDto.getReference());
+        assertThat(updatedArea.getLocation()).isEqualTo(location);
     }
 }

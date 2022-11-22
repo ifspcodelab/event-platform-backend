@@ -276,4 +276,33 @@ public class AreaServiceTest {
         assertThatThrownBy(() -> areaService.delete(locationId, areaId))
                 .isInstanceOf(ResourceReferentialIntegrityException.class);
     }
+
+    @Test
+    public void delete_LogsDeletedArea_WhenSuccessful() {
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(area));
+        when(spaceRepository.existsByAreaId(any(UUID.class)))
+                .thenReturn(Boolean.FALSE);
+
+        areaService.delete(locationId, areaId);
+
+        verify(areaRepository, times(1)).deleteById(any(UUID.class));
+        verify(auditService, times(1)).logAdminDelete(
+                any(ResourceName.class),
+                any(UUID.class)
+        );
+    }
 }

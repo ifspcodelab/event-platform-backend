@@ -155,4 +155,37 @@ class SpaceServiceTest {
         assertThat(createdSpace.getCapacity()).isEqualTo(space.getCapacity());
         assertThat(createdSpace.getType()).isEqualTo(space.getType());
     }
+
+    @Test
+    public void update_ThrowsException_WhenThereIsNoAreaPersisted() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String name = dto.getName();
+        Integer capacity = dto.getCapacity();
+        SpaceType type = dto.getType();
+
+        Space space = new Space(name, capacity, type, area);
+
+        UUID locationId = location.getId();
+        UUID randomAreaId = UUID.randomUUID();
+        UUID spaceId = space.getId();
+
+        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId , spaceId, dto))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

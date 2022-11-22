@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotExistsAssociationException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceReferentialIntegrityException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -257,5 +258,42 @@ class SpaceServiceTest {
 
         assertThatThrownBy(() -> spaceService.update(locationId, areaId, randomSpaceId, dto))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void update_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String name = dto.getName();
+        Integer capacity = dto.getCapacity();
+        SpaceType type = dto.getType();
+
+        Space space = new Space(name, capacity, type, area);
+
+        UUID locationId = location.getId();
+        UUID randomAreaId = UUID.randomUUID();
+        UUID spaceId = space.getId();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId, spaceId, dto))
+                .isInstanceOf(ResourceReferentialIntegrityException.class);
     }
 }

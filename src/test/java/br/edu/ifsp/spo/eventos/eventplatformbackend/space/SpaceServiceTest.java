@@ -223,4 +223,39 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.update(locationId, areaId, spaceId, dto))
                 .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
+
+    @Test
+    public void update_ThrowsException_WhenThereIsNoSpacePersisted() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String name = dto.getName();
+        Integer capacity = dto.getCapacity();
+        SpaceType type = dto.getType();
+
+        Space space = new Space(name, capacity, type, area);
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID randomSpaceId = UUID.randomUUID();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        assertThatThrownBy(() -> spaceService.update(locationId, areaId, randomSpaceId, dto))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -374,5 +375,19 @@ public class AreaServiceTest {
 
         assertThatThrownBy(() -> areaService.findAll(locationId))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void findAll_ReturnsEmptyList_WhenAreasDoNotExistInGivenLocation() {
+        UUID locationId = UUID.randomUUID();
+
+        when(locationRepository.existsById(any(UUID.class)))
+                .thenReturn(Boolean.TRUE);
+        when(areaRepository.findAllByLocationId(any(UUID.class)))
+                .thenReturn(List.of());
+
+        List<Area> foundArea = areaService.findAll(locationId);
+
+        assertThat(foundArea).asList().hasSize(0);
     }
 }

@@ -390,4 +390,28 @@ public class AreaServiceTest {
 
         assertThat(foundArea).asList().hasSize(0);
     }
+
+    @Test
+    public void findAll_ReturnsAreaList_WhenSuccessful() {
+        Location location = new Location(
+                UUID.randomUUID(),
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
+        );
+        Area area = new Area(
+                "Bloco A",
+                "Piso Superior",
+                location
+        );
+        UUID locationId = location.getId();
+
+        when(locationRepository.existsById(any(UUID.class)))
+                .thenReturn(Boolean.TRUE);
+        when(areaRepository.findAllByLocationId(any(UUID.class)))
+                .thenReturn(List.of(area));
+
+        List<Area> foundArea = areaService.findAll(locationId);
+
+        assertThat(foundArea).asList().hasSize(1);
+    }
 }

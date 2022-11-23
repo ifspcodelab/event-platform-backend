@@ -397,4 +397,25 @@ class SpaceServiceTest {
 
         verify(auditService, times(1)).logAdminUpdate(any(ResourceName.class), any(String.class), any(UUID.class));
     }
+
+    @Test
+    public void delete_ThrowsException_WhenThereIsNoSpacePersisted() {
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID randomSpaceId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, randomSpaceId))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

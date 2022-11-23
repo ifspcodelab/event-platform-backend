@@ -490,4 +490,43 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.delete(randomLocationId, areaId, spaceId))
                 .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
+
+    @Test
+    public void delete_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String spaceName = dto.getName();
+        Integer spaceCapacity = dto.getCapacity();
+        SpaceType spaceType = dto.getType();
+
+        Space space = new Space(spaceName, spaceCapacity, spaceType, area);
+
+        UUID locationId = location.getId();
+        UUID randomAreaId = UUID.randomUUID();
+        UUID spaceId = space.getId();
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        assertThat(location.getId().equals(area.getLocation().getId())).isTrue();
+
+        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
+                .isInstanceOf(ResourceReferentialIntegrityException.class);
+    }
 }

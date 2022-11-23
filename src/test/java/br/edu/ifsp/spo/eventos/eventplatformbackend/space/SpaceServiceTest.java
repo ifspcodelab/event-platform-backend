@@ -3,10 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAlreadyExistsException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotExistsAssociationException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceReferentialIntegrityException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -338,5 +335,66 @@ class SpaceServiceTest {
 
         assertThatThrownBy(() -> spaceService.update(locationId, areaId, spaceId, dto))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
+
+    @Test
+    public void update_ReturnsSpace_WhenSuccessful() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String name = dto.getName();
+        Integer capacity = dto.getCapacity();
+        SpaceType type = dto.getType();
+
+        Space space = new Space(name, capacity, type, area); //Old space instantiated
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID spaceId = space.getId();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        UUID spaceAreaId = space.getArea().getId();
+
+        assertThat(areaId.equals(spaceAreaId)).isTrue();
+
+        when(spaceRepository.existsByNameAndAreaIdAndIdNot(any(String.class), any(UUID.class), any(UUID.class))).thenReturn(Boolean.FALSE);
+
+        SpaceCreateDto updateDto = new SpaceCreateDto(
+                "novo nome",
+                456,
+                SpaceType.CLASSROOM
+        );
+
+        space.setName(updateDto.getName());
+        space.setCapacity(updateDto.getCapacity());
+        space.setType(updateDto.getType());
+
+        Space updatedSpace = spaceService.update(locationId, areaId, spaceId, updateDto);
+
+        verify(spaceRepository, times(1)).save(any(Space.class));
+        assertThat(updatedSpace).isNotNull();
+        assertThat(updatedSpace.getName().equals(space.getName())).isTrue();
+        assertThat(updatedSpace.getCapacity().equals(space.getCapacity())).isTrue();
+        assertThat(updatedSpace.getType().equals(space.getType())).isTrue();
+        assertThat(updatedSpace.getArea().equals(space.getArea())).isTrue();
+
+        verify(auditService, times(1)).logAdminUpdate(any(ResourceName.class), any(String.class), any(UUID.class));
     }
 }

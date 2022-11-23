@@ -418,4 +418,39 @@ class SpaceServiceTest {
         assertThatThrownBy(() -> spaceService.delete(locationId, areaId, randomSpaceId))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
+
+    @Test
+    public void delete_ThrowsException_WhenThereIsNoAreaPersisted() {
+        SpaceCreateDto dto = new SpaceCreateDto(
+                "nome",
+                123,
+                SpaceType.AUDITORIUM
+        );
+
+        Location location = new Location(
+                "nome",
+                "endereco"
+        );
+
+        Area area = new Area(
+                "nome",
+                "referencia",
+                location
+        );
+
+        String spaceName = dto.getName();
+        Integer spaceCapacity = dto.getCapacity();
+        SpaceType spaceType = dto.getType();
+
+        Space space = new Space(spaceName, spaceCapacity, spaceType, area);
+
+        UUID locationId = location.getId();
+        UUID randomAreaId = UUID.randomUUID();
+        UUID spaceId = space.getId();
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

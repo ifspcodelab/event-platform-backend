@@ -40,10 +40,7 @@ public class AreaServiceTest {
 
     @Test
     public void create_ThrowsException_WhenLocationDoesNotExist() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco A",
-                "Piso Superior"
-        );
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoA();
         UUID locationId = UUID.randomUUID();
 
         when(locationRepository.findById(any(UUID.class)))
@@ -61,10 +58,7 @@ public class AreaServiceTest {
 
     @Test
     public void create_ThrowsException_WhenAreaAlreadyExists() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco A",
-                "Piso Superior"
-        );
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoA();
         Location location = LocationFactory.sampleLocation();
         UUID locationId = location.getId();
 
@@ -81,10 +75,7 @@ public class AreaServiceTest {
 
     @Test
     public void create_ReturnsArea_WhenSuccessful() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco A",
-                "Piso Superior"
-        );
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoA();
         Location location = LocationFactory.sampleLocation();
         UUID locationId = location.getId();
         Area area = AreaFactory.sampleArea();
@@ -105,10 +96,7 @@ public class AreaServiceTest {
 
     @Test
     public void update_ThrowsException_WhenAreaDoesNotExist() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco A",
-                "Piso Superior"
-        );
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoB();
         UUID locationId = UUID.randomUUID();
         UUID areaId = UUID.randomUUID();
         when(areaRepository.findById(any(UUID.class)))
@@ -120,10 +108,7 @@ public class AreaServiceTest {
 
     @Test
     public void update_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco C",
-                "Térreo"
-        );
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoB();
         Area area = AreaFactory.sampleArea();
         UUID locationId = UUID.randomUUID();
         UUID areaId = area.getId();
@@ -137,11 +122,7 @@ public class AreaServiceTest {
 
     @Test
     public void update_ThrowsException_WhenLocationAndGivenAreaAlreadyExist() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco C",
-                "Térreo"
-        );
-        //TODO: dto em um método privado
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoB();
 
         Area area = AreaFactory.sampleArea();
         UUID locationId = area.getLocation().getId();
@@ -158,10 +139,7 @@ public class AreaServiceTest {
 
     @Test
     public void update_ReturnsUpdatedArea_WhenSuccessful() {
-        AreaCreateDto areaCreateDto = new AreaCreateDto(
-                "Bloco C",
-                "Térreo"
-        );
+        AreaCreateDto areaCreateDto = getSampleAreaCreateDtoB();
         Area area = AreaFactory.sampleArea();
         UUID locationId = area.getLocation().getId();
         UUID areaId = area.getId();
@@ -327,5 +305,19 @@ public class AreaServiceTest {
         List<Area> foundArea = areaService.findAll(locationId);
 
         assertThat(foundArea).hasSize(1);
+    }
+
+    private AreaCreateDto getSampleAreaCreateDtoA() {
+        return new AreaCreateDto(
+                "Bloco A",
+                "Piso Superior"
+        );
+    }
+
+    private AreaCreateDto getSampleAreaCreateDtoB() {
+        return new AreaCreateDto(
+                "Bloco C",
+                "Térreo"
+        );
     }
 }

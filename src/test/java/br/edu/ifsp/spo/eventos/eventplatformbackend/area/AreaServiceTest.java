@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -49,8 +48,14 @@ public class AreaServiceTest {
         when(locationRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
-                .isInstanceOf(ResourceNotFoundException.class);
+        //exception assertion without using catch throwable
+//        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> areaService.create(locationId, areaCreateDto));
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(locationId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
     }
 
     @Test
@@ -101,14 +106,9 @@ public class AreaServiceTest {
         when(areaRepository.save(any(Area.class)))
                 .thenReturn(area);
 
-        Area createdArea = areaService.create(location.getId(), areaCreateDto);
+        areaService.create(location.getId(), areaCreateDto);
 
         verify(areaRepository, times(1)).save(any(Area.class));
-        assertThat(createdArea).isNotNull();
-        assertThat(createdArea.getId()).isEqualTo(area.getId());
-        assertThat(createdArea.getName()).isEqualTo(area.getName());
-        assertThat(createdArea.getReference()).isEqualTo(area.getReference());
-        assertThat(createdArea.getLocation()).isEqualTo(area.getLocation());
     }
 
     @Test
@@ -158,17 +158,10 @@ public class AreaServiceTest {
                 "Bloco C",
                 "Térreo"
         );
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
-        UUID locationId = location.getId();
+        //TODO: dto em um método privado
+
+        Area area = AreaFactory.sampleArea();
+        UUID locationId = area.getLocation().getId();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class)))
@@ -388,7 +381,7 @@ public class AreaServiceTest {
 
         List<Area> foundArea = areaService.findAll(locationId);
 
-        assertThat(foundArea).asList().hasSize(0);
+        assertThat(foundArea).hasSize(0);
     }
 
     @Test
@@ -412,6 +405,6 @@ public class AreaServiceTest {
 
         List<Area> foundArea = areaService.findAll(locationId);
 
-        assertThat(foundArea).asList().hasSize(1);
+        assertThat(foundArea).hasSize(1);
     }
 }

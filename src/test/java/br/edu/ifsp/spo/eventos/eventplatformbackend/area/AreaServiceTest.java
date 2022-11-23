@@ -3,6 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.area;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import org.junit.jupiter.api.Test;
@@ -64,11 +65,8 @@ public class AreaServiceTest {
                 "Bloco A",
                 "Piso Superior"
         );
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
+        Location location = LocationFactory.sampleLocation();
+        UUID locationId = location.getId();
 
         when(locationRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(location));
@@ -77,7 +75,7 @@ public class AreaServiceTest {
                 location.getId())
         ).thenReturn(true);
 
-        assertThatThrownBy(() -> areaService.create(location.getId(), areaCreateDto))
+        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
     }
 
@@ -87,16 +85,10 @@ public class AreaServiceTest {
                 "Bloco A",
                 "Piso Superior"
         );
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                areaCreateDto.getName(),
-                areaCreateDto.getReference(),
-                location
-        );
+        Location location = LocationFactory.sampleLocation();
+        UUID locationId = location.getId();
+        Area area = AreaFactory.sampleArea();
+
         when(locationRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(location));
         when(areaRepository.existsByNameAndLocationId(
@@ -106,7 +98,7 @@ public class AreaServiceTest {
         when(areaRepository.save(any(Area.class)))
                 .thenReturn(area);
 
-        areaService.create(location.getId(), areaCreateDto);
+        areaService.create(locationId, areaCreateDto);
 
         verify(areaRepository, times(1)).save(any(Area.class));
     }
@@ -132,16 +124,7 @@ public class AreaServiceTest {
                 "Bloco C",
                 "Térreo"
         );
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
+        Area area = AreaFactory.sampleArea();
         UUID locationId = UUID.randomUUID();
         UUID areaId = area.getId();
 
@@ -179,17 +162,8 @@ public class AreaServiceTest {
                 "Bloco C",
                 "Térreo"
         );
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
-        UUID locationId = location.getId();
+        Area area = AreaFactory.sampleArea();
+        UUID locationId = area.getLocation().getId();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class)))
@@ -210,7 +184,7 @@ public class AreaServiceTest {
         assertThat(updatedArea).isNotNull();
         assertThat(updatedArea.getName()).isEqualTo(areaCreateDto.getName());
         assertThat(updatedArea.getReference()).isEqualTo(areaCreateDto.getReference());
-        assertThat(updatedArea.getLocation()).isEqualTo(location);
+        assertThat(updatedArea.getLocation()).isEqualTo(area.getLocation());
     }
 
     @Test
@@ -227,16 +201,7 @@ public class AreaServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
+        Area area = AreaFactory.sampleArea();
         UUID locationId = UUID.randomUUID();
         UUID areaId = area.getId();
 
@@ -249,17 +214,8 @@ public class AreaServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenSpaceExistsInGivenArea() {
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
-        UUID locationId = location.getId();
+        Area area = AreaFactory.sampleArea();
+        UUID locationId = area.getLocation().getId();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class)))
@@ -273,17 +229,8 @@ public class AreaServiceTest {
 
     @Test
     public void delete_LogsDeletedArea_WhenSuccessful() {
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
-        UUID locationId = location.getId();
+        Area area = AreaFactory.sampleArea();
+        UUID locationId = area.getLocation().getId();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class)))
@@ -314,16 +261,7 @@ public class AreaServiceTest {
 
     @Test
     public void findById_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
+        Area area = AreaFactory.sampleArea();
         UUID locationId = UUID.randomUUID();
         UUID areaId = area.getId();
 
@@ -336,17 +274,8 @@ public class AreaServiceTest {
 
     @Test
     public void findById_ReturnsArea_WhenSuccessful() {
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
-        UUID locationId = location.getId();
+        Area area = AreaFactory.sampleArea();
+        UUID locationId = area.getLocation().getId();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class)))
@@ -386,16 +315,8 @@ public class AreaServiceTest {
 
     @Test
     public void findAll_ReturnsAreaList_WhenSuccessful() {
-        Location location = new Location(
-                UUID.randomUUID(),
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
-        Area area = new Area(
-                "Bloco A",
-                "Piso Superior",
-                location
-        );
+        Location location = LocationFactory.sampleLocation();
+        Area area = AreaFactory.sampleArea();
         UUID locationId = location.getId();
 
         when(locationRepository.existsById(any(UUID.class)))

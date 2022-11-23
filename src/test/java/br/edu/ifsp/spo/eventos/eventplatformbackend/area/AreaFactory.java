@@ -7,7 +7,7 @@ public class AreaFactory {
         return new Area(
                 "Bloco A",
                 "Piso Superior",
-                LocationFactory.validLocation()
+                LocationFactory.sampleLocation()
         );
     }
 }

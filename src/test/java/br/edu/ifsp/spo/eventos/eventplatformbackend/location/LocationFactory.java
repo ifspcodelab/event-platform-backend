@@ -3,7 +3,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.location;
 import java.util.UUID;
 
 public class LocationFactory {
-    public static Location validLocation() {
+    public static Location sampleLocation() {
         return new Location(
                 UUID.randomUUID(),
                 "IFSP Campus São Paulo",

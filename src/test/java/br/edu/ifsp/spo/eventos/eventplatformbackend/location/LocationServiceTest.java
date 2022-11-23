@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceAl
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceReferentialIntegrityException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,13 +30,16 @@ public class LocationServiceTest {
     private AuditService auditService;
     @InjectMocks
     private LocationService locationService;
+    private Location location;
+
+    @BeforeEach
+    public void setUp() {
+        location = LocationFactory.sampleLocation();
+    }
 
     @Test
     public void create_ThrowsException_WhenLocationNameAlreadyExists() {
-        LocationCreateDto locationCreateDto = new LocationCreateDto(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
         when(locationRepository.existsByName(any(String.class))).thenReturn(true);
 
         assertThatThrownBy(() -> locationService.create(locationCreateDto))
@@ -44,14 +48,7 @@ public class LocationServiceTest {
 
     @Test
     public void create_ReturnsLocation_WhenSuccessful() {
-        LocationCreateDto locationCreateDto = new LocationCreateDto(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
-        Location location = new Location(
-                locationCreateDto.getName(),
-                locationCreateDto.getAddress()
-        );
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
         when(locationRepository.existsByName(any(String.class))).thenReturn(false);
         when(locationRepository.save(any(Location.class))).thenReturn(location);
 
@@ -66,10 +63,7 @@ public class LocationServiceTest {
 
     @Test
     public void update_ThrowsException_WhenLocationDoesNotExists() {
-        LocationCreateDto locationCreateDto = new LocationCreateDto(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
@@ -78,14 +72,7 @@ public class LocationServiceTest {
     }
     @Test
     public void update_ThrowsException_WhenLocationNameAlreadyExistsExcludingTheProvided() {
-        LocationCreateDto locationCreateDto = new LocationCreateDto(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
-        Location location = new Location(
-                locationCreateDto.getName(),
-                locationCreateDto.getAddress()
-        );
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(true);
@@ -96,14 +83,7 @@ public class LocationServiceTest {
 
     @Test
     public void update_ReturnsLocation_WhenSuccessful() {
-        LocationCreateDto locationCreateDto = new LocationCreateDto(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
-        Location location = new Location(
-                locationCreateDto.getName(),
-                locationCreateDto.getAddress()
-        );
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(false);
@@ -133,10 +113,6 @@ public class LocationServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenLocationHasArea() {
-        Location location = new Location(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(areaRepository.existsByLocationId(any(UUID.class))).thenReturn(true);
@@ -147,10 +123,6 @@ public class LocationServiceTest {
 
     @Test
     public void delete_DeletesLocation_WhenSuccessful() {
-        Location location = new Location(
-                "Shopping D",
-                "Av. Cruzeiro do Sul"
-        );
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(areaRepository.existsByLocationId(any(UUID.class))).thenReturn(false);
@@ -161,6 +133,13 @@ public class LocationServiceTest {
         verify(auditService, times(1)).logAdminDelete(
                 any(ResourceName.class),
                 any(UUID.class)
+        );
+    }
+
+    private LocationCreateDto sampleLocationCreateDto(Location location) {
+        return new LocationCreateDto(
+            location.getName(),
+            location.getAddress()
         );
     }
 }

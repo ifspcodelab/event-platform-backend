@@ -10,4 +10,12 @@ public class AreaFactory {
                 LocationFactory.sampleLocation()
         );
     }
+
+    public static Area sampleAreaWithHardcodedLocationUuid() {
+        return new Area(
+                "Bloco A",
+                "Piso Superior",
+                LocationFactory.sampleLocationHardcodedUuid()
+        );
+    }
 }

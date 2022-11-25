@@ -6,6 +6,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -72,7 +73,9 @@ class SpaceServiceTest {
 
 
 //        Testing using catchThrowable
-        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(() -> spaceService.create(randomLocationId, areaId, spaceCreateDto));
+        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
+                () -> spaceService.create(randomLocationId, areaId, spaceCreateDto)
+        );
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
         assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
@@ -80,22 +83,11 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowException_WhenThereIsAlreadyASpaceWithNameAndAreaId() {
-        Location location = new Location(
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
+        Location location = LocationFactory.sampleLocationHardcodedUuid();
 
-        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
-                "IVO",
-                100,
-                SpaceType.AUDITORIUM
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "Bloco C",
-                null,
-                location
-        );
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
@@ -107,8 +99,18 @@ class SpaceServiceTest {
 
         when(spaceRepository.existsByNameAndAreaId(spaceCreateDto.getName(), areaId)).thenReturn(Boolean.TRUE);
 
-        assertThatThrownBy(() -> spaceService.create(locationId, areaId, spaceCreateDto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.create(locationId, areaId, spaceCreateDto))
+//                .isInstanceOf(ResourceAlreadyExistsException.class);
+
+//        Testing using catchThrowable
+        ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException) catchException(
+                () -> spaceService.create(locationId, areaId, spaceCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceAttribute()).isEqualTo("name");
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
+        assertThat(exception.getResourceAttributeValue()).isEqualTo("IVO");
     }
 
     @Test

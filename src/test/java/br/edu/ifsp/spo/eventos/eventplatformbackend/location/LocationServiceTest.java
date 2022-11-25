@@ -13,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -156,6 +158,26 @@ public class LocationServiceTest {
                 any(ResourceName.class),
                 any(UUID.class)
         );
+    }
+
+    @Test
+    public void findAll_ReturnsEmptyList_WhenLocationsDoNotExist()
+    {
+        when(locationRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<Location> locations = locationService.findAll();
+
+        assertThat(locations).isEmpty();
+    }
+
+    @Test
+    public void findAll_ReturnsAreaList_WhenSuccessful()
+    {
+        when(locationRepository.findAll()).thenReturn(List.of(location));
+
+        List<Location> locations = locationService.findAll();
+
+        assertThat(locations).hasSize(1);
     }
 
     private LocationCreateDto sampleLocationCreateDto(Location location) {

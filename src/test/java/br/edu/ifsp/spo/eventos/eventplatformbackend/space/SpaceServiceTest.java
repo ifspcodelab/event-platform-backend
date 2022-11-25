@@ -243,39 +243,35 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
+        Space space = SpaceFactory.sampleSpace();
 
-        String name = dto.getName();
-        Integer capacity = dto.getCapacity();
-        SpaceType type = dto.getType();
-
-        Space space = new Space(name, capacity, type, area);
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID randomAreaId = UUID.randomUUID();
         UUID spaceId = space.getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
-        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId, spaceId, dto))
-                .isInstanceOf(ResourceReferentialIntegrityException.class);
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId, spaceId, spaceCreateDto))
+//                .isInstanceOf(ResourceReferentialIntegrityException.class);
+
+        ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(
+                () -> spaceService.update(locationId, randomAreaId, spaceId, spaceCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.SPACE);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.AREA);
     }
 
     @Test

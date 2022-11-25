@@ -710,6 +710,34 @@ class SpaceServiceTest {
         assertThat(exception.getRelated()).isEqualTo(ResourceName.AREA);
     }
 
+    @Test
+    public void findById_ReturnsSpace_WhenSuccessful() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID areaLocationId = area.getLocation().getId();
+        UUID spaceId = space.getId();
+        UUID spaceAreaId = space.getArea().getId();
+
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        assertThat(areaId.equals(spaceAreaId)).isTrue();
+
+        Space spaceFound = spaceService.findById(locationId, areaId, spaceId);
+
+        assertThat(spaceFound).isNotNull();
+        assertThat(spaceFound.getId().equals(spaceId)).isTrue();
+    }
+
     private SpaceCreateDto getSampleSpaceCreateDto() {
         return new SpaceCreateDto(
                 "IVO",

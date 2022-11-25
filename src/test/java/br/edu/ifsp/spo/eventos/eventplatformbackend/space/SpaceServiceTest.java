@@ -526,6 +526,29 @@ class SpaceServiceTest {
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
+    @Test
+    public void findAll_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID randomLocationId = UUID.randomUUID();
+        UUID areaId = area.getId();
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.findAll(randomLocationId, areaId))
+//                .isInstanceOf(ResourceNotExistsAssociationException.class);
+
+//        Testing using catchThrowable
+        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
+                () -> spaceService.findAll(randomLocationId, areaId));
+        assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
+    }
+
     private SpaceCreateDto getSampleSpaceCreateDto() {
         return new SpaceCreateDto(
                 "IVO",

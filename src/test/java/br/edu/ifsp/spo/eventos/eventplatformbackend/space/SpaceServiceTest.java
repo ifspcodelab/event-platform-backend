@@ -13,9 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -571,6 +569,27 @@ class SpaceServiceTest {
         List<Space> spaces = spaceService.findAll(locationId, areaId);
 
         assertThat(spaces.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void findAll_ReturnEmptyList_WhenSuccessful() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID areaLocationId = area.getLocation().getId();
+
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        when(spaceRepository.findAllByAreaId(any(UUID.class))).thenReturn(Collections.emptyList());
+
+        List<Space> spaces = spaceService.findAll(locationId, areaId);
+
+        assertThat(spaces.size()).isEqualTo(0);
     }
 
     private SpaceCreateDto getSampleSpaceCreateDto() {

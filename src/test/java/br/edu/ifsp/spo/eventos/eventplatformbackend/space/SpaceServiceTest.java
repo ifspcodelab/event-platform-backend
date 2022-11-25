@@ -14,8 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,17 +35,22 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowsException_WhenThereIsNoAreaPersisted() {
-        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
-                "SP1",
-                100,
-                SpaceType.AUDITORIUM
-        );
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         UUID randomLocationId = UUID.randomUUID();
         UUID randomAreaId = UUID.randomUUID();
 
-        assertThatThrownBy(() -> spaceService.create(randomLocationId, randomAreaId , spaceCreateDto))
-                .isInstanceOf(ResourceNotFoundException.class);
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.create(randomLocationId, randomAreaId , spaceCreateDto))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> spaceService.create(randomLocationId, randomAreaId, spaceCreateDto));
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test

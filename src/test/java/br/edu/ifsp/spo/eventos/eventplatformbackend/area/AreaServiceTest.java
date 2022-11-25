@@ -70,7 +70,7 @@ public class AreaServiceTest {
                 location.getId())
         ).thenReturn(true);
 
-        //exception assertion withou using catchThrowable()
+        //exception assertion without using catchThrowable()
 //        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
 //                .isInstanceOf(ResourceAlreadyExistsException.class);
         ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException) catchThrowable(() -> areaService.create(locationId, areaCreateDto));
@@ -109,7 +109,7 @@ public class AreaServiceTest {
         when(areaRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.empty());
 
-        //exception assertion withou using catchThrowable()
+        //exception assertion without using catchThrowable()
 //        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
 //                .isInstanceOf(ResourceNotFoundException.class);
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> areaService.update(locationId, areaId, areaCreateDto));
@@ -129,8 +129,14 @@ public class AreaServiceTest {
         when(areaRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(area));
 
-        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
-                .isInstanceOf(ResourceNotExistsAssociationException.class);
+        //exception assertion without using catchThrowable()
+//        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
+//                .isInstanceOf(ResourceNotExistsAssociationException.class);
+        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(() -> areaService.update(locationId, areaId, areaCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
     }
 
     @Test

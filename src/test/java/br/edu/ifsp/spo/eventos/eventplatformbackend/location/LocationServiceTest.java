@@ -70,7 +70,7 @@ public class LocationServiceTest {
     @Test
     public void update_ThrowsException_WhenLocationDoesNotExists() {
         LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
-        UUID locationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = (ResourceNotFoundException)
@@ -84,7 +84,7 @@ public class LocationServiceTest {
     @Test
     public void update_ThrowsException_WhenLocationNameAlreadyExistsExcludingTheProvided() {
         LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
-        UUID locationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(true);
 
@@ -100,7 +100,7 @@ public class LocationServiceTest {
     @Test
     public void update_ReturnsLocation_WhenSuccessful() {
         LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
-        UUID locationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(false);
 
@@ -120,7 +120,7 @@ public class LocationServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenLocationDoesNotExists() {
-        UUID locationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = (ResourceNotFoundException)
@@ -133,7 +133,7 @@ public class LocationServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenLocationHasArea() {
-        UUID locationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(areaRepository.existsByLocationId(any(UUID.class))).thenReturn(true);
 
@@ -147,7 +147,7 @@ public class LocationServiceTest {
 
     @Test
     public void delete_DeletesLocation_WhenSuccessful() {
-        UUID locationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(areaRepository.existsByLocationId(any(UUID.class))).thenReturn(false);
 
@@ -171,13 +171,39 @@ public class LocationServiceTest {
     }
 
     @Test
-    public void findAll_ReturnsAreaList_WhenSuccessful()
+    public void findAll_ReturnsLocationList_WhenSuccessful()
     {
         when(locationRepository.findAll()).thenReturn(List.of(location));
 
         List<Location> locations = locationService.findAll();
 
         assertThat(locations).hasSize(1);
+    }
+
+    @Test
+    public void findById_ThrowsException_WhenLocationDoesNotExist()
+    {
+        UUID locationId = location.getId();
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException)
+                catchThrowable(() -> locationService.findById(locationId));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
+        assertThat(exception.getResourceId()).isEqualTo(locationId.toString());
+    }
+
+    @Test
+    public void findById_ReturnsLocation_WhenSuccessful()
+    {
+        UUID locationId = location.getId();
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
+
+        Location locationFound = locationService.findById(locationId);
+
+        assertThat(locationFound).isNotNull();
+        assertThat(locationFound.getId()).isEqualTo(locationId);
     }
 
     private LocationCreateDto sampleLocationCreateDto(Location location) {

@@ -476,29 +476,12 @@ class SpaceServiceTest {
     }
 
     @Test
-    public void delete_ReturnVoid_WhenSpaceIsDeleted() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+    public void delete_ReturnVoid_WhenSuccessful() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
-
-        String spaceName = dto.getName();
-        Integer spaceCapacity = dto.getCapacity();
-        SpaceType spaceType = dto.getType();
-
-        Space space = new Space(spaceName, spaceCapacity, spaceType, area);
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
         UUID locationId = location.getId();
         UUID areaId = area.getId();
@@ -534,7 +517,4 @@ class SpaceServiceTest {
                 SpaceType.AUDITORIUM
         );
     }
-
-
-
 }

@@ -69,8 +69,13 @@ public class AreaServiceTest {
                 location.getId())
         ).thenReturn(true);
 
-        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+//        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
+//                .isInstanceOf(ResourceAlreadyExistsException.class);
+        ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException) catchThrowable(() -> areaService.create(locationId, areaCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(areaCreateDto.getName());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test

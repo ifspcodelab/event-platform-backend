@@ -211,37 +211,34 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenThereIsNoSpacePersisted() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
+        Space space = SpaceFactory.sampleSpace();
 
-        String name = dto.getName();
-        Integer capacity = dto.getCapacity();
-        SpaceType type = dto.getType();
-
-        Space space = new Space(name, capacity, type, area);
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
         UUID randomSpaceId = UUID.randomUUID();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        assertThatThrownBy(() -> spaceService.update(locationId, areaId, randomSpaceId, dto))
-                .isInstanceOf(ResourceNotFoundException.class);
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.update(locationId, areaId, randomSpaceId, spaceCreateDto))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+//        Testing using catchThrowable
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> spaceService.update(locationId, areaId , randomSpaceId, spaceCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(randomSpaceId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
     @Test

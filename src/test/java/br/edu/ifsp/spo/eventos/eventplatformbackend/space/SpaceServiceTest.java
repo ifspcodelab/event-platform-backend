@@ -2,6 +2,7 @@ package br.edu.ifsp.spo.eventos.eventplatformbackend.space;
 
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
@@ -47,6 +48,7 @@ class SpaceServiceTest {
 //        assertThatThrownBy(() -> spaceService.create(randomLocationId, randomAreaId , spaceCreateDto))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
+//        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> spaceService.create(randomLocationId, randomAreaId, spaceCreateDto));
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
         assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
@@ -55,30 +57,25 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = new Location(
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
+        Area area = AreaFactory.sampleArea();
 
-        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
-                "IVO",
-                100,
-                SpaceType.AUDITORIUM
-        );
-
-        Area area = new Area(
-                "Bloco C",
-                null,
-                location
-        );
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         UUID randomLocationId = UUID.randomUUID();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        assertThatThrownBy(() -> spaceService.create(randomLocationId, areaId, spaceCreateDto))
-                .isInstanceOf(ResourceNotExistsAssociationException.class);
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.create(randomLocationId, areaId, spaceCreateDto))
+//                .isInstanceOf(ResourceNotExistsAssociationException.class);
+
+
+//        Testing using catchThrowable
+        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(() -> spaceService.create(randomLocationId, areaId, spaceCreateDto));
+        assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
     }
 
     @Test

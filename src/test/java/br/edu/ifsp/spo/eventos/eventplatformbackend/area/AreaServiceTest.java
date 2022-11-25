@@ -238,8 +238,14 @@ public class AreaServiceTest {
         when(spaceRepository.existsByAreaId(any(UUID.class)))
                 .thenReturn(Boolean.TRUE);
 
-        assertThatThrownBy(() -> areaService.delete(locationId, areaId))
-                .isInstanceOf(ResourceReferentialIntegrityException.class);
+        //exception assertion without using catchThrowable()
+//        assertThatThrownBy(() -> areaService.delete(locationId, areaId))
+//                .isInstanceOf(ResourceReferentialIntegrityException.class);
+        ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(() -> areaService.delete(locationId, areaId));
+
+        assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.SPACE);
     }
 
     @Test

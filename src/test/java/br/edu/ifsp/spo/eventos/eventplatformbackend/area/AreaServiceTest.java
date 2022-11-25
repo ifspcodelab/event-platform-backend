@@ -51,6 +51,7 @@ public class AreaServiceTest {
 //                .isInstanceOf(ResourceNotFoundException.class);
 
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> areaService.create(locationId, areaCreateDto));
+
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
         assertThat(exception.getResourceId()).isEqualTo(locationId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
@@ -69,6 +70,7 @@ public class AreaServiceTest {
                 location.getId())
         ).thenReturn(true);
 
+        //exception assertion withou using catchThrowable()
 //        assertThatThrownBy(() -> areaService.create(locationId, areaCreateDto))
 //                .isInstanceOf(ResourceAlreadyExistsException.class);
         ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException) catchThrowable(() -> areaService.create(locationId, areaCreateDto));
@@ -107,8 +109,14 @@ public class AreaServiceTest {
         when(areaRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
-                .isInstanceOf(ResourceNotFoundException.class);
+        //exception assertion withou using catchThrowable()
+//        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
+//                .isInstanceOf(ResourceNotFoundException.class);
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> areaService.update(locationId, areaId, areaCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
     }
 
     @Test

@@ -675,6 +675,41 @@ class SpaceServiceTest {
         assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
     }
 
+    @Test
+    public void findById_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        Space space = SpaceFactory.sampleSpace();
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID areaLocationId = area.getLocation().getId();
+        UUID spaceId = space.getId();
+        UUID spaceAreaId = space.getArea().getId();
+
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        assertThat(areaId.equals(spaceAreaId)).isFalse();
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.findById(locationId, areaId, spaceId))
+//                .isInstanceOf(ResourceReferentialIntegrityException.class);
+
+//        Testing using catchThrowable
+        ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(
+                () -> spaceService.findById(locationId, areaId, spaceId)
+        );
+        assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.SPACE);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.AREA);
+    }
+
     private SpaceCreateDto getSampleSpaceCreateDto() {
         return new SpaceCreateDto(
                 "IVO",

@@ -276,8 +276,14 @@ public class AreaServiceTest {
         when(areaRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> areaService.findById(locationId, areaId))
-                .isInstanceOf(ResourceNotFoundException.class);
+        //exception assertion without using catchThrowable() but assertThatThrownBy()
+//        assertThatThrownBy(() -> areaService.findById(locationId, areaId))
+//                .isInstanceOf(ResourceNotFoundException.class);
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> areaService.findById(locationId, areaId));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
     }
 
     @Test

@@ -16,8 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,8 +41,13 @@ public class LocationServiceTest {
         LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
         when(locationRepository.existsByName(any(String.class))).thenReturn(true);
 
-        assertThatThrownBy(() -> locationService.create(locationCreateDto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+        ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException)
+                catchThrowable(() -> locationService.create(locationCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
+        assertThat(exception.getResourceAttribute()).isEqualTo("name");
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(locationCreateDto.getName());
     }
 
     @Test
@@ -67,9 +71,14 @@ public class LocationServiceTest {
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> locationService.update(locationId, locationCreateDto))
-                .isInstanceOf(ResourceNotFoundException.class);
+        ResourceNotFoundException exception = (ResourceNotFoundException)
+                catchThrowable(() -> locationService.update(locationId, locationCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
+        assertThat(exception.getResourceId()).isEqualTo(locationId.toString());
     }
+
     @Test
     public void update_ThrowsException_WhenLocationNameAlreadyExistsExcludingTheProvided() {
         LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
@@ -77,8 +86,13 @@ public class LocationServiceTest {
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(true);
 
-        assertThatThrownBy(() -> locationService.update(locationId, locationCreateDto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+        ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException)
+                catchThrowable(() -> locationService.update(locationId, locationCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
+        assertThat(exception.getResourceAttribute()).isEqualTo("name");
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(locationCreateDto.getName());
     }
 
     @Test
@@ -107,8 +121,12 @@ public class LocationServiceTest {
         UUID locationId = UUID.randomUUID();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> locationService.delete(locationId))
-                .isInstanceOf(ResourceNotFoundException.class);
+        ResourceNotFoundException exception = (ResourceNotFoundException)
+                catchThrowable(() -> locationService.delete(locationId));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
+        assertThat(exception.getResourceId()).isEqualTo(locationId.toString());
     }
 
     @Test
@@ -117,8 +135,12 @@ public class LocationServiceTest {
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(areaRepository.existsByLocationId(any(UUID.class))).thenReturn(true);
 
-        assertThatThrownBy(() -> locationService.delete(locationId))
-                .isInstanceOf(ResourceReferentialIntegrityException.class);
+        ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException)
+                catchThrowable(() -> locationService.delete(locationId));
+
+        assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.LOCATION);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.AREA);
     }
 
     @Test

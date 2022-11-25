@@ -152,35 +152,32 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenThereIsNoAreaPersisted() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
+        Space space = SpaceFactory.sampleSpace();
 
-        String name = dto.getName();
-        Integer capacity = dto.getCapacity();
-        SpaceType type = dto.getType();
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
-        Space space = new Space(name, capacity, type, area);
+        when(areaRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
         UUID randomAreaId = UUID.randomUUID();
         UUID spaceId = space.getId();
 
-        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId , spaceId, dto))
-                .isInstanceOf(ResourceNotFoundException.class);
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId , spaceId, spaceCreateDto))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+//        Testing using catchThrowable
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> spaceService.update(locationId, randomAreaId , spaceId, spaceCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test

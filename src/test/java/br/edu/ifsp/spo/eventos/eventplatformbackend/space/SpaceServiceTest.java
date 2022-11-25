@@ -35,60 +35,64 @@ class SpaceServiceTest {
     }
 
     @Test
-    public void create_ResourceNotFoundExceptionException_WhenThereIsNoAreaPersisted() {
-        SpaceCreateDto dto = new SpaceCreateDto("nome", 123, SpaceType.AUDITORIUM);
+    public void create_ThrowsException_WhenThereIsNoAreaPersisted() {
+        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
+                "SP1",
+                100,
+                SpaceType.AUDITORIUM
+        );
 
-        UUID randomLocationUuid = UUID.randomUUID();
-        UUID randomAreaUuid = UUID.randomUUID();
+        UUID randomLocationId = UUID.randomUUID();
+        UUID randomAreaId = UUID.randomUUID();
 
-        assertThatThrownBy(() -> spaceService.create(randomLocationUuid, randomAreaUuid , dto))
+        assertThatThrownBy(() -> spaceService.create(randomLocationId, randomAreaId , spaceCreateDto))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
     public void create_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
         Location location = new Location(
-                "nome",
-                "endereco"
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
         );
 
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
+        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
+                "IVO",
+                100,
                 SpaceType.AUDITORIUM
         );
 
         Area area = new Area(
-                "nome",
-                "referencia",
+                "Bloco C",
+                null,
                 location
         );
 
-        UUID locationId = UUID.randomUUID();
+        UUID randomLocationId = UUID.randomUUID();
         UUID areaId = area.getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        assertThatThrownBy(() -> spaceService.create(locationId, areaId, dto))
+        assertThatThrownBy(() -> spaceService.create(randomLocationId, areaId, spaceCreateDto))
                 .isInstanceOf(ResourceNotExistsAssociationException.class);
     }
 
     @Test
     public void create_ThrowException_WhenThereIsAlreadyASpaceWithNameAndAreaId() {
         Location location = new Location(
-                "nome",
-                "endereco"
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
         );
 
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
+        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
+                "IVO",
+                100,
                 SpaceType.AUDITORIUM
         );
 
         Area area = new Area(
-                "nome",
-                "referencia",
+                "Bloco C",
+                null,
                 location
         );
 
@@ -100,28 +104,28 @@ class SpaceServiceTest {
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        when(spaceRepository.existsByNameAndAreaId(dto.getName(), areaId)).thenReturn(Boolean.TRUE);
+        when(spaceRepository.existsByNameAndAreaId(spaceCreateDto.getName(), areaId)).thenReturn(Boolean.TRUE);
 
-        assertThatThrownBy(() -> spaceService.create(locationId, areaId, dto))
+        assertThatThrownBy(() -> spaceService.create(locationId, areaId, spaceCreateDto))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
     }
 
     @Test
     public void create_ReturnsArea_WhenSuccessful() {
         Location location = new Location(
-                "nome",
-                "endereco"
+                "IFSP Campus São Paulo",
+                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
         );
 
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
+        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
+                "IVO",
+                100,
                 SpaceType.AUDITORIUM
         );
 
         Area area = new Area(
-                "nome",
-                "referencia",
+                "Bloco C",
+                null,
                 location
         );
 
@@ -133,17 +137,17 @@ class SpaceServiceTest {
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        when(spaceRepository.existsByNameAndAreaId(dto.getName(), areaId)).thenReturn(Boolean.FALSE);
+        when(spaceRepository.existsByNameAndAreaId(spaceCreateDto.getName(), areaId)).thenReturn(Boolean.FALSE);
 
-        String name = dto.getName();
-        Integer capacity = dto.getCapacity();
-        SpaceType type = dto.getType();
+        String name = spaceCreateDto.getName();
+        Integer capacity = spaceCreateDto.getCapacity();
+        SpaceType type = spaceCreateDto.getType();
 
         Space space = new Space(name, capacity, type, area);
 
         when(spaceRepository.save(any(Space.class))).thenReturn(space);
 
-        Space createdSpace = spaceService.create(locationId, areaId, dto);
+        Space createdSpace = spaceService.create(locationId, areaId, spaceCreateDto);
 
         verify(spaceRepository, times(1)).save(any(Space.class));
         assertThat(createdSpace).isNotNull();
@@ -573,4 +577,23 @@ class SpaceServiceTest {
 
         verify(auditService, times(1)).logAdminDelete(any(ResourceName.class), any(UUID.class));
     }
+
+    private SpaceCreateDto getSampleSpaceCreateDto() {
+        return new SpaceCreateDto(
+                "IVO",
+                100,
+                SpaceType.AUDITORIUM
+        );
+    }
+
+    private SpaceCreateDto getSampleSpaceCreateDtoUpdate() {
+        return new SpaceCreateDto(
+                "SP1",
+                100,
+                SpaceType.AUDITORIUM
+        );
+    }
+
+
+
 }

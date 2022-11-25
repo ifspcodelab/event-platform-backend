@@ -152,8 +152,14 @@ public class AreaServiceTest {
         when(areaRepository.existsByNameAndLocationIdAndIdNot(anyString(), any(UUID.class), any(UUID.class)))
                 .thenReturn(Boolean.TRUE);
 
-        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+        //exception assertion withou catchThrowable()
+//        assertThatThrownBy(() -> areaService.update(locationId, areaId, areaCreateDto))
+//                .isInstanceOf(ResourceAlreadyExistsException.class);
+        ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException) catchThrowable(() -> areaService.update(locationId, areaId, areaCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(areaCreateDto.getName());
     }
 
     @Test

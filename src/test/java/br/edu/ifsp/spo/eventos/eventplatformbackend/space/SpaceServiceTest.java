@@ -317,48 +317,31 @@ class SpaceServiceTest {
 
     @Test
     public void update_ReturnsSpace_WhenSuccessful() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
-        String name = dto.getName();
-        Integer capacity = dto.getCapacity();
-        SpaceType type = dto.getType();
-
-        Space space = new Space(name, capacity, type, area); //Old space instantiated
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
+        UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+        assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        UUID spaceAreaId = space.getArea().getId();
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
         assertThat(areaId.equals(spaceAreaId)).isTrue();
 
         when(spaceRepository.existsByNameAndAreaIdAndIdNot(any(String.class), any(UUID.class), any(UUID.class))).thenReturn(Boolean.FALSE);
 
-        SpaceCreateDto updateDto = new SpaceCreateDto(
-                "novo nome",
-                456,
-                SpaceType.CLASSROOM
-        );
+        SpaceCreateDto updateDto = getSampleSpaceCreateDtoUpdate();
 
         space.setName(updateDto.getName());
         space.setCapacity(updateDto.getCapacity());

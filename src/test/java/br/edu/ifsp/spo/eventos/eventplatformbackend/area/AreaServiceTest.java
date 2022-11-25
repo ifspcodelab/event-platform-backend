@@ -217,8 +217,14 @@ public class AreaServiceTest {
         when(areaRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(area));
 
-        assertThatThrownBy(() -> areaService.delete(locationId, areaId))
-                .isInstanceOf(ResourceNotExistsAssociationException.class);
+        //exception assertion without using catchThrowable()
+//        assertThatThrownBy(() -> areaService.delete(locationId, areaId))
+//                .isInstanceOf(ResourceNotExistsAssociationException.class);
+        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(() -> areaService.delete(locationId, areaId));
+
+        assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
     }
 
     @Test

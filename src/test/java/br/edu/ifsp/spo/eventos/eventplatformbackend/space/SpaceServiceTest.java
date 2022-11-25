@@ -502,6 +502,30 @@ class SpaceServiceTest {
         verify(auditService, times(1)).logAdminDelete(any(ResourceName.class), any(UUID.class));
     }
 
+    @Test
+    public void findAll_ThrowsException_WhenThereIsNoAreaPersisted() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        UUID locationId = location.getId();
+        UUID randomAreaId = UUID.randomUUID();
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.findAll(locationId, randomAreaId))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+//        Testing using catchThrowable
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> spaceService.findAll(locationId, randomAreaId)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
+    }
+
     private SpaceCreateDto getSampleSpaceCreateDto() {
         return new SpaceCreateDto(
                 "IVO",

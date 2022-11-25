@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -547,6 +548,29 @@ class SpaceServiceTest {
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
         assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
+    }
+
+    @Test
+    public void findAll_ReturnListOfSpaces_WhenSuccessful() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
+        UUID areaLocationId = area.getLocation().getId();
+
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+
+        when(spaceRepository.findAllByAreaId(any(UUID.class))).thenReturn(List.of(space));
+
+        List<Space> spaces = spaceService.findAll(locationId, areaId);
+
+        assertThat(spaces.size()).isEqualTo(1);
     }
 
     private SpaceCreateDto getSampleSpaceCreateDto() {

@@ -435,9 +435,9 @@ class SpaceServiceTest {
 //        assertThatThrownBy(() -> spaceService.delete(randomLocationId, areaId, spaceId))
 //                .isInstanceOf(ResourceNotExistsAssociationException.class);
 
-        //        Testing using catchThrowable
+//        Testing using catchThrowable
         ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
-                () ->spaceService.delete(randomLocationId, areaId, spaceId)
+                () -> spaceService.delete(randomLocationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
@@ -446,28 +446,11 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
-
-        String spaceName = dto.getName();
-        Integer spaceCapacity = dto.getCapacity();
-        SpaceType spaceType = dto.getType();
-
-        Space space = new Space(spaceName, spaceCapacity, spaceType, area);
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
         UUID locationId = location.getId();
         UUID randomAreaId = UUID.randomUUID();
@@ -479,8 +462,17 @@ class SpaceServiceTest {
 
         assertThat(location.getId().equals(area.getLocation().getId())).isTrue();
 
-        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
-                .isInstanceOf(ResourceReferentialIntegrityException.class);
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
+//                .isInstanceOf(ResourceReferentialIntegrityException.class);
+
+//        Testing using catchThrowable
+        ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(
+                () -> spaceService.delete(locationId, randomAreaId, spaceId)
+        );
+        assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.SPACE);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.AREA);
     }
 
     @Test

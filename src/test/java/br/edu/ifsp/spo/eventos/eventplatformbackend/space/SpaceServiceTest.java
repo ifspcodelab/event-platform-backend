@@ -619,6 +619,33 @@ class SpaceServiceTest {
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
+    @Test
+    public void findById_ThrowsException_WhenThereIsNoAreaPersisted() {
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+
+        UUID locationId = location.getId();
+        UUID randomAreaId = UUID.randomUUID();
+        UUID spaceId = space.getId();
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.findById(locationId, randomAreaId, spaceId))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+//        Testing using catchThrowable
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> spaceService.findById(locationId, randomAreaId, spaceId)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
+    }
+
     private SpaceCreateDto getSampleSpaceCreateDto() {
         return new SpaceCreateDto(
                 "IVO",

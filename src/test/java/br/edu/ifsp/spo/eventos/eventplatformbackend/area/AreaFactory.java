@@ -15,7 +15,7 @@ public class AreaFactory {
         return new Area(
                 "Bloco A",
                 "Piso Superior",
-                LocationFactory.sampleLocationHardcodedUuid()
+                LocationFactory.sampleLocationWithHardcodedUuid()
         );
     }
 }

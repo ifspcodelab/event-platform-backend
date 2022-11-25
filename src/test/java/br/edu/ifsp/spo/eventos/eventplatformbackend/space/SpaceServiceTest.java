@@ -83,7 +83,7 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowException_WhenThereIsAlreadyASpaceWithNameAndAreaId() {
-        Location location = LocationFactory.sampleLocationHardcodedUuid();
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
         Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
@@ -115,22 +115,11 @@ class SpaceServiceTest {
 
     @Test
     public void create_ReturnsArea_WhenSuccessful() {
-        Location location = new Location(
-                "IFSP Campus São Paulo",
-                "R. Pedro Vicente, 625 - Canindé, São Paulo - SP, 01109-010"
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        SpaceCreateDto spaceCreateDto = new SpaceCreateDto(
-                "IVO",
-                100,
-                SpaceType.AUDITORIUM
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "Bloco C",
-                null,
-                location
-        );
+        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 

@@ -11,7 +11,7 @@ public class LocationFactory {
         );
     }
 
-    public static Location sampleLocationHardcodedUuid() {
+    public static Location sampleLocationWithHardcodedUuid() {
         return new Location(
                 UUID.fromString("73c8b552-1d2c-4d62-9506-90697b53aa85"),
                 "IFSP Campus São Paulo",

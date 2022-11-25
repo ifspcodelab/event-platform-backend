@@ -50,7 +50,9 @@ class SpaceServiceTest {
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
-        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> spaceService.create(randomLocationId, randomAreaId, spaceCreateDto));
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> spaceService.create(randomLocationId, randomAreaId, spaceCreateDto)
+        );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
         assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
@@ -361,23 +363,29 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenThereIsNoSpacePersisted() {
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
         UUID locationId = location.getId();
         UUID areaId = area.getId();
         UUID randomSpaceId = UUID.randomUUID();
 
-        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, randomSpaceId))
-                .isInstanceOf(ResourceNotFoundException.class);
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, randomSpaceId))
+//                .isInstanceOf(ResourceNotFoundException.class);
+
+//        Testing using catchThrowable
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> spaceService.delete(locationId, areaId, randomSpaceId)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(randomSpaceId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
     @Test

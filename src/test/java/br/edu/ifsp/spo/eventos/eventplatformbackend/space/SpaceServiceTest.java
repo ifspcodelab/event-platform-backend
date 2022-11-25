@@ -13,7 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -36,46 +39,54 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowsException_WhenThereIsNoAreaPersisted() {
+        Location location = LocationFactory.sampleLocation();
+
+        Area area = AreaFactory.sampleArea();
+
         SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
-        UUID randomLocationId = UUID.randomUUID();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID locationId = location.getId();
+        UUID areaId = area.getId();
 
-        when(areaRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.empty());
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.create(randomLocationId, randomAreaId , spaceCreateDto))
+//        assertThatThrownBy(() -> spaceService.create(locationId, areaId , spaceCreateDto))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.create(randomLocationId, randomAreaId, spaceCreateDto)
+                () -> spaceService.create(locationId, areaId, spaceCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test
     public void create_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
+        Location location = LocationFactory.sampleLocation();
+
         Area area = AreaFactory.sampleArea();
 
         SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
-        UUID randomLocationId = UUID.randomUUID();
+        UUID locationId = location.getId();
         UUID areaId = area.getId();
+        UUID areaLocationId = area.getLocation().getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
+        assertThat(locationId.equals(areaLocationId)).isFalse();
+
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.create(randomLocationId, areaId, spaceCreateDto))
+//        assertThatThrownBy(() -> spaceService.create(locationId, areaId, spaceCreateDto))
 //                .isInstanceOf(ResourceNotExistsAssociationException.class);
 
 
 //        Testing using catchThrowable
         ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
-                () -> spaceService.create(randomLocationId, areaId, spaceCreateDto)
+                () -> spaceService.create(locationId, areaId, spaceCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
@@ -132,11 +143,7 @@ class SpaceServiceTest {
 
         when(spaceRepository.existsByNameAndAreaId(spaceCreateDto.getName(), areaId)).thenReturn(Boolean.FALSE);
 
-        String name = spaceCreateDto.getName();
-        Integer capacity = spaceCreateDto.getCapacity();
-        SpaceType type = spaceCreateDto.getType();
-
-        Space space = new Space(name, capacity, type, area);
+        Space space = SpaceFactory.sampleSpace();
 
         when(spaceRepository.save(any(Space.class))).thenReturn(space);
 
@@ -153,39 +160,38 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
         Space space = SpaceFactory.sampleSpace();
 
         SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
 
-        when(areaRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.empty());
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID areaId = area.getId();
         UUID spaceId = space.getId();
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId , spaceId, spaceCreateDto))
+//        assertThatThrownBy(() -> spaceService.update(locationId, areaId , spaceId, spaceCreateDto))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.update(locationId, randomAreaId , spaceId, spaceCreateDto)
+                () -> spaceService.update(locationId, areaId , spaceId, spaceCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test
     public void update_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
         Space space = SpaceFactory.sampleSpace();
 
@@ -193,9 +199,12 @@ class SpaceServiceTest {
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        UUID randomLocationId = UUID.randomUUID();
+        UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
         UUID spaceId = space.getId();
+
+        assertThat(locationId.equals(areaLocationId)).isFalse();
 
 //        Testing using assertThatThrownBy
 //        assertThatThrownBy(() -> spaceService.update(locationId, areaId, spaceId, spaceCreateDto))
@@ -203,7 +212,7 @@ class SpaceServiceTest {
 
 //        Testing using catchThrowable
         ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
-                () -> spaceService.create(randomLocationId, areaId, spaceCreateDto)
+                () -> spaceService.update(locationId, areaId, spaceId, spaceCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
@@ -223,22 +232,24 @@ class SpaceServiceTest {
         UUID locationId = location.getId();
         UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
-        UUID randomSpaceId = UUID.randomUUID();
+        UUID spaceId = space.getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.update(locationId, areaId, randomSpaceId, spaceCreateDto))
+//        assertThatThrownBy(() -> spaceService.update(locationId, areaId, spaceId, spaceCreateDto))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.update(locationId, areaId , randomSpaceId, spaceCreateDto)
+                () -> spaceService.update(locationId, areaId , spaceId, spaceCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomSpaceId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(spaceId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
@@ -254,7 +265,8 @@ class SpaceServiceTest {
 
         UUID locationId = location.getId();
         UUID areaLocationId = area.getLocation().getId();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID areaId = area.getId();
+        UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
@@ -263,13 +275,15 @@ class SpaceServiceTest {
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
+        assertThat(areaId.equals(spaceAreaId)).isFalse();
+
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.update(locationId, randomAreaId, spaceId, spaceCreateDto))
+//        assertThatThrownBy(() -> spaceService.update(locationId, areaId, spaceId, spaceCreateDto))
 //                .isInstanceOf(ResourceReferentialIntegrityException.class);
 
 //        Testing using catchThrowable
         ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(
-                () -> spaceService.update(locationId, randomAreaId, spaceId, spaceCreateDto)
+                () -> spaceService.update(locationId, areaId, spaceId, spaceCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.SPACE);
@@ -324,8 +338,6 @@ class SpaceServiceTest {
 
         Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
         UUID locationId = location.getId();
         UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
@@ -362,67 +374,68 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenThereIsNoSpacePersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         UUID locationId = location.getId();
         UUID areaId = area.getId();
-        UUID randomSpaceId = UUID.randomUUID();
+        UUID spaceId = space.getId();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, randomSpaceId))
+//        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, spaceId))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.delete(locationId, areaId, randomSpaceId)
+                () -> spaceService.delete(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomSpaceId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(spaceId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
     @Test
     public void delete_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         UUID locationId = location.getId();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID areaId = area.getId();
         UUID spaceId = space.getId();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
+//        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, spaceId))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.delete(locationId, randomAreaId, spaceId)
+                () -> spaceService.delete(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test
     public void delete_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
-        UUID randomLocationId = UUID.randomUUID();
+        UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
         UUID spaceId = space.getId();
 
@@ -430,13 +443,15 @@ class SpaceServiceTest {
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
+        assertThat(locationId.equals(areaLocationId)).isFalse();
+
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.delete(randomLocationId, areaId, spaceId))
+//        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, spaceId))
 //                .isInstanceOf(ResourceNotExistsAssociationException.class);
 
 //        Testing using catchThrowable
         ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
-                () -> spaceService.delete(randomLocationId, areaId, spaceId)
+                () -> spaceService.delete(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
@@ -449,25 +464,29 @@ class SpaceServiceTest {
 
         Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         UUID locationId = location.getId();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID areaLocationId = area.getLocation().getId();
+        UUID areaId = area.getId();
+        UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        assertThat(location.getId().equals(area.getLocation().getId())).isTrue();
+        assertThat(locationId.equals(areaLocationId)).isTrue();
+
+        assertThat(areaId.equals(spaceAreaId)).isFalse();
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
+//        assertThatThrownBy(() -> spaceService.delete(locationId, areaId, spaceId))
 //                .isInstanceOf(ResourceReferentialIntegrityException.class);
 
 //        Testing using catchThrowable
         ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(
-                () -> spaceService.delete(locationId, randomAreaId, spaceId)
+                () -> spaceService.delete(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.SPACE);
@@ -483,16 +502,18 @@ class SpaceServiceTest {
         Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
         UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
+        UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        assertThat(location.getId().equals(area.getLocation().getId())).isTrue();
+        assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        assertThat(area.getId().equals(space.getArea().getId())).isTrue();
+        assertThat(areaId.equals(spaceAreaId)).isTrue();
 
         spaceService.delete(locationId, areaId, spaceId);
 
@@ -503,46 +524,49 @@ class SpaceServiceTest {
 
     @Test
     public void findAll_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID areaId = area.getId();
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.findAll(locationId, randomAreaId))
+//        assertThatThrownBy(() -> spaceService.findAll(locationId, areaId))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.findAll(locationId, randomAreaId)
+                () -> spaceService.findAll(locationId, areaId)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test
     public void findAll_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        UUID randomLocationId = UUID.randomUUID();
+        UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
 
+        assertThat(locationId.equals(areaLocationId)).isFalse();
+
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.findAll(randomLocationId, areaId))
+//        assertThatThrownBy(() -> spaceService.findAll(locationId, areaId))
 //                .isInstanceOf(ResourceNotExistsAssociationException.class);
 
 //        Testing using catchThrowable
         ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
-                () -> spaceService.findAll(randomLocationId, areaId));
+                () -> spaceService.findAll(locationId, areaId));
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
         assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
@@ -557,12 +581,12 @@ class SpaceServiceTest {
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         UUID locationId = location.getId();
-        UUID areaId = area.getId();
         UUID areaLocationId = area.getLocation().getId();
+        UUID areaId = area.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         when(spaceRepository.findAllByAreaId(any(UUID.class))).thenReturn(List.of(space));
 
@@ -580,8 +604,8 @@ class SpaceServiceTest {
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         UUID locationId = location.getId();
-        UUID areaId = area.getId();
         UUID areaLocationId = area.getLocation().getId();
+        UUID areaId = area.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -594,17 +618,17 @@ class SpaceServiceTest {
 
     @Test
     public void findById_ThrowsException_WhenThereIsNoSpacePersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
         UUID areaId = area.getId();
-        UUID randomSpaceId = UUID.randomUUID();
+        UUID spaceId = space.getId();
 
 //        Testing using assertThatThrownBy
 //        assertThatThrownBy(() -> spaceService.findById(locationId, areaId, spaceId))
@@ -612,63 +636,68 @@ class SpaceServiceTest {
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.findById(locationId, areaId, randomSpaceId)
+                () -> spaceService.findById(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomSpaceId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(spaceId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
     @Test
     public void findById_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
         UUID locationId = location.getId();
-        UUID randomAreaId = UUID.randomUUID();
+        UUID areaId = area.getId();
         UUID spaceId = space.getId();
 
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.findById(locationId, randomAreaId, spaceId))
+//        assertThatThrownBy(() -> spaceService.findById(locationId, areaId, spaceId))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
 //        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
-                () -> spaceService.findById(locationId, randomAreaId, spaceId)
+                () -> spaceService.findById(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-        assertThat(exception.getResourceId()).isEqualTo(randomAreaId.toString());
+        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
     }
 
     @Test
     public void findById_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        Location location = LocationFactory.sampleLocation();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        Area area = AreaFactory.sampleArea();
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        Space space = SpaceFactory.sampleSpace();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        UUID randomLocationId = UUID.randomUUID();
+        UUID locationId = location.getId();
+        UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
         UUID spaceId = space.getId();
 
+        assertThat(locationId.equals(areaLocationId)).isFalse();
+
 //        Testing using assertThatThrownBy
-//        assertThatThrownBy(() -> spaceService.findById(randomLocationId, areaId, spaceId))
+//        assertThatThrownBy(() -> spaceService.findById(locationId, areaId, spaceId))
 //                .isInstanceOf(ResourceNotExistsAssociationException.class);
 
 //        Testing using catchThrowable
         ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
-                () -> spaceService.findById(randomLocationId, areaId, spaceId)
+                () -> spaceService.findById(locationId, areaId, spaceId)
         );
         assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
         assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
@@ -688,10 +717,10 @@ class SpaceServiceTest {
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         UUID locationId = location.getId();
-        UUID areaId = area.getId();
         UUID areaLocationId = area.getLocation().getId();
-        UUID spaceId = space.getId();
+        UUID areaId = area.getId();
         UUID spaceAreaId = space.getArea().getId();
+        UUID spaceId = space.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -723,10 +752,10 @@ class SpaceServiceTest {
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         UUID locationId = location.getId();
-        UUID areaId = area.getId();
         UUID areaLocationId = area.getLocation().getId();
-        UUID spaceId = space.getId();
+        UUID areaId = area.getId();
         UUID spaceAreaId = space.getArea().getId();
+        UUID spaceId = space.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 

@@ -406,6 +406,7 @@ class SpaceServiceTest {
 //        assertThatThrownBy(() -> spaceService.delete(locationId, randomAreaId, spaceId))
 //                .isInstanceOf(ResourceNotFoundException.class);
 
+//        Testing using catchThrowable
         ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
                 () -> spaceService.delete(locationId, randomAreaId, spaceId)
         );
@@ -416,28 +417,11 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        SpaceCreateDto dto = new SpaceCreateDto(
-                "nome",
-                123,
-                SpaceType.AUDITORIUM
-        );
+        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
 
-        Location location = new Location(
-                "nome",
-                "endereco"
-        );
+        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
 
-        Area area = new Area(
-                "nome",
-                "referencia",
-                location
-        );
-
-        String spaceName = dto.getName();
-        Integer spaceCapacity = dto.getCapacity();
-        SpaceType spaceType = dto.getType();
-
-        Space space = new Space(spaceName, spaceCapacity, spaceType, area);
+        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
 
         UUID randomLocationId = UUID.randomUUID();
         UUID areaId = area.getId();
@@ -447,8 +431,17 @@ class SpaceServiceTest {
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
-        assertThatThrownBy(() -> spaceService.delete(randomLocationId, areaId, spaceId))
-                .isInstanceOf(ResourceNotExistsAssociationException.class);
+//        Testing using assertThatThrownBy
+//        assertThatThrownBy(() -> spaceService.delete(randomLocationId, areaId, spaceId))
+//                .isInstanceOf(ResourceNotExistsAssociationException.class);
+
+        //        Testing using catchThrowable
+        ResourceNotExistsAssociationException exception = (ResourceNotExistsAssociationException) catchThrowable(
+                () ->spaceService.delete(randomLocationId, areaId, spaceId)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotExistsAssociationException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.AREA);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.LOCATION);
     }
 
     @Test

@@ -7,6 +7,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +33,26 @@ class SpaceServiceTest {
     @InjectMocks
     private SpaceService spaceService;
 
+    private Location location;
+    private Location locationWithHardCodedUuid;
+    private Area area;
+    private Area areaWithHardCodedUuid;
+    private Space space;
+    private Space spaceWithHardCodedUuid;
+    private SpaceCreateDto spaceCreateDto;
+
+    @Test
+    @BeforeEach
+    public void setUp() {
+        location = LocationFactory.sampleLocation();
+        locationWithHardCodedUuid = LocationFactory.sampleLocationWithHardcodedUuid();
+        area = AreaFactory.sampleArea();
+        areaWithHardCodedUuid = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        space = SpaceFactory.sampleSpace();
+        spaceWithHardCodedUuid = SpaceFactory.sampleSpaceWithHardcodedUuid();
+        spaceCreateDto = getSampleSpaceCreateDto();
+    }
+
     @Test
     public void spaceServiceShouldNotBeNull() {
         assertThat(spaceService).isNotNull();
@@ -39,12 +60,6 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
         UUID locationId = location.getId();
         UUID areaId = area.getId();
 
@@ -65,12 +80,6 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
         UUID locationId = location.getId();
         UUID areaId = area.getId();
         UUID areaLocationId = area.getLocation().getId();
@@ -95,17 +104,11 @@ class SpaceServiceTest {
 
     @Test
     public void create_ThrowException_WhenThereIsAlreadyASpaceWithNameAndAreaId() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -127,17 +130,11 @@ class SpaceServiceTest {
 
     @Test
     public void create_ReturnsArea_WhenSuccessful() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -160,14 +157,6 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
@@ -189,14 +178,6 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         UUID locationId = location.getId();
@@ -221,20 +202,12 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenThereIsNoSpacePersisted() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
-
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        Space space = SpaceFactory.sampleSpace();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
         UUID spaceId = space.getId();
 
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -255,21 +228,13 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
-
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        Space space = SpaceFactory.sampleSpace();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
         UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -292,25 +257,17 @@ class SpaceServiceTest {
 
     @Test
     public void update_ThrowsException_WhenThereIsAlreadyASpaceWithNameAreaIdAndNotSpaceId() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
+        UUID spaceAreaId = spaceWithHardCodedUuid.getArea().getId();
+        UUID spaceId = spaceWithHardCodedUuid.getId();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
-
-        SpaceCreateDto spaceCreateDto = getSampleSpaceCreateDto();
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
-        UUID spaceAreaId = space.getArea().getId();
-        UUID spaceId = space.getId();
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(spaceWithHardCodedUuid));
 
         assertThat(areaId.equals(spaceAreaId)).isTrue();
 
@@ -332,23 +289,17 @@ class SpaceServiceTest {
 
     @Test
     public void update_ReturnsSpace_WhenSuccessful() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
+        UUID spaceAreaId = spaceWithHardCodedUuid.getArea().getId();
+        UUID spaceId = spaceWithHardCodedUuid.getId();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
-        UUID spaceAreaId = space.getArea().getId();
-        UUID spaceId = space.getId();
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
-        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(spaceWithHardCodedUuid));
 
         assertThat(areaId.equals(spaceAreaId)).isTrue();
 
@@ -356,30 +307,24 @@ class SpaceServiceTest {
 
         SpaceCreateDto updateDto = getSampleSpaceCreateDtoUpdate();
 
-        space.setName(updateDto.getName());
-        space.setCapacity(updateDto.getCapacity());
-        space.setType(updateDto.getType());
+        spaceWithHardCodedUuid.setName(updateDto.getName());
+        spaceWithHardCodedUuid.setCapacity(updateDto.getCapacity());
+        spaceWithHardCodedUuid.setType(updateDto.getType());
 
         Space updatedSpace = spaceService.update(locationId, areaId, spaceId, updateDto);
 
         verify(spaceRepository, times(1)).save(any(Space.class));
         assertThat(updatedSpace).isNotNull();
-        assertThat(updatedSpace.getName().equals(space.getName())).isTrue();
-        assertThat(updatedSpace.getCapacity().equals(space.getCapacity())).isTrue();
-        assertThat(updatedSpace.getType().equals(space.getType())).isTrue();
-        assertThat(updatedSpace.getArea().equals(space.getArea())).isTrue();
+        assertThat(updatedSpace.getName().equals(spaceWithHardCodedUuid.getName())).isTrue();
+        assertThat(updatedSpace.getCapacity().equals(spaceWithHardCodedUuid.getCapacity())).isTrue();
+        assertThat(updatedSpace.getType().equals(spaceWithHardCodedUuid.getType())).isTrue();
+        assertThat(updatedSpace.getArea().equals(spaceWithHardCodedUuid.getArea())).isTrue();
 
         verify(auditService, times(1)).logAdminUpdate(any(ResourceName.class), any(String.class), any(UUID.class));
     }
 
     @Test
     public void delete_ThrowsException_WhenThereIsNoSpacePersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
         UUID locationId = location.getId();
         UUID areaId = area.getId();
         UUID spaceId = space.getId();
@@ -401,12 +346,6 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
         UUID locationId = location.getId();
         UUID areaId = area.getId();
         UUID spaceId = space.getId();
@@ -428,12 +367,6 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
         UUID locationId = location.getId();
         UUID areaLocationId = area.getLocation().getId();
         UUID areaId = area.getId();
@@ -460,21 +393,15 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
-
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        Space space = SpaceFactory.sampleSpace();
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
         UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -495,21 +422,15 @@ class SpaceServiceTest {
 
     @Test
     public void delete_ReturnVoid_WhenSuccessful() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
+        UUID spaceAreaId = spaceWithHardCodedUuid.getArea().getId();
+        UUID spaceId = spaceWithHardCodedUuid.getId();
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(spaceWithHardCodedUuid));
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
-        UUID spaceAreaId = space.getArea().getId();
-        UUID spaceId = space.getId();
-
-        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -524,10 +445,6 @@ class SpaceServiceTest {
 
     @Test
     public void findAll_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
@@ -548,10 +465,6 @@ class SpaceServiceTest {
 
     @Test
     public void findAll_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
 
         UUID locationId = location.getId();
@@ -574,19 +487,13 @@ class SpaceServiceTest {
 
     @Test
     public void findAll_ReturnListOfSpaces_WhenSuccessful() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
-
-        Space space = SpaceFactory.sampleSpace();
 
         when(spaceRepository.findAllByAreaId(any(UUID.class))).thenReturn(List.of(space));
 
@@ -597,15 +504,11 @@ class SpaceServiceTest {
 
     @Test
     public void findAll_ReturnEmptyList_WhenSuccessful() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 
@@ -618,12 +521,6 @@ class SpaceServiceTest {
 
     @Test
     public void findById_ThrowsException_WhenThereIsNoSpacePersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UUID locationId = location.getId();
@@ -645,12 +542,6 @@ class SpaceServiceTest {
 
     @Test
     public void findById_ThrowsException_WhenThereIsNoAreaPersisted() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
@@ -674,12 +565,6 @@ class SpaceServiceTest {
 
     @Test
     public void findById_ThrowsException_WhenLocationDoesNotExistInGivenArea() {
-        Location location = LocationFactory.sampleLocation();
-
-        Area area = AreaFactory.sampleArea();
-
-        Space space = SpaceFactory.sampleSpace();
-
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
         when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
@@ -706,19 +591,13 @@ class SpaceServiceTest {
 
     @Test
     public void findById_ThrowsException_WhenAreaDoesNotExistInGivenSpace() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
-
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
-
-        Space space = SpaceFactory.sampleSpace();
-
         when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
 
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
         UUID spaceAreaId = space.getArea().getId();
         UUID spaceId = space.getId();
 
@@ -741,21 +620,15 @@ class SpaceServiceTest {
 
     @Test
     public void findById_ReturnsSpace_WhenSuccessful() {
-        Location location = LocationFactory.sampleLocationWithHardcodedUuid();
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(spaceWithHardCodedUuid));
 
-        Area area = AreaFactory.sampleAreaWithHardcodedLocationUuid();
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardCodedUuid));
 
-        Space space = SpaceFactory.sampleSpaceWithHardcodedUuid();
-
-        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(space));
-
-        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(area));
-
-        UUID locationId = location.getId();
-        UUID areaLocationId = area.getLocation().getId();
-        UUID areaId = area.getId();
-        UUID spaceAreaId = space.getArea().getId();
-        UUID spaceId = space.getId();
+        UUID locationId = locationWithHardCodedUuid.getId();
+        UUID areaLocationId = areaWithHardCodedUuid.getLocation().getId();
+        UUID areaId = areaWithHardCodedUuid.getId();
+        UUID spaceAreaId = spaceWithHardCodedUuid.getArea().getId();
+        UUID spaceId = spaceWithHardCodedUuid.getId();
 
         assertThat(locationId.equals(areaLocationId)).isTrue();
 

@@ -27,10 +27,28 @@ public class RegistrationServiceTest {
     private String emailConfirmationTime;
     @InjectMocks
     private RegistrationService registrationService;
-    private Registration registration;
+    private Registration registrationConfirmedStatus;
+    private Registration registrationWaitingListStatus;
 
-//    @BeforeEach
-//    public void setUp() {
-//        registration = RegistrationFactory.sampleRegistration();
+
+    @BeforeEach
+    public void setUp() {
+        registrationConfirmedStatus = RegistrationFactory.sampleRegistrationWithConfirmedStatus();
+        registrationWaitingListStatus = RegistrationFactory.sampleRegistrationWithWaitingListStatus();
+    }
+
+//    @Test
+//    public void create_ThrowsException_WhenThereIsNoAreaPersisted() {
+//        UUID locationId = location.getId();
+//        UUID areaId = area.getId();
+//
+//        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+//
+//        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+//                () -> spaceService.create(locationId, areaId, spaceCreateDto)
+//        );
+//        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+//        assertThat(exception.getResourceId()).isEqualTo(areaId.toString());
+//        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
 //    }
 }

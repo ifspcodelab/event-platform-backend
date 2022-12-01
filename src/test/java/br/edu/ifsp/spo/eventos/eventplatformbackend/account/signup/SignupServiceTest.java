@@ -4,8 +4,11 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.invalidemail.InvalidEmailRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SignupServiceTest {
@@ -42,5 +47,28 @@ public class SignupServiceTest {
     @Test
     public void signupServiceShouldNotBeNull() {
         assertThat(signupService).isNotNull();
+    }
+
+    @Test
+    public void create_ThrowsException_WhenRecaptchaIsInvalid() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDto();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.FALSE);
+
+        RecaptchaException exception = (RecaptchaException) catchThrowable(() -> signupService.create(accountCreateDto));
+
+        assertThat(exception).isInstanceOf(RecaptchaException.class);
+        assertThat(exception.getEmail()).isEqualTo(accountCreateDto.getEmail());
+        assertThat(exception.getRecaptchaExceptionType()).isEqualTo(RecaptchaExceptionType.INVALID_RECAPTCHA);
+    }
+
+    private AccountCreateDto getSampleAccountCreateDto() {
+        return new AccountCreateDto(
+                "Shinei Nouzen",
+                "shineinouzen@email.com",
+                "06011909043",
+                "PlainPass@01",
+                true,
+                "3d1a8ed4-88b5-4e40-bb9c-2ccfdfdc014f"
+        );
     }
 }

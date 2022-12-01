@@ -10,8 +10,8 @@ public class SessionScheduleFactory {
     public static SessionSchedule sampleSessionSchedule() {
         return new SessionSchedule(
 
-                LocalDateTime.of(2022, 9, 23, 14, 0, 0),
-                LocalDateTime.of(2022, 9, 23, 16, 0, 0),
+                LocalDateTime.of(2023, 9, 23, 14, 0, 0),
+                LocalDateTime.of(2023, 9, 23, 16, 0, 0),
                 "url",
                 LocationFactory.sampleLocation(),
                 AreaFactory.sampleArea(),
@@ -20,6 +20,18 @@ public class SessionScheduleFactory {
     }
 
     public static SessionSchedule sampleSessionSchedule2() {
+        return new SessionSchedule(
+
+                LocalDateTime.of(2023, 9, 21, 14, 0, 0),
+                LocalDateTime.of(2023, 9, 22, 16, 0, 0),
+                "url",
+                LocationFactory.sampleLocation(),
+                AreaFactory.sampleArea(),
+                SpaceFactory.sampleSpace()
+        );
+    }
+
+    public static SessionSchedule sampleSessionScheduleThatStarted() {
         return new SessionSchedule(
 
                 LocalDateTime.of(2022, 9, 21, 14, 0, 0),

@@ -1,9 +1,6 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountFactory;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
@@ -200,6 +197,23 @@ public class SignupServiceTest {
         assertThat(exception.getEmail()).isEqualTo(verificationToken.getAccount().getEmail());
     }
 
+    @Test
+    public void verify_ReturnsVerifiedAccount_WhenSuccessful() {
+        UUID verificationTokenString = UUID.randomUUID();
+        VerificationToken verificationToken = getSampleVerificationToken();
+        Account account = verificationToken.getAccount();
+        account.setStatus(AccountStatus.UNVERIFIED);
+        when(verificationTokenRepository.findByToken(any(UUID.class))).thenReturn(Optional.of(verificationToken));
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+
+        Account verifiedAccount = signupService.verify(verificationTokenString);
+
+        verify(verificationTokenRepository, times(1)).delete(any(VerificationToken.class));
+        verify(auditService, times(1))
+                .logUpdate(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
+        assertThat(verifiedAccount.getStatus()).isEqualTo(AccountStatus.VERIFIED);
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",
@@ -228,6 +242,13 @@ public class SignupServiceTest {
                 UUID.randomUUID(),
                 Instant.now().minusSeconds(1000),
                 AccountFactory.sampleAccount()
+        );
+    }
+
+    private VerificationToken getSampleVerificationToken() {
+        return new VerificationToken(
+                AccountFactory.sampleAccount(),
+                900 //accountConfig.getVerificationTokenExpiresIn()
         );
     }
 }

@@ -127,6 +127,25 @@ public class SignupServiceTest {
         assertThat(exception.getResourceAttributeValue()).isEqualTo(accountCreateDto.getEmail());
     }
 
+    @Test
+    public void create_ThrowsException_WhenAccountWithGivenCpfAlreadyExists() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDto();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(invalidEmailRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.findByCpfAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.findByEmailAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.existsByCpf(anyString())).thenReturn(Boolean.TRUE);
+
+        ResourceAlreadyExistsException exception =
+                (ResourceAlreadyExistsException) catchThrowable(() -> signupService.create(accountCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.ACCOUNT);
+        assertThat(exception.getResourceAttribute()).isEqualTo("cpf");
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(accountCreateDto.getCpf());
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

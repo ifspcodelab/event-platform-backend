@@ -256,6 +256,22 @@ public class SignupServiceTest {
         assertThat(exception.getEmail()).isEqualTo(email);
     }
 
+    @Test
+    public void resendEmailRegistration_ThrowsException_WhenVerificationTokenIsExpired() {
+        VerificationToken verificationToken = getSampleVerificationToken_Expired();
+        Account account = verificationToken.getAccount();
+        String email = account.getEmail();
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+        when(verificationTokenRepository.existsByAccount(any(Account.class))).thenReturn(Boolean.TRUE);
+        when(verificationTokenRepository.existsByExpiresInAfter(any(Instant.now().getClass()))).thenReturn(Boolean.FALSE);
+
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.resendEmailRegistration(email));
+
+        assertThat(exception).isInstanceOf(SignupException.class);
+        assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.VERIFICATION_TOKEN_EXPIRED);
+        assertThat(exception.getEmail()).isEqualTo(email);
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

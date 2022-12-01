@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.password;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
@@ -58,7 +60,7 @@ public class PasswordResetServiceTest {
     }
 
     @Test
-    public void createResetPasswordRequest_ThrowsException_WhenAccountDoesNotExist() {
+    public void createResetPasswordRequest_ThrowsException_WhenAccountWithGivenEmailDoestNotExist() {
         ForgotPasswordCreateDto forgotPasswordCreateDto = sampleForgotPasswordCreateDto();
         when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
         when(accountRepository.findByEmail(anyString())).thenReturn(Optional.empty());
@@ -70,9 +72,30 @@ public class PasswordResetServiceTest {
         assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
     }
 
+    @Test
+    public void createResetPasswordRequest_ThrowsException_WhenAccountIsUnverified() {
+        ForgotPasswordCreateDto forgotPasswordCreateDto = sampleForgotPasswordCreateDtoB();
+        Account account = AccountFactory.sampleAccount();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+
+        PasswordResetException exception = (PasswordResetException) catchThrowable(() -> passwordResetService.createResetPasswordRequest(forgotPasswordCreateDto));
+
+        assertThat(exception).isInstanceOf(PasswordResetException.class);
+        assertThat(exception.getPasswordResetExceptionType()).isEqualTo(PasswordResetExceptionType.UNVERIFIED_ACCOUNT);
+        assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
+    }
+
     private ForgotPasswordCreateDto sampleForgotPasswordCreateDto() {
         return new ForgotPasswordCreateDto(
                 "shineinouzen@email.com",
+                UUID.randomUUID().toString()
+        );
+    }
+
+    private ForgotPasswordCreateDto sampleForgotPasswordCreateDtoB() {
+        return new ForgotPasswordCreateDto(
+                "marcelo01@email.com",
                 UUID.randomUUID().toString()
         );
     }

@@ -230,6 +230,18 @@ public class SignupServiceTest {
         verify(accountRepository, times(3)).delete(any(Account.class));
     }
 
+    @Test
+    public void resendEmailRegistration_ThrowsException_WhenAccountWithGivenEmailDoestNotExist() {
+        String email = AccountFactory.sampleAccount().getEmail();
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(() -> signupService.resendEmailRegistration(email));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.ACCOUNT);
+        assertThat(exception.getResourceId()).isEqualTo(email);
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

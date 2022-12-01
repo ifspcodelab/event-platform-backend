@@ -16,10 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +85,21 @@ public class PasswordResetServiceTest {
 
         assertThat(exception).isInstanceOf(PasswordResetException.class);
         assertThat(exception.getPasswordResetExceptionType()).isEqualTo(PasswordResetExceptionType.UNVERIFIED_ACCOUNT);
+        assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
+    }
+
+    @Test
+    public void createResetPasswordRequest_ThrowsException_WhenAccountAlreadyHasValidRequest() {
+        ForgotPasswordCreateDto forgotPasswordCreateDto = sampleForgotPasswordCreateDtoB();
+        Account account = AccountFactory.sampleAccount_StatusVerified();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+        when(passwordResetTokenRepository.existsByAccountAndExpiresInAfter(any(Account.class), any(Instant.class))).thenReturn(Boolean.TRUE);
+
+        PasswordResetException exception = (PasswordResetException) catchThrowable(() -> passwordResetService.createResetPasswordRequest(forgotPasswordCreateDto));
+
+        assertThat(exception).isInstanceOf(PasswordResetException.class);
+        assertThat(exception.getPasswordResetExceptionType()).isEqualTo(PasswordResetExceptionType.OPEN_REQUEST);
         assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
     }
 

@@ -10,4 +10,11 @@ public class AccountFactory {
                 Boolean.TRUE
         );
     }
+
+    public static Account sampleAccount_StatusVerified() {
+        Account account = sampleAccount();
+        account.setStatus(AccountStatus.VERIFIED);
+
+        return account;
+    }
 }

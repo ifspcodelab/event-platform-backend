@@ -162,6 +162,8 @@ public class SignupServiceTest {
 
         Account createdAccount = signupService.create(accountCreateDto);
 
+        verify(passwordEncoder, times(1)).encode(anyString());
+        verify(accountConfig, times(1)).getVerificationTokenExpiresIn();
         verify(accountRepository, times(1)).save(any(Account.class));
         verify(verificationTokenRepository, times(1)).save(any(VerificationToken.class));
         Throwable sendVerificationEmailThrowable = catchThrowable(() ->

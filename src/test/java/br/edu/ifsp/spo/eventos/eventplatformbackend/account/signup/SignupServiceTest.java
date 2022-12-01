@@ -242,6 +242,20 @@ public class SignupServiceTest {
         assertThat(exception.getResourceId()).isEqualTo(email);
     }
 
+    @Test
+    public void resendEmailRegistration_ThrowsException_WhenVerificationTokenDoesNotExistInGivenEmail() {
+        Account account = AccountFactory.sampleAccount();
+        String email = account.getEmail();
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+        when(verificationTokenRepository.existsByAccount(any(Account.class))).thenReturn(Boolean.FALSE);
+
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.resendEmailRegistration(email));
+
+        assertThat(exception).isInstanceOf(SignupException.class);
+        assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.NONEXISTENT_TOKEN);
+        assertThat(exception.getEmail()).isEqualTo(email);
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

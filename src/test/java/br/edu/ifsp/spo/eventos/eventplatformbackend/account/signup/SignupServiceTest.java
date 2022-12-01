@@ -272,6 +272,22 @@ public class SignupServiceTest {
         assertThat(exception.getEmail()).isEqualTo(email);
     }
 
+    @Test
+    public void resendEmailRegistration_ThrowsException_WhenAccountIsNotOlderThanInstant() {
+        VerificationToken verificationToken = getSampleVerificationToken();
+        Account account = verificationToken.getAccount();
+        String email = account.getEmail();
+        account.setRegistrationTimestamp(Instant.now());
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+        when(verificationTokenRepository.existsByAccount(any(Account.class))).thenReturn(Boolean.TRUE);
+        when(verificationTokenRepository.existsByExpiresInAfter(any(Instant.now().getClass()))).thenReturn(Boolean.TRUE);
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(() -> signupService.resendEmailRegistration(email));
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType()).isEqualTo(BusinessRuleType.RESEND_EMAIL_DELAY);
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

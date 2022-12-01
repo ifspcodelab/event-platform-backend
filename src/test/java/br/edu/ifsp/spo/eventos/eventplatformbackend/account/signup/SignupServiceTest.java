@@ -1,6 +1,8 @@
 package br.edu.ifsp.spo.eventos.eventplatformbackend.account.signup;
 
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
@@ -18,6 +20,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -73,6 +77,22 @@ public class SignupServiceTest {
 
         assertThat(exception).isInstanceOf(BusinessRuleException.class);
         assertThat(exception.getBusinessRuleType()).isEqualTo(BusinessRuleType.INVALID_EMAIL);
+    }
+
+    @Test
+    public void create_ThrowsException_WhenCpfExistsInUnverifiedAccount() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDto();
+        Account account = AccountFactory.sampleAccount();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(invalidEmailRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.findByCpfAndStatusUnverified(anyString())).thenReturn(Optional.of(account));
+
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.create(accountCreateDto));
+
+        assertThat(exception).isInstanceOf(SignupException.class);
+        assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_CPF_NOT_VERIFIED);
+        assertThat(exception.getCpf()).isEqualTo(accountCreateDto.getCpf());
+        assertThat(exception.getEmail()).isEqualTo(accountCreateDto.getEmail());
     }
 
     private AccountCreateDto getSampleAccountCreateDto() {

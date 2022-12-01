@@ -8,6 +8,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PasswordResetServiceTest {
@@ -103,6 +104,27 @@ public class PasswordResetServiceTest {
         assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
     }
 
+    @Test
+    public void createResetPasswordRequest_CreatesResetToken_WhenSuccessful() {
+        ForgotPasswordCreateDto forgotPasswordCreateDto = sampleForgotPasswordCreateDtoB();
+        Account account = AccountFactory.sampleAccount_StatusVerified();
+        PasswordResetToken passwordResetToken = samplePasswordResetToken();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+        when(passwordResetTokenRepository.existsByAccountAndExpiresInAfter(any(Account.class), any(Instant.class))).thenReturn(Boolean.FALSE);
+        when(passwordResetTokenRepository.save(any(PasswordResetToken.class))).thenReturn(passwordResetToken);
+
+        passwordResetService.createResetPasswordRequest(forgotPasswordCreateDto);
+
+        verify(accountConfig, times(1)).getPasswordResetTokenExpiresIn();
+        verify(passwordResetTokenRepository, times(1)).save(any(PasswordResetToken.class));
+        Throwable throwable = catchThrowable(() ->
+                verify(emailService, times(1)).sendPasswordResetEmail(any(Account.class), any(PasswordResetToken.class))
+        );
+        assertThat(throwable).doesNotThrowAnyException();
+        verify(auditService, times(1)).logCreate(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
+    }
+
     private ForgotPasswordCreateDto sampleForgotPasswordCreateDto() {
         return new ForgotPasswordCreateDto(
                 "shineinouzen@email.com",
@@ -114,6 +136,13 @@ public class PasswordResetServiceTest {
         return new ForgotPasswordCreateDto(
                 "marcelo01@email.com",
                 UUID.randomUUID().toString()
+        );
+    }
+
+    private PasswordResetToken samplePasswordResetToken() {
+        return new PasswordResetToken(
+                AccountFactory.sampleAccount_StatusVerified(),
+                900
         );
     }
 }

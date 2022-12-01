@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -53,6 +54,19 @@ public class PasswordResetServiceTest {
 
         assertThat(exception).isInstanceOf(RecaptchaException.class);
         assertThat(exception.getRecaptchaExceptionType()).isEqualTo(RecaptchaExceptionType.INVALID_RECAPTCHA);
+        assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
+    }
+
+    @Test
+    public void createResetPasswordRequest_ThrowsException_WhenAccountDoesNotExist() {
+        ForgotPasswordCreateDto forgotPasswordCreateDto = sampleForgotPasswordCreateDto();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        PasswordResetException exception = (PasswordResetException) catchThrowable(() -> passwordResetService.createResetPasswordRequest(forgotPasswordCreateDto));
+
+        assertThat(exception).isInstanceOf(PasswordResetException.class);
+        assertThat(exception.getPasswordResetExceptionType()).isEqualTo(PasswordResetExceptionType.NONEXISTENT_ACCOUNT);
         assertThat(exception.getEmail()).isEqualTo(forgotPasswordCreateDto.getEmail());
     }
 

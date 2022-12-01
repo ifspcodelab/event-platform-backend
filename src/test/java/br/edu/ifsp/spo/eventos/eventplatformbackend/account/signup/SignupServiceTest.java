@@ -4,6 +4,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.Account;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountConfig;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.AccountRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.Action;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.AuditService;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
@@ -19,10 +20,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class SignupServiceTest {
@@ -146,12 +149,49 @@ public class SignupServiceTest {
         assertThat(exception.getResourceAttributeValue()).isEqualTo(accountCreateDto.getCpf());
     }
 
+    @Test
+    public void create_ReturnsAccount_WhenSuccessful() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDtoB();
+        Account account = AccountFactory.sampleAccount();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(invalidEmailRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.findByCpfAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.findByEmailAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.existsByCpf(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+
+        Account createdAccount = signupService.create(accountCreateDto);
+
+        verify(accountRepository, times(1)).save(any(Account.class));
+        verify(verificationTokenRepository, times(1)).save(any(VerificationToken.class));
+        //verify(emailService, times(1)).sendVerificationEmail(any(Account.class), any(VerificationToken.class));
+        verify(auditService, times(1))
+                .log(any(Account.class), any(Action.class), any(ResourceName.class), any(UUID.class));
+        assertThat(createdAccount).isNotNull();
+        assertThat(createdAccount.getName()).isEqualTo(accountCreateDto.getName());
+        assertThat(createdAccount.getEmail()).isEqualTo(accountCreateDto.getEmail());
+        assertThat(createdAccount.getCpf()).isEqualTo(accountCreateDto.getCpf());
+        assertThat(createdAccount.getAgreed()).isEqualTo(accountCreateDto.getAgreed());
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",
                 "shineinouzen@email.com",
                 "06011909043",
                 "PlainPass@01",
+                true,
+                "3d1a8ed4-88b5-4e40-bb9c-2ccfdfdc014f"
+        );
+    }
+
+    private AccountCreateDto getSampleAccountCreateDtoB() {
+        return new AccountCreateDto(
+                "Marcelo Silva",
+                "marcelo01@email.com",
+                "66709094030",
+                "Senha@01",
                 true,
                 "3d1a8ed4-88b5-4e40-bb9c-2ccfdfdc014f"
         );

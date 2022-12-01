@@ -175,6 +175,17 @@ public class SignupServiceTest {
         assertThat(createdAccount.getAgreed()).isEqualTo(accountCreateDto.getAgreed());
     }
 
+    @Test
+    public void verify_ThrowsException_WhenNonexistentToken() {
+        UUID verificationToken = UUID.randomUUID();
+        when(verificationTokenRepository.findByToken(any(UUID.class))).thenReturn(Optional.empty());
+
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.verify(verificationToken));
+
+        assertThat(exception).isInstanceOf(SignupException.class);
+        assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.NONEXISTENT_TOKEN);
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

@@ -87,6 +87,7 @@ public class SignupServiceTest {
         when(accountRepository.findByCpfAndStatusUnverified(anyString())).thenReturn(Optional.of(account));
 
         SignupException exception = (SignupException) catchThrowable(() -> signupService.create(accountCreateDto));
+        //TODO: need to refactor since typo makes the test fail
 
         assertThat(exception).isInstanceOf(SignupException.class);
         assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_CPF_NOT_VERIFIED);
@@ -326,6 +327,21 @@ public class SignupServiceTest {
 
         verify(accountRepository, times(1)).findByNameStartingWithIgnoreCaseAndStatus(anyString(), any(AccountStatus.class));
         assertThat(searchedAccounts).isEmpty();
+    }
+
+    @Test
+    public void search_ReturnsAccountList_WhenExistsAccountsInGivenName() {
+        Account account = AccountFactory.sampleAccount();
+        String name = account.getName();
+        AccountStatus status = account.getStatus();
+        when(accountRepository.findByNameStartingWithIgnoreCaseAndStatus(anyString(), any(AccountStatus.class))).thenReturn(List.of(account));
+
+        List<Account> searchedAccounts = signupService.search(name, status);
+        //TODO: need to refactor since part of its implementation logic is in the controller?
+
+        verify(accountRepository, times(1)).findByNameStartingWithIgnoreCaseAndStatus(anyString(), any(AccountStatus.class));
+        assertThat(searchedAccounts).isNotEmpty();
+        assertThat(searchedAccounts).hasSize(1);
     }
 
     private AccountCreateDto getSampleAccountCreateDto() {

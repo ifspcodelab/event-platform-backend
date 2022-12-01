@@ -288,6 +288,26 @@ public class SignupServiceTest {
         assertThat(exception.getBusinessRuleType()).isEqualTo(BusinessRuleType.RESEND_EMAIL_DELAY);
     }
 
+    @Test
+    public void resendEmailRegistration_ReturnsAccount_WhenSuccessful() {
+        VerificationToken verificationToken = getSampleVerificationToken();
+        Account account = verificationToken.getAccount();
+        String email = account.getEmail();
+        account.setRegistrationTimestamp(Instant.now().minusSeconds(60));
+        when(accountRepository.findByEmail(anyString())).thenReturn(Optional.of(account));
+        when(verificationTokenRepository.existsByAccount(any(Account.class))).thenReturn(Boolean.TRUE);
+        when(verificationTokenRepository.existsByExpiresInAfter(any(Instant.now().getClass()))).thenReturn(Boolean.TRUE);
+        when(verificationTokenRepository.findByAccount(any(Account.class))).thenReturn(verificationToken);
+
+        signupService.resendEmailRegistration(email);
+
+        verify(verificationTokenRepository, times(1)).findByAccount(any(Account.class));
+        Throwable emailServiceThrowable = catchThrowable(() -> verify(emailService, times(1)).sendVerificationEmail(any(Account.class), any(VerificationToken.class)));
+        assertThat(emailServiceThrowable).doesNotThrowAnyException();
+        verify(auditService, times(1)).log(any(Account.class), any(Action.class), any(ResourceName.class), any(UUID.class));
+
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

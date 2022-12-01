@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -212,6 +213,21 @@ public class SignupServiceTest {
         verify(auditService, times(1))
                 .logUpdate(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
         assertThat(verifiedAccount.getStatus()).isEqualTo(AccountStatus.VERIFIED);
+    }
+
+    @Test
+    public void deleteVerificationTokenAndAccount_DeletesAccountData_WhenSuccessful() {
+        VerificationToken expiredVerificationTokenA = getSampleVerificationToken_Expired();
+        VerificationToken expiredVerificationTokenB = getSampleVerificationToken_Expired();
+        VerificationToken expiredVerificationTokenC = getSampleVerificationToken_Expired();
+        when(verificationTokenRepository.findAllByExpiresInBefore(any(Instant.now().getClass())))
+                .thenReturn(List.of(expiredVerificationTokenA, expiredVerificationTokenB, expiredVerificationTokenC));
+
+        signupService.deleteVerificationTokenAndAccount();
+
+        verify(logRepository, times(3)).deleteAllByAccount(any(Account.class));
+        verify(verificationTokenRepository, times(3)).delete(any(VerificationToken.class));
+        verify(accountRepository, times(3)).delete(any(Account.class));
     }
 
     private AccountCreateDto getSampleAccountCreateDto() {

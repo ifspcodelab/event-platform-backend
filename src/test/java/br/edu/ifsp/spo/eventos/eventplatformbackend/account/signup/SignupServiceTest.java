@@ -9,10 +9,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.invalidemail.InvalidEmailRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,6 +107,24 @@ public class SignupServiceTest {
         assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_EMAIL_NOT_VERIFIED);
         assertThat(exception.getEmail()).isEqualTo(accountCreateDto.getEmail());
         assertThat(exception.getCpf()).isEqualTo(accountCreateDto.getCpf());
+    }
+
+    @Test
+    public void create_ThrowsException_WhenAccountWithGivenEmailAlreadyExists() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDto();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(invalidEmailRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.findByCpfAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.findByEmailAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.existsByEmail(anyString())).thenReturn(Boolean.TRUE);
+
+        ResourceAlreadyExistsException exception =
+                (ResourceAlreadyExistsException) catchThrowable(() -> signupService.create(accountCreateDto));
+
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.ACCOUNT);
+        assertThat(exception.getResourceAttribute()).isEqualTo("email");
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(accountCreateDto.getEmail());
     }
 
     private AccountCreateDto getSampleAccountCreateDto() {

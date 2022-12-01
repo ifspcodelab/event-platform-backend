@@ -164,7 +164,10 @@ public class SignupServiceTest {
 
         verify(accountRepository, times(1)).save(any(Account.class));
         verify(verificationTokenRepository, times(1)).save(any(VerificationToken.class));
-        //verify(emailService, times(1)).sendVerificationEmail(any(Account.class), any(VerificationToken.class));
+        Throwable sendVerificationEmailThrowable = catchThrowable(() ->
+                verify(emailService, times(1)).sendVerificationEmail(any(Account.class), any(VerificationToken.class))
+        );
+        assertThat(sendVerificationEmailThrowable).doesNotThrowAnyException();
         verify(auditService, times(1))
                 .log(any(Account.class), any(Action.class), any(ResourceName.class), any(UUID.class));
         assertThat(createdAccount).isNotNull();
@@ -299,10 +302,13 @@ public class SignupServiceTest {
         when(verificationTokenRepository.existsByExpiresInAfter(any(Instant.now().getClass()))).thenReturn(Boolean.TRUE);
         when(verificationTokenRepository.findByAccount(any(Account.class))).thenReturn(verificationToken);
 
-        signupService.resendEmailRegistration(email);
+        Account resendEmailAccount = signupService.resendEmailRegistration(email);
 
+        assertThat(resendEmailAccount).isNotNull();
         verify(verificationTokenRepository, times(1)).findByAccount(any(Account.class));
-        Throwable emailServiceThrowable = catchThrowable(() -> verify(emailService, times(1)).sendVerificationEmail(any(Account.class), any(VerificationToken.class)));
+        Throwable emailServiceThrowable = catchThrowable(() ->
+                verify(emailService, times(1)).sendVerificationEmail(any(Account.class), any(VerificationToken.class))
+        );
         assertThat(emailServiceThrowable).doesNotThrowAnyException();
         verify(auditService, times(1)).log(any(Account.class), any(Action.class), any(ResourceName.class), any(UUID.class));
 

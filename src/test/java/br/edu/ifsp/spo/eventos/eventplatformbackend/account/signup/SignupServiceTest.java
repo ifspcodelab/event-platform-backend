@@ -95,6 +95,23 @@ public class SignupServiceTest {
         assertThat(exception.getEmail()).isEqualTo(accountCreateDto.getEmail());
     }
 
+    @Test
+    public void create_ThrowsException_WhenEmailExistsInUnverifiedAccount() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDto();
+        Account account = AccountFactory.sampleAccount();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(invalidEmailRepository.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
+        when(accountRepository.findByCpfAndStatusUnverified(anyString())).thenReturn(Optional.empty());
+        when(accountRepository.findByEmailAndStatusUnverified(anyString())).thenReturn(Optional.of(account));
+
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.create(accountCreateDto));
+
+        assertThat(exception).isInstanceOf(SignupException.class);
+        assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_EMAIL_NOT_VERIFIED);
+        assertThat(exception.getEmail()).isEqualTo(accountCreateDto.getEmail());
+        assertThat(exception.getCpf()).isEqualTo(accountCreateDto.getCpf());
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

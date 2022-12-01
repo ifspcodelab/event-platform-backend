@@ -18,4 +18,16 @@ public class SessionScheduleFactory {
                 SpaceFactory.sampleSpace()
         );
     }
+
+    public static SessionSchedule sampleSessionSchedule2() {
+        return new SessionSchedule(
+
+                LocalDateTime.of(2022, 9, 21, 14, 0, 0),
+                LocalDateTime.of(2022, 9, 22, 16, 0, 0),
+                "url",
+                LocationFactory.sampleLocation(),
+                AreaFactory.sampleArea(),
+                SpaceFactory.sampleSpace()
+        );
+    }
 }

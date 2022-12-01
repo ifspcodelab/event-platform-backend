@@ -11,6 +11,13 @@ public class RegistrationFactory {
         );
     }
 
+    public static Registration sampleRegistrationWithConfirmedStatusInOtherSession() {
+        return Registration.createWithConfirmedStatus(
+                AccountFactory.sampleAccount(),
+                SessionFactory.sampleSession2()
+        );
+    }
+
     public static Registration sampleRegistrationWithWaitingListStatus() {
         return Registration.createWithWaitingListdStatus(
                 AccountFactory.sampleAccount(),

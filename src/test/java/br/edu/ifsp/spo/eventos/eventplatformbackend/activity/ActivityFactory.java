@@ -22,4 +22,19 @@ public class ActivityFactory {
                 SubeventFactory.sampleSubevent()
         );
     }
+
+    public static Activity sampleActivity2() {
+        return new Activity(
+                "Atividade de exemplo 2",
+                "slug-de-exemplo 2",
+                "descrição de exemplo 2",
+                ActivityType.SEMINAR,
+                ActivityModality.IN_PERSON,
+                true,
+                10,
+                20,
+                EventFactory.sampleEvent(),
+                SubeventFactory.sampleSubevent()
+        );
+    }
 }

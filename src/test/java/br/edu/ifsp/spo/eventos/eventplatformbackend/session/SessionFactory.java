@@ -13,4 +13,13 @@ public class SessionFactory {
                 List.of(SessionScheduleFactory.sampleSessionSchedule())
         );
     }
+
+    public static Session sampleSession2() {
+        return new Session(
+                "Sessão de exemplo 2",
+                20,
+                ActivityFactory.sampleActivity(),
+                List.of(SessionScheduleFactory.sampleSessionSchedule2())
+        );
+    }
 }

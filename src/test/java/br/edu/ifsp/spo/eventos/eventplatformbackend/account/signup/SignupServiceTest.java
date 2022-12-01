@@ -7,6 +7,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.account.audit.LogRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.dto.AccountCreateDto;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.account.invalidemail.InvalidEmailRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.email.EmailService;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaException;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.RecaptchaExceptionType;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.recaptcha.RecaptchaService;
@@ -59,6 +61,18 @@ public class SignupServiceTest {
         assertThat(exception).isInstanceOf(RecaptchaException.class);
         assertThat(exception.getEmail()).isEqualTo(accountCreateDto.getEmail());
         assertThat(exception.getRecaptchaExceptionType()).isEqualTo(RecaptchaExceptionType.INVALID_RECAPTCHA);
+    }
+
+    @Test
+    public void create_ThrowsException_WhenEmailIsInvalid() {
+        AccountCreateDto accountCreateDto = getSampleAccountCreateDto();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(invalidEmailRepository.existsByEmail(anyString())).thenReturn(Boolean.TRUE);
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(() -> signupService.create(accountCreateDto));
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType()).isEqualTo(BusinessRuleType.INVALID_EMAIL);
     }
 
     private AccountCreateDto getSampleAccountCreateDto() {

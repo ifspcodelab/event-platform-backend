@@ -316,6 +316,18 @@ public class SignupServiceTest {
 
     }
 
+    @Test
+    public void search_ReturnsEmptyList_WhenAccountsDoesNotExistInGivenName() {
+        String name = UUID.randomUUID().toString();
+        AccountStatus status = AccountStatus.VERIFIED;
+        when(accountRepository.findByNameStartingWithIgnoreCaseAndStatus(anyString(), any(AccountStatus.class))).thenReturn(List.of());
+
+        List<Account> searchedAccounts = signupService.search(name, status);
+
+        verify(accountRepository, times(1)).findByNameStartingWithIgnoreCaseAndStatus(anyString(), any(AccountStatus.class));
+        assertThat(searchedAccounts).isEmpty();
+    }
+
     private AccountCreateDto getSampleAccountCreateDto() {
         return new AccountCreateDto(
                 "Shinei Nouzen",

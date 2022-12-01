@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -177,13 +178,26 @@ public class SignupServiceTest {
 
     @Test
     public void verify_ThrowsException_WhenNonexistentToken() {
-        UUID verificationToken = UUID.randomUUID();
+        UUID verificationTokenString = UUID.randomUUID();
         when(verificationTokenRepository.findByToken(any(UUID.class))).thenReturn(Optional.empty());
 
-        SignupException exception = (SignupException) catchThrowable(() -> signupService.verify(verificationToken));
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.verify(verificationTokenString));
 
         assertThat(exception).isInstanceOf(SignupException.class);
         assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.NONEXISTENT_TOKEN);
+    }
+
+    @Test
+    public void verify_ThrowsException_WhenTokenIsExpired() {
+        UUID verificationTokenString = UUID.randomUUID();
+        VerificationToken verificationToken = getSampleVerificationToken_Expired();
+        when(verificationTokenRepository.findByToken(any(UUID.class))).thenReturn(Optional.of(verificationToken));
+
+        SignupException exception = (SignupException) catchThrowable(() -> signupService.verify(verificationTokenString));
+
+        assertThat(exception).isInstanceOf(SignupException.class);
+        assertThat(exception.getSignupRuleType()).isEqualTo(SignupRuleType.VERIFICATION_TOKEN_EXPIRED);
+        assertThat(exception.getEmail()).isEqualTo(verificationToken.getAccount().getEmail());
     }
 
     private AccountCreateDto getSampleAccountCreateDto() {
@@ -205,6 +219,15 @@ public class SignupServiceTest {
                 "Senha@01",
                 true,
                 "3d1a8ed4-88b5-4e40-bb9c-2ccfdfdc014f"
+        );
+    }
+
+    private VerificationToken getSampleVerificationToken_Expired() {
+        return new VerificationToken(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Instant.now().minusSeconds(1000),
+                AccountFactory.sampleAccount()
         );
     }
 }

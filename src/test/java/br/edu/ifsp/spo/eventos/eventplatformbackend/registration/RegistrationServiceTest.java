@@ -2145,6 +2145,238 @@ public class RegistrationServiceTest {
                 .isEqualTo(registrationConfirmedStatus.getDate());
     }
 
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenCurrentUserHasNoPermissionForEvent() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsNotAuthorized();
+
+        OrganizerAuthorizationException exception = (OrganizerAuthorizationException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(OrganizerAuthorizationException.class);
+        assertThat(exception.getOrganizerAuthorizationExceptionType())
+                .isEqualTo(OrganizerAuthorizationExceptionType.UNAUTHORIZED_EVENT);
+        assertThat(exception.getResourceId()).isEqualTo(eventId);
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_When() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        when(registrationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.REGISTRATION);
+        assertThat(exception.getResourceId()).isEqualTo(registrationId.toString());
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenSessionDoesNotExist() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        NoSuchElementException exception = (NoSuchElementException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenEventIsNotAssociateToActivity() {
+        UUID eventId = UUID.randomUUID();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.ACTIVITY_IS_NOT_ASSOCIATED_TO_EVENT);
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenActivityIsNotAssociateToSession() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = UUID.randomUUID();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.SESSION_IS_NOT_ASSOCIATED_TO_ACTIVITY);
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenSessionIsNotAssociateToRegistration() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = UUID.randomUUID();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_SESSION);
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenEmailWasAnswered() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        registrationWaitingListStatus.setEmailReplyDate(
+                LocalDateTime.of(2022, 12, 2, 0, 0, 0)
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_ALREADY_WAS_ANSWERED);
+    }
+
+    @Test
+    public void confirmWaitingList_ThrowsException_WhenRegistrationIsInWaitingListAndSessionIsFull() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        registrationWaitingListStatus.getSession().setConfirmedSeats(
+                registrationWaitingListStatus.getSession().getSeats()
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+                )
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_CREATE_WITH_NO_SEATS_AVAILABLE);
+    }
+
+    @Test
+    public void confirmWaitingList_ReturnsRegistrationConfirmed_WhenSuccessful() {
+        UUID eventId = registrationWaitingListStatus.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationWaitingListStatus.getSession().getActivity().getId();
+        UUID sessionId = registrationWaitingListStatus.getSession().getId();
+        UUID registrationId = registrationWaitingListStatus.getId();
+        mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
+        List<Registration> registrations = List.of(
+                RegistrationFactory.sampleRegistrationWithConfirmedStatusInOtherSession()
+        );
+        List<Registration> registrationsInWaitingList = List.of(
+                RegistrationFactory.sampleRegistrationWithWaitingListStatus()
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingListStatus.getSession()));
+        when(registrationRepository.save(any(Registration.class)))
+                .thenReturn(registrationConfirmedStatus);
+        when(registrationRepository.findAllByAccountIdAndRegistrationStatusInAndDate(
+                any(UUID.class),
+                any(LocalDateTime.class),
+                anyList()
+        )).thenReturn(registrations);
+        when(registrationRepository.findAllByAccountIdAndSessionIdIn(
+                any(UUID.class),
+                anyList()
+        )).thenReturn(registrationsInWaitingList);
+
+        Registration registrationCreated = registrationService.confirmWaitingList(
+                        eventId, activityId, sessionId, registrationId
+        );
+
+        verify(registrationRepository, times(1)).save(any(Registration.class));
+        verify(registrationRepository, times(1)).saveAll(anyList());
+        assertThat(registrationCreated).isNotNull();
+        assertThat(registrationCreated.getId()).isEqualTo(registrationWaitingListStatus.getId());
+        assertThat(registrationCreated.getAccount().getId())
+                .isEqualTo(registrationWaitingListStatus.getAccount().getId());
+        assertThat(registrationCreated.getSession().getId())
+                .isEqualTo(registrationWaitingListStatus.getSession().getId());
+        assertThat(registrationCreated.getRegistrationStatus())
+                .isEqualTo(RegistrationStatus.CONFIRMED);
+        assertThat(registrationCreated.getDate())
+                .isEqualTo(registrationWaitingListStatus.getDate());
+        assertThat(registrationsInWaitingList)
+                .extracting(Registration::getRegistrationStatus)
+                .contains(RegistrationStatus.CANCELED_BY_SYSTEM);
+    }
+
     private void mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(UUID eventId) {
         JwtUserDetails userDetails = JwtUserDetailsFactory.sampleJwtUserDetailsThatIsOrganizer(eventId);
         Authentication authentication = Mockito.mock(Authentication.class);

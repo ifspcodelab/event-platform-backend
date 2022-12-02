@@ -24,4 +24,13 @@ public class RegistrationFactory {
                 SessionFactory.sampleSession()
         );
     }
+
+    public static Registration sampleRegistrationWithCanceledByAdminStatus() {
+        Registration registration = Registration.createWithWaitingListdStatus(
+                AccountFactory.sampleAccount(),
+                SessionFactory.sampleSession()
+        );
+        registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
+        return registration;
+    }
 }

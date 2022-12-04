@@ -33,4 +33,13 @@ public class RegistrationFactory {
         registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_ADMIN);
         return registration;
     }
+
+    public static Registration sampleRegistrationWithWaitingConfirmationStatus() {
+        Registration registration = Registration.createWithWaitingListdStatus(
+                AccountFactory.sampleAccount(),
+                SessionFactory.sampleSession()
+        );
+        registration.setRegistrationStatus(RegistrationStatus.WAITING_CONFIRMATION);
+        return registration;
+    }
 }

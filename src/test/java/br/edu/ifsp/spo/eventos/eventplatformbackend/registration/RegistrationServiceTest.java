@@ -27,7 +27,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -57,13 +57,14 @@ public class RegistrationServiceTest {
     private AttendanceRepository attendanceRepository;
     @Mock
     private EmailService emailService;
-    @Value("${registration.email-confirmation-time}")
-    private String emailConfirmationTime;
+    @Mock
+    private EmailConfirmationTime emailConfirmationTime;
     @InjectMocks
     private RegistrationService registrationService;
     private Registration registrationConfirmedStatus;
     private Registration registrationWaitingListStatus;
     private Registration registrationCanceled;
+    private Registration registrationWaitingConfirmation;
     private RegistrationCreateDto registrationCreateDto;
 
     @BeforeEach
@@ -71,6 +72,7 @@ public class RegistrationServiceTest {
         registrationConfirmedStatus = RegistrationFactory.sampleRegistrationWithConfirmedStatus();
         registrationWaitingListStatus = RegistrationFactory.sampleRegistrationWithWaitingListStatus();
         registrationCanceled = RegistrationFactory.sampleRegistrationWithCanceledByAdminStatus();
+        registrationWaitingConfirmation = RegistrationFactory.sampleRegistrationWithWaitingConfirmationStatus();
         registrationCreateDto = sampleRegistrationCreateDto();
     }
 
@@ -1400,7 +1402,6 @@ public class RegistrationServiceTest {
 
     @Test
     public void cancel_ThrowsException_WhenRegistrationDoesNotExist() {
-        //TODO: AQUI
         UUID eventId = registrationConfirmedStatus.getSession().getActivity().getEvent().getId();
         UUID activityId = registrationConfirmedStatus.getSession().getActivity().getId();
         UUID sessionId = registrationConfirmedStatus.getSession().getId();
@@ -2372,6 +2373,146 @@ public class RegistrationServiceTest {
                 .isEqualTo(RegistrationStatus.CONFIRMED);
         assertThat(registrationCreated.getDate())
                 .isEqualTo(registrationWaitingListStatus.getDate());
+        assertThat(registrationsInWaitingList)
+                .extracting(Registration::getRegistrationStatus)
+                .contains(RegistrationStatus.CANCELED_BY_SYSTEM);
+    }
+
+    @Test
+    public void acceptSessionSeat_ThrowsException_WhenRegistrationDoesNotExist() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        when(registrationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> registrationService.acceptSessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.REGISTRATION);
+        assertThat(exception.getResourceId()).isEqualTo(registrationId.toString());
+    }
+
+    @Test
+    public void acceptSessionSeat_ThrowsException_WhenAccountDoesNotExist() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(accountRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        NoSuchElementException exception = (NoSuchElementException) catchThrowable(
+                () -> registrationService.acceptSessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    public void acceptSessionSeat_ThrowsException_WhenAccountIsNotAssociateToRegistration() {
+        UUID accountId = UUID.randomUUID();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(accountRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getAccount()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.acceptSessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT);
+    }
+
+    @Test
+    public void acceptSessionSeat_ThrowsException_WhenEmailWasAnswered() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        registrationWaitingConfirmation.setEmailReplyDate(
+                LocalDateTime.of(2022, 12, 2, 0, 0, 0)
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(accountRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getAccount()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.acceptSessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_ALREADY_WAS_ANSWERED);
+    }
+
+    @Test
+    public void acceptSessionSeat_ThrowsException_WhenSolicitationIsExpired() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        String timeToConfirmEmail = "12";
+        registrationWaitingConfirmation.setTimeEmailWasSent(
+                LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(accountRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getAccount()));
+        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.acceptSessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS);
+    }
+
+    @Test
+    public void acceptSessionSeat_ReturnsRegistrationConfirmed_WhenSuccessful() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        String timeToConfirmEmail = "12";
+        registrationWaitingConfirmation.setTimeEmailWasSent(
+                LocalDateTime.now()
+        );
+        List<Registration> registrationsInWaitingList = List.of(
+                RegistrationFactory.sampleRegistrationWithWaitingListStatus()
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(accountRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getAccount()));
+        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+        when(registrationRepository.findAllByAccountIdAndRegistrationStatusInAndDate(
+                any(UUID.class),
+                any(LocalDateTime.class),
+                anyList()
+        )).thenReturn(registrationsInWaitingList);
+        when(registrationRepository.findAllByAccountIdAndSessionIdIn(
+                any(UUID.class),
+                anyList()
+        )).thenReturn(registrationsInWaitingList);
+        when(registrationRepository.save(any(Registration.class)))
+                .thenReturn(registrationConfirmedStatus);
+
+        Registration registrationCreated = registrationService.acceptSessionSeat(accountId, registrationId);
+
+        verify(registrationRepository, times(1)).save(any(Registration.class));
+        verify(registrationRepository, times(1)).saveAll(anyList());
+        assertThat(registrationCreated).isNotNull();
+        assertThat(registrationCreated.getId()).isEqualTo(registrationConfirmedStatus.getId());
+        assertThat(registrationCreated.getAccount().getId())
+                .isEqualTo(registrationConfirmedStatus.getAccount().getId());
+        assertThat(registrationCreated.getSession().getId())
+                .isEqualTo(registrationConfirmedStatus.getSession().getId());
+        assertThat(registrationCreated.getRegistrationStatus())
+                .isEqualTo(registrationConfirmedStatus.getRegistrationStatus());
+        assertThat(registrationCreated.getDate())
+                .isEqualTo(registrationConfirmedStatus.getDate());
         assertThat(registrationsInWaitingList)
                 .extracting(Registration::getRegistrationStatus)
                 .contains(RegistrationStatus.CANCELED_BY_SYSTEM);

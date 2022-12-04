@@ -37,8 +37,9 @@ public class RegistrationService {
     private final AccountRepository accountRepository;
     private final AttendanceRepository attendanceRepository;
     private final EmailService emailService;
-    @Value("${registration.email-confirmation-time}")
-    private String emailConfirmationTime;
+//    @Value("${registration.email-confirmation-time}")
+//    private String emailConfirmationTime;
+    private final EmailConfirmationTime emailConfirmationTime;
 
     private void checkUserEventPermission(UUID eventId) {
         JwtUserDetails jwtUserDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -426,7 +427,7 @@ public class RegistrationService {
         checksIfEmailWasAnswered(registration);
 
         if(registration.getTimeEmailWasSent() != null &&
-            registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now())
+            registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime.getEmailConfirmationTime())).isBefore(LocalDateTime.now())
         ) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_ACCEPT_WITH_EXPIRED_HOURS);
         }
@@ -448,7 +449,7 @@ public class RegistrationService {
         //verificar se o usuário ja negou ou sistema negou
         checksIfEmailWasAnswered(registration);
 
-        if(registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now())) {
+        if(registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime.getEmailConfirmationTime())).isBefore(LocalDateTime.now())) {
             throw new BusinessRuleException(BusinessRuleType.REGISTRATION_DENY_WITH_EXPIRED_HOURS);
         }
 
@@ -481,7 +482,7 @@ public class RegistrationService {
     public void cancelAllRegistrationInWaitConfirmation() {
         List<Registration> registrations = registrationRepository.findAllByRegistrationStatus(LocalDateTime.now(), RegistrationStatus.WAITING_CONFIRMATION);
 
-        registrations.stream().filter(registration -> registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime)).isBefore(LocalDateTime.now()))
+        registrations.stream().filter(registration -> registration.getTimeEmailWasSent().plusHours(Long.parseLong(emailConfirmationTime.getEmailConfirmationTime())).isBefore(LocalDateTime.now()))
             .forEach(registration -> {
                 registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_SYSTEM);
                 log.info("Registration cancelled: date={}, status={}", LocalDateTime.now(), registration.getRegistrationStatus());

@@ -25,6 +25,10 @@ public class AreaService {
     public Area create(UUID locationId, AreaCreateDto dto) {
         Location location = getLocation(locationId);
 
+        if(areaRepository.existsByNameIgnoreCaseAndLocationId(dto.getName(), locationId)) {
+            throw new ResourceAlreadyExistsException(ResourceName.AREA, "name", dto.getName());
+        }
+
         if(areaRepository.existsByNameAndLocationId(dto.getName(), locationId)) {
             throw new ResourceAlreadyExistsException(ResourceName.AREA, "name", dto.getName());
         }

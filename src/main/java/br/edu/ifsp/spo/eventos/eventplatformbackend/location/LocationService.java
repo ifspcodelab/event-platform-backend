@@ -23,7 +23,7 @@ public class LocationService {
     private final AuditService auditService;
 
     public Location create(LocationCreateDto dto) {
-        if(locationRepository.existsByName(dto.getName())) {
+        if(locationRepository.existsByNameIgnoreCase(dto.getName())) {
             throw new ResourceAlreadyExistsException(ResourceName.LOCATION, "name", dto.getName());
         }
 

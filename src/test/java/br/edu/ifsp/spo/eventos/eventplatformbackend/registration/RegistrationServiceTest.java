@@ -2822,6 +2822,229 @@ public class RegistrationServiceTest {
 //                .isEqualTo(registrationWaitingConfirmation.getDate());
 //    }
 
+    @Test
+    public void cancelAllRegistrationInWaitConfirmation_DoNotCancelRegistrations_WhenThereAreNotRegistrationsInWaitConfirmation() {
+        when(registrationRepository.findAllByRegistrationStatus(
+                any(LocalDateTime.class),
+                any(RegistrationStatus.class)
+        )).thenReturn(List.of());
+
+        registrationService.cancelAllRegistrationInWaitConfirmation();
+
+        verify(sessionRepository, times(0))
+                .findByIdWithPessimisticLock(any(UUID.class));
+        verify(registrationRepository, times(0))
+                .save(any(Registration.class));
+    }
+
+//    @Test
+//    public void cancelAllRegistrationInWaitConfirmation_DoNotCancelRegistrations_WhenThereAreNotRegistrationsExpired() {
+        //TODO: Criar classe contendo as configurações de e-mail
+//        //Nesse caso, não há inscrições esperando confirmação já expiradas.
+//        String timeToConfirmEmail = "12";
+//        registrationWaitingConfirmation.setTimeEmailWasSent(
+//                LocalDateTime.now()
+//        );
+//        when(registrationRepository.findAllByRegistrationStatus(
+//                any(LocalDateTime.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(List.of(registrationWaitingConfirmation));
+//        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+//
+//        registrationService.cancelAllRegistrationInWaitConfirmation();
+//
+//        verify(sessionRepository, times(0))
+//                .findByIdWithPessimisticLock(any(UUID.class));
+//        verify(registrationRepository, times(0))
+//                .save(any(Registration.class));
+//    }
+
+//    @Test
+//    public void cancelAllRegistrationInWaitConfirmation_CancelRegistrations_WhenSessionHasStarted() {
+//        //TODO: Criar classe contendo as configurações de e-mail
+//        String timeToConfirmEmail = "12";
+//        registrationWaitingConfirmation.setTimeEmailWasSent(
+//                LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+//        );
+//        List<SessionSchedule> sessionSchedulesStarted = List.of(
+//                SessionScheduleFactory.sampleSessionScheduleThatStarted()
+//        );
+//        registrationWaitingConfirmation.getSession().setSessionSchedules(sessionSchedulesStarted);
+//        when(registrationRepository.findAllByRegistrationStatus(
+//                any(LocalDateTime.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(List.of(registrationWaitingConfirmation));
+//        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+//        when(sessionRepository.findByIdWithPessimisticLock(
+//                any(UUID.class)
+//        )).thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+//
+//        registrationService.cancelAllRegistrationInWaitConfirmation();
+//
+//        verify(sessionRepository, times(1))
+//                .save(any(Session.class));
+//        verify(registrationRepository, times(1))
+//                .save(any(Registration.class));
+//        assertThat(registrationWaitingConfirmation.getRegistrationStatus())
+//                .isEqualTo(RegistrationStatus.CANCELED_BY_SYSTEM);
+//    }
+
+//    @Test
+//    public void cancelAllRegistrationInWaitConfirmation_CancelRegistrations_WhenExistAnyRegistrationInWaitingListAndAccountHasAllowEmail() {
+//        //TODO: Criar classe contendo as configurações de e-mail
+//        //Nesse caso, a sessão não começou, existe inscrição na lista de espera,
+//        // conta tem e-mail autorizado e o e-mail é enviado
+//        try {
+//            String timeToConfirmEmail = "12";
+//            registrationWaitingConfirmation.setTimeEmailWasSent(
+//                    LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+//            );
+//            when(registrationRepository.findAllByRegistrationStatus(
+//                    any(LocalDateTime.class),
+//                    any(RegistrationStatus.class)
+//            )).thenReturn(List.of(registrationWaitingConfirmation));
+//            when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+//            when(sessionRepository.findByIdWithPessimisticLock(
+//                    any(UUID.class)
+//            )).thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+//            when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+//                    any(UUID.class),
+//                    any(RegistrationStatus.class)
+//            )).thenReturn(true);
+//            when(registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(
+//                    any(UUID.class),
+//                    any(RegistrationStatus.class)
+//            )).thenReturn(Optional.of(registrationWaitingListStatus));
+//            doNothing().when(emailService).sendEmailToConfirmRegistration(
+//                    any(Account.class),
+//                    any(Registration.class)
+//            );
+//
+//            registrationService.cancelAllRegistrationInWaitConfirmation();
+//
+//            verify(registrationRepository, times(2)).save(any(Registration.class));
+//            verify(emailService, times(1))
+//                    .sendEmailToConfirmRegistration(any(Account.class), any(Registration.class));
+//            assertThat(registrationWaitingListStatus.getRegistrationStatus())
+//                    .isEqualTo(RegistrationStatus.WAITING_CONFIRMATION);
+//            assertThat(registrationWaitingConfirmation.getRegistrationStatus())
+//                    .isEqualTo(RegistrationStatus.CANCELED_BY_SYSTEM);
+//        } catch (MessagingException e) {
+//        }
+//    }
+
+//    @Test
+//    public void cancelAllRegistrationInWaitConfirmation_CancelRegistrations_WhenExistAnyRegistrationInWaitingListAndEmailIsNotSend() {
+//        //TODO: Criar classe contendo as configurações de e-mail
+//        //TODO: Pegar exceção lançada ao não conseguir enviar e-mail
+//        //Nesse caso, a sessão não começou, existe inscrição na lista de espera,
+//        // conta tem e-mail autorizado e o e-mail não é enviado.
+//        try {
+//            String timeToConfirmEmail = "12";
+//            registrationWaitingConfirmation.setTimeEmailWasSent(
+//                    LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+//            );
+//            when(registrationRepository.findAllByRegistrationStatus(
+//                    any(LocalDateTime.class),
+//                    any(RegistrationStatus.class)
+//            )).thenReturn(List.of(registrationWaitingConfirmation));
+//            when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+//            when(sessionRepository.findByIdWithPessimisticLock(
+//                    any(UUID.class)
+//            )).thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+//            when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+//                    any(UUID.class),
+//                    any(RegistrationStatus.class)
+//            )).thenReturn(true);
+//            when(registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(
+//                    any(UUID.class),
+//                    any(RegistrationStatus.class)
+//            )).thenReturn(Optional.of(registrationWaitingListStatus));
+//            doThrow(new MessagingException()).when(emailService).sendEmailToConfirmRegistration(
+//                    any(Account.class),
+//                    any(Registration.class)
+//            );
+//
+//            registrationService.cancelAllRegistrationInWaitConfirmation();
+//
+//            verify(registrationRepository, times(2)).save(any(Registration.class));
+//            verify(emailService, times(1))
+//                    .sendEmailToConfirmRegistration(any(Account.class), any(Registration.class));
+//            assertThat(registrationWaitingListStatus.getRegistrationStatus())
+//                    .isEqualTo(RegistrationStatus.WAITING_CONFIRMATION);
+//            assertThat(registrationWaitingConfirmation.getRegistrationStatus())
+//                    .isEqualTo(RegistrationStatus.CANCELED_BY_SYSTEM);
+//        } catch (MessagingException e) {
+//        }
+//    }
+
+//    @Test
+//    public void cancelAllRegistrationInWaitConfirmation_CancelRegistrations_WhenExistAnyRegistrationInWaitingListAndAccountHasNotAllowEmail() {
+//        //TODO: Criar classe contendo as configurações de e-mail
+//        //Nesse caso, a sessão não começou, existe inscrição na lista de espera e
+//        //a conta não tem e-mail autorizado.
+//
+//        String timeToConfirmEmail = "12";
+//        registrationWaitingConfirmation.setTimeEmailWasSent(
+//                LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+//        );
+//        registrationWaitingConfirmation.getAccount().setAllowEmail(false);
+//        when(registrationRepository.findAllByRegistrationStatus(
+//                any(LocalDateTime.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(List.of(registrationWaitingConfirmation));
+//        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+//        when(sessionRepository.findByIdWithPessimisticLock(
+//                any(UUID.class)
+//        )).thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+//        when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+//                any(UUID.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(true);
+//        when(registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(
+//                any(UUID.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(Optional.of(registrationWaitingListStatus));
+//
+//        registrationService.cancelAllRegistrationInWaitConfirmation();
+//
+//        verify(registrationRepository, times(2)).save(any(Registration.class));
+//        assertThat(registrationWaitingListStatus.getRegistrationStatus())
+//                .isEqualTo(RegistrationStatus.WAITING_CONFIRMATION);
+//        assertThat(registrationWaitingConfirmation.getRegistrationStatus())
+//                .isEqualTo(RegistrationStatus.CANCELED_BY_SYSTEM);
+//    }
+
+//    @Test
+//    public void cancelAllRegistrationInWaitConfirmation_CancelRegistrations_WhenThereIsNoRegistrationInWaitingList() {
+//        //TODO: Criar classe contendo as configurações de e-mail.
+//
+//        // Nesse caso, a sessão não começou e não existe inscrição na lista de espera.
+//        String timeToConfirmEmail = "12";
+//        registrationWaitingConfirmation.setTimeEmailWasSent(
+//                LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+//        );
+//        when(registrationRepository.findAllByRegistrationStatus(
+//                any(LocalDateTime.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(List.of(registrationWaitingConfirmation));
+//        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+//        when(sessionRepository.findByIdWithPessimisticLock(
+//                any(UUID.class)
+//        )).thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+//        when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+//                any(UUID.class),
+//                any(RegistrationStatus.class)
+//        )).thenReturn(false);
+//
+//        registrationService.cancelAllRegistrationInWaitConfirmation();
+//
+//        verify(registrationRepository, times(1)).save(any(Registration.class));
+//        verify(sessionRepository, times(1)).save(any(Session.class));
+//        assertThat(registrationWaitingConfirmation.getRegistrationStatus())
+//                .isEqualTo(RegistrationStatus.CANCELED_BY_SYSTEM);
+//    }
+
     private void mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(UUID eventId) {
         JwtUserDetails userDetails = JwtUserDetailsFactory.sampleJwtUserDetailsThatIsOrganizer(eventId);
         Authentication authentication = Mockito.mock(Authentication.class);

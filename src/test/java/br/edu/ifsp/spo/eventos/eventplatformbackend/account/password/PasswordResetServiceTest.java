@@ -125,6 +125,17 @@ public class PasswordResetServiceTest {
         verify(auditService, times(1)).logCreate(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
     }
 
+    @Test
+    public void resetPassword_ThrowsException_WhenRecaptchaIsInvalid() {
+        PasswordResetDto passwordResetDto = samplePasswordResetDto();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.FALSE);
+
+        RecaptchaException exception = (RecaptchaException) catchThrowable(() -> passwordResetService.resetPassword(passwordResetDto));
+
+        assertThat(exception).isInstanceOf(RecaptchaException.class);
+        assertThat(exception.getRecaptchaExceptionType()).isEqualTo(RecaptchaExceptionType.INVALID_RECAPTCHA);
+    }
+
     private ForgotPasswordCreateDto sampleForgotPasswordCreateDto() {
         return new ForgotPasswordCreateDto(
                 "shineinouzen@email.com",
@@ -143,6 +154,14 @@ public class PasswordResetServiceTest {
         return new PasswordResetToken(
                 AccountFactory.sampleAccount_StatusVerified(),
                 900
+        );
+    }
+
+    private PasswordResetDto samplePasswordResetDto() {
+        return new PasswordResetDto(
+                UUID.randomUUID().toString(),
+                "Plainpass@01",
+                UUID.randomUUID().toString()
         );
     }
 }

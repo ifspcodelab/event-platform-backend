@@ -136,6 +136,19 @@ public class PasswordResetServiceTest {
         assertThat(exception.getRecaptchaExceptionType()).isEqualTo(RecaptchaExceptionType.INVALID_RECAPTCHA);
     }
 
+    @Test
+    public void resetPassword_ThrowsException_WhenTokenDoesNotExist() {
+        PasswordResetDto passwordResetDto = samplePasswordResetDto();
+        UUID tokenId = UUID.fromString(passwordResetDto.getToken());
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(passwordResetTokenRepository.findByToken(tokenId)).thenReturn(Optional.empty());
+
+        PasswordResetException exception = (PasswordResetException) catchThrowable(() -> passwordResetService.resetPassword(passwordResetDto));
+
+        assertThat(exception).isInstanceOf(PasswordResetException.class);
+        assertThat(exception.getPasswordResetExceptionType()).isEqualTo(PasswordResetExceptionType.RESET_TOKEN_NOT_FOUND);
+    }
+
     private ForgotPasswordCreateDto sampleForgotPasswordCreateDto() {
         return new ForgotPasswordCreateDto(
                 "shineinouzen@email.com",

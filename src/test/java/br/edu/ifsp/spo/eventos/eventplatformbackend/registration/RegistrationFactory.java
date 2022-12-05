@@ -34,6 +34,15 @@ public class RegistrationFactory {
         return registration;
     }
 
+    public static Registration sampleRegistrationWithCanceledByUserStatus() {
+        Registration registration = Registration.createWithWaitingListdStatus(
+                AccountFactory.sampleAccount(),
+                SessionFactory.sampleSession()
+        );
+        registration.setRegistrationStatus(RegistrationStatus.CANCELED_BY_USER);
+        return registration;
+    }
+
     public static Registration sampleRegistrationWithWaitingConfirmationStatus() {
         Registration registration = Registration.createWithWaitingListdStatus(
                 AccountFactory.sampleAccount(),

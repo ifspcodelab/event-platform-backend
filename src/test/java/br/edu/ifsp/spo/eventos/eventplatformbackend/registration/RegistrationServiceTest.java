@@ -63,7 +63,8 @@ public class RegistrationServiceTest {
     private RegistrationService registrationService;
     private Registration registrationConfirmedStatus;
     private Registration registrationWaitingListStatus;
-    private Registration registrationCanceled;
+    private Registration registrationCanceledByAdmin;
+    private Registration registrationCanceledByUser;
     private Registration registrationWaitingConfirmation;
     private RegistrationCreateDto registrationCreateDto;
 
@@ -71,7 +72,8 @@ public class RegistrationServiceTest {
     public void setUp() {
         registrationConfirmedStatus = RegistrationFactory.sampleRegistrationWithConfirmedStatus();
         registrationWaitingListStatus = RegistrationFactory.sampleRegistrationWithWaitingListStatus();
-        registrationCanceled = RegistrationFactory.sampleRegistrationWithCanceledByAdminStatus();
+        registrationCanceledByAdmin = RegistrationFactory.sampleRegistrationWithCanceledByAdminStatus();
+        registrationCanceledByUser = RegistrationFactory.sampleRegistrationWithCanceledByUserStatus();
         registrationWaitingConfirmation = RegistrationFactory.sampleRegistrationWithWaitingConfirmationStatus();
         registrationCreateDto = sampleRegistrationCreateDto();
     }
@@ -1564,23 +1566,23 @@ public class RegistrationServiceTest {
 
     @Test
     public void cancel_ReturnsRegistrationCanceled_WhenSessionHasStartedAndRegistrationIsCanceled() {
-        UUID eventId = registrationCanceled.getSession().getActivity().getEvent().getId();
-        UUID activityId = registrationCanceled.getSession().getActivity().getId();
-        UUID sessionId = registrationCanceled.getSession().getId();
-        UUID registrationId = registrationCanceled.getId();
+        UUID eventId = registrationCanceledByAdmin.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationCanceledByAdmin.getSession().getActivity().getId();
+        UUID sessionId = registrationCanceledByAdmin.getSession().getId();
+        UUID registrationId = registrationCanceledByAdmin.getId();
         mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
         List<SessionSchedule> sessionSchedulesStarted = List.of(
                 SessionScheduleFactory.sampleSessionScheduleThatStarted()
         );
-        registrationCanceled.getSession().setSessionSchedules(sessionSchedulesStarted);
+        registrationCanceledByAdmin.getSession().setSessionSchedules(sessionSchedulesStarted);
         when(registrationRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.of(registrationCanceled));
+                .thenReturn(Optional.of(registrationCanceledByAdmin));
         when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
-                .thenReturn(Optional.of(registrationCanceled.getSession()));
+                .thenReturn(Optional.of(registrationCanceledByAdmin.getSession()));
         when(attendanceRepository.existsByRegistrationId(any(UUID.class)))
                 .thenReturn(false);
         when(registrationRepository.save(any(Registration.class)))
-                .thenReturn(registrationCanceled);
+                .thenReturn(registrationCanceledByAdmin);
 
         Registration registrationCreated = registrationService.cancel(
                 eventId,
@@ -1591,15 +1593,15 @@ public class RegistrationServiceTest {
 
         verify(registrationRepository, times(1)).save(any(Registration.class));
         assertThat(registrationCreated).isNotNull();
-        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceled.getId());
+        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByAdmin.getId());
         assertThat(registrationCreated.getAccount().getId())
-                .isEqualTo(registrationCanceled.getAccount().getId());
+                .isEqualTo(registrationCanceledByAdmin.getAccount().getId());
         assertThat(registrationCreated.getSession().getId())
-                .isEqualTo(registrationCanceled.getSession().getId());
+                .isEqualTo(registrationCanceledByAdmin.getSession().getId());
         assertThat(registrationCreated.getRegistrationStatus())
                 .isEqualTo(RegistrationStatus.CANCELED_BY_ADMIN);
         assertThat(registrationCreated.getDate())
-                .isEqualTo(registrationCanceled.getDate());
+                .isEqualTo(registrationCanceledByAdmin.getDate());
     }
 
     @Test
@@ -1816,15 +1818,15 @@ public class RegistrationServiceTest {
     public void cancel_ReturnsRegistrationCanceled_WhenThereIsNoRegistrationInWaitingListAndRegistrationIsCanceled() {
         // Nesse caso, a sessão não começou, não existe inscrição na lista de espera e
         // a inscrição está cancelada.
-        UUID eventId = registrationCanceled.getSession().getActivity().getEvent().getId();
-        UUID activityId = registrationCanceled.getSession().getActivity().getId();
-        UUID sessionId = registrationCanceled.getSession().getId();
-        UUID registrationId = registrationCanceled.getId();
+        UUID eventId = registrationCanceledByAdmin.getSession().getActivity().getEvent().getId();
+        UUID activityId = registrationCanceledByAdmin.getSession().getActivity().getId();
+        UUID sessionId = registrationCanceledByAdmin.getSession().getId();
+        UUID registrationId = registrationCanceledByAdmin.getId();
         mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(eventId);
         when(registrationRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.of(registrationCanceled));
+                .thenReturn(Optional.of(registrationCanceledByAdmin));
         when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
-                .thenReturn(Optional.of(registrationCanceled.getSession()));
+                .thenReturn(Optional.of(registrationCanceledByAdmin.getSession()));
         when(attendanceRepository.existsByRegistrationId(any(UUID.class)))
                 .thenReturn(false);
         when(registrationRepository.existsBySessionIdAndRegistrationStatus(
@@ -1832,7 +1834,7 @@ public class RegistrationServiceTest {
                 any(RegistrationStatus.class)
         )).thenReturn(false);
         when(registrationRepository.save(any(Registration.class)))
-                .thenReturn(registrationCanceled);
+                .thenReturn(registrationCanceledByAdmin);
 
         Registration registrationCreated = registrationService.cancel(
                 eventId,
@@ -1843,15 +1845,15 @@ public class RegistrationServiceTest {
 
         verify(registrationRepository, times(1)).save(any(Registration.class));
         assertThat(registrationCreated).isNotNull();
-        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceled.getId());
+        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByAdmin.getId());
         assertThat(registrationCreated.getAccount().getId())
-                .isEqualTo(registrationCanceled.getAccount().getId());
+                .isEqualTo(registrationCanceledByAdmin.getAccount().getId());
         assertThat(registrationCreated.getSession().getId())
-                .isEqualTo(registrationCanceled.getSession().getId());
+                .isEqualTo(registrationCanceledByAdmin.getSession().getId());
         assertThat(registrationCreated.getRegistrationStatus())
                 .isEqualTo(RegistrationStatus.CANCELED_BY_ADMIN);
         assertThat(registrationCreated.getDate())
-                .isEqualTo(registrationCanceled.getDate());
+                .isEqualTo(registrationCanceledByAdmin.getDate());
     }
 
     @Test
@@ -2516,6 +2518,305 @@ public class RegistrationServiceTest {
         assertThat(registrationsInWaitingList)
                 .extracting(Registration::getRegistrationStatus)
                 .contains(RegistrationStatus.CANCELED_BY_SYSTEM);
+    }
+
+    @Test
+    public void denySessionSeat_ThrowsException_WhenRegistrationDoesNotExist() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        when(registrationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> registrationService.denySessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.REGISTRATION);
+        assertThat(exception.getResourceId()).isEqualTo(registrationId.toString());
+    }
+
+    @Test
+    public void denySessionSeat_ThrowsException_WhenAccountIsNotAssociateToRegistration() {
+        UUID accountId = UUID.randomUUID();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.denySessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_IS_NOT_ASSOCIATED_TO_ACCOUNT);
+    }
+
+    @Test
+    public void denySessionSeat_ThrowsException_WhenEmailWasAnswered() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        registrationWaitingConfirmation.setEmailReplyDate(
+                LocalDateTime.of(2022, 12, 2, 0, 0, 0)
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.denySessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_ALREADY_WAS_ANSWERED);
+    }
+
+    @Test
+    public void denySessionSeat_ThrowsException_WhenSolicitationIsExpired() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        String timeToConfirmEmail = "12";
+        registrationWaitingConfirmation.setTimeEmailWasSent(
+                LocalDateTime.of(2022, 11, 30, 0, 0, 0)
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+
+        BusinessRuleException exception = (BusinessRuleException) catchThrowable(
+                () -> registrationService.denySessionSeat(accountId, registrationId)
+        );
+
+        assertThat(exception).isInstanceOf(BusinessRuleException.class);
+        assertThat(exception.getBusinessRuleType())
+                .isEqualTo(BusinessRuleType.REGISTRATION_DENY_WITH_EXPIRED_HOURS);
+    }
+
+    @Test
+    public void denySessionSeat_ReturnsRegistrationCanceled_WhenSessionHasStarted() {
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        String timeToConfirmEmail = "12";
+        registrationWaitingConfirmation.setTimeEmailWasSent(
+                LocalDateTime.now()
+        );
+        List<SessionSchedule> sessionSchedulesStarted = List.of(
+                SessionScheduleFactory.sampleSessionScheduleThatStarted()
+        );
+        registrationWaitingConfirmation.getSession().setSessionSchedules(sessionSchedulesStarted);
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+        when(registrationRepository.save(any(Registration.class))).thenReturn(registrationCanceledByUser);
+
+        Registration registrationCreated = registrationService.denySessionSeat(accountId, registrationId);
+
+        verify(registrationRepository, times(1)).save(any(Registration.class));
+        verify(sessionRepository, times(1)).save(any(Session.class));
+        assertThat(registrationCreated).isNotNull();
+        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByUser.getId());
+        assertThat(registrationCreated.getAccount().getId())
+                .isEqualTo(registrationCanceledByUser.getAccount().getId());
+        assertThat(registrationCreated.getSession().getId())
+                .isEqualTo(registrationCanceledByUser.getSession().getId());
+        assertThat(registrationCreated.getRegistrationStatus())
+                .isEqualTo(RegistrationStatus.CANCELED_BY_USER);
+        assertThat(registrationCreated.getDate())
+                .isEqualTo(registrationCanceledByUser.getDate());
+    }
+
+    @Test
+    public void denySessionSeat_ReturnsRegistrationCanceled_WhenExistAnyRegistrationInWaitingListAndAccountHasAllowEmail() {
+        //Nesse caso, a sessão não começou, existe inscrição na lista de espera,
+        // conta tem e-mail autorizado e o e-mail é enviado
+        try {
+            UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+            UUID registrationId = registrationWaitingConfirmation.getId();
+            String timeToConfirmEmail = "12";
+            registrationWaitingConfirmation.setTimeEmailWasSent(
+                    LocalDateTime.now()
+            );
+            when(registrationRepository.findById(any(UUID.class)))
+                    .thenReturn(Optional.of(registrationWaitingConfirmation));
+            when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                    .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+            when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+            when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+                    any(UUID.class),
+                    any(RegistrationStatus.class)
+            )).thenReturn(true);
+            when(registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(
+                    any(UUID.class),
+                    any(RegistrationStatus.class)
+            )).thenReturn(Optional.of(registrationWaitingListStatus));
+            doNothing().when(emailService).sendEmailToConfirmRegistration(
+                    any(Account.class),
+                    any(Registration.class)
+            );
+            when(registrationRepository.save(any(Registration.class)))
+                    .thenReturn(registrationCanceledByUser);
+
+            Registration registrationCreated = registrationService.denySessionSeat(accountId, registrationId);
+
+            verify(registrationRepository, times(2)).save(any(Registration.class));
+            verify(emailService, times(1))
+                    .sendEmailToConfirmRegistration(any(Account.class), any(Registration.class));
+            assertThat(registrationCreated).isNotNull();
+            assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByUser.getId());
+            assertThat(registrationCreated.getAccount().getId())
+                    .isEqualTo(registrationCanceledByUser.getAccount().getId());
+            assertThat(registrationCreated.getSession().getId())
+                    .isEqualTo(registrationCanceledByUser.getSession().getId());
+            assertThat(registrationCreated.getRegistrationStatus())
+                    .isEqualTo(RegistrationStatus.CANCELED_BY_USER);
+            assertThat(registrationCreated.getDate())
+                    .isEqualTo(registrationCanceledByUser.getDate());
+            assertThat(registrationWaitingListStatus.getRegistrationStatus())
+                    .isEqualTo(RegistrationStatus.WAITING_CONFIRMATION);
+        } catch (MessagingException e) {
+        }
+    }
+
+    @Test
+    public void denySessionSeat_ReturnsRegistrationCanceled_WhenExistAnyRegistrationInWaitingListAndEmailIsNotSend() {
+        //Nesse caso, a sessão não começou, existe inscrição na lista de espera,
+        // conta tem e-mail autorizado e o e-mail não é enviado.
+        try {
+            UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+            UUID registrationId = registrationWaitingConfirmation.getId();
+            String timeToConfirmEmail = "12";
+            registrationWaitingConfirmation.setTimeEmailWasSent(
+                    LocalDateTime.now()
+            );
+            when(registrationRepository.findById(any(UUID.class)))
+                    .thenReturn(Optional.of(registrationWaitingConfirmation));
+            when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                    .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+            when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+            when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+                    any(UUID.class),
+                    any(RegistrationStatus.class)
+            )).thenReturn(true);
+            when(registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(
+                    any(UUID.class),
+                    any(RegistrationStatus.class)
+            )).thenReturn(Optional.of(registrationWaitingListStatus));
+            doThrow(new MessagingException()).when(emailService).sendEmailToConfirmRegistration(
+                    any(Account.class),
+                    any(Registration.class)
+            );
+            when(registrationRepository.save(any(Registration.class)))
+                    .thenReturn(registrationCanceledByUser);
+
+            Registration registrationCreated = registrationService.denySessionSeat(accountId, registrationId);
+
+            verify(registrationRepository, times(2)).save(any(Registration.class));
+            verify(emailService, times(1))
+                    .sendEmailToConfirmRegistration(any(Account.class), any(Registration.class));
+            assertThat(registrationCreated).isNotNull();
+            assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByUser.getId());
+            assertThat(registrationCreated.getAccount().getId())
+                    .isEqualTo(registrationCanceledByUser.getAccount().getId());
+            assertThat(registrationCreated.getSession().getId())
+                    .isEqualTo(registrationCanceledByUser.getSession().getId());
+            assertThat(registrationCreated.getRegistrationStatus())
+                    .isEqualTo(RegistrationStatus.CANCELED_BY_USER);
+            assertThat(registrationCreated.getDate())
+                    .isEqualTo(registrationCanceledByUser.getDate());
+            assertThat(registrationWaitingListStatus.getRegistrationStatus())
+                    .isEqualTo(RegistrationStatus.WAITING_CONFIRMATION);
+        } catch (MessagingException e) {
+        }
+    }
+
+    @Test
+    public void denySessionSeat_ReturnsRegistrationCanceled_WhenExistAnyRegistrationInWaitingListAndAccountHasNotAllowEmail() {
+        //Nesse caso, a sessão não começou, existe inscrição na lista de espera e
+        //a conta não tem e-mail autorizado.
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        registrationWaitingConfirmation.getAccount().setAllowEmail(false);
+        String timeToConfirmEmail = "12";
+        registrationWaitingConfirmation.setTimeEmailWasSent(
+                LocalDateTime.now()
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+        when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+                any(UUID.class),
+                any(RegistrationStatus.class)
+        )).thenReturn(true);
+        when(registrationRepository.getFirstBySessionIdAndRegistrationStatusOrderByDate(
+                any(UUID.class),
+                any(RegistrationStatus.class)
+        )).thenReturn(Optional.of(registrationWaitingListStatus));
+        when(registrationRepository.save(any(Registration.class)))
+                .thenReturn(registrationCanceledByUser);
+
+        Registration registrationCreated = registrationService.denySessionSeat(accountId, registrationId);
+
+        verify(registrationRepository, times(2)).save(any(Registration.class));
+        assertThat(registrationCreated).isNotNull();
+        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByUser.getId());
+        assertThat(registrationCreated.getAccount().getId())
+                .isEqualTo(registrationCanceledByUser.getAccount().getId());
+        assertThat(registrationCreated.getSession().getId())
+                .isEqualTo(registrationCanceledByUser.getSession().getId());
+        assertThat(registrationCreated.getRegistrationStatus())
+                .isEqualTo(RegistrationStatus.CANCELED_BY_USER);
+        assertThat(registrationCreated.getDate())
+                .isEqualTo(registrationCanceledByUser.getDate());
+        assertThat(registrationWaitingListStatus.getRegistrationStatus())
+                .isEqualTo(RegistrationStatus.WAITING_CONFIRMATION);
+    }
+
+    @Test
+    public void denySessionSeat_ReturnsRegistrationCanceled_WhenThereIsNoRegistrationInWaitingList() {
+        // Nesse caso, a sessão não começou e não existe inscrição na lista de espera.
+        UUID accountId = registrationWaitingConfirmation.getAccount().getId();
+        UUID registrationId = registrationWaitingConfirmation.getId();
+        String timeToConfirmEmail = "12";
+        registrationWaitingConfirmation.setTimeEmailWasSent(
+                LocalDateTime.now()
+        );
+        when(registrationRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation));
+        when(sessionRepository.findByIdWithPessimisticLock(any(UUID.class)))
+                .thenReturn(Optional.of(registrationWaitingConfirmation.getSession()));
+        when(emailConfirmationTime.getEmailConfirmationTime()).thenReturn(timeToConfirmEmail);
+        when(registrationRepository.existsBySessionIdAndRegistrationStatus(
+                any(UUID.class),
+                any(RegistrationStatus.class)
+        )).thenReturn(false);
+        when(registrationRepository.save(any(Registration.class)))
+                .thenReturn(registrationCanceledByUser);
+
+        Registration registrationCreated = registrationService.denySessionSeat(accountId, registrationId);
+
+        verify(registrationRepository, times(1)).save(any(Registration.class));
+        verify(sessionRepository, times(1)).save(any(Session.class));
+        assertThat(registrationCreated).isNotNull();
+        assertThat(registrationCreated.getId()).isEqualTo(registrationCanceledByUser.getId());
+        assertThat(registrationCreated.getAccount().getId())
+                .isEqualTo(registrationCanceledByUser.getAccount().getId());
+        assertThat(registrationCreated.getSession().getId())
+                .isEqualTo(registrationCanceledByUser.getSession().getId());
+        assertThat(registrationCreated.getSession().getConfirmedSeats())
+                .isEqualTo(registrationCanceledByUser.getSession().getConfirmedSeats());
+        assertThat(registrationCreated.getRegistrationStatus())
+                .isEqualTo(RegistrationStatus.CANCELED_BY_USER);
+        assertThat(registrationCreated.getDate())
+                .isEqualTo(registrationCanceledByUser.getDate());
     }
 
     private void mocksAuthenticationWithCurrentUserThatIsOrganizerOfEvent(UUID eventId) {

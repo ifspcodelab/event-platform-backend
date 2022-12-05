@@ -149,6 +149,8 @@ public class SignupServiceTest {
         assertThat(exception.getResourceAttributeValue()).isEqualTo(accountCreateDto.getCpf());
     }
 
+    //TODO: send verification email fail scenario
+
     @Test
     public void create_ReturnsAccount_WhenSuccessful() {
         AccountCreateDto accountCreateDto = getSampleAccountCreateDtoB();

@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -181,6 +182,20 @@ public class PasswordResetServiceTest {
         verify(accountRepository, times(1)).save(account);
         verify(passwordResetTokenRepository, times(1)).deleteById(any(UUID.class));
         verify(auditService, times(1)).logUpdate(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
+    }
+
+    @Test
+    public void removePasswordResetTokens_DeletesTokenAndLogsData_WhenSuccessful() {
+        PasswordResetToken passwordResetTokenA = samplePasswordResetToken();
+        PasswordResetToken passwordResetTokenB = samplePasswordResetToken();
+        PasswordResetToken passwordResetTokenC = samplePasswordResetToken();
+        when(passwordResetTokenRepository.findAllByExpiresInBefore(any(Instant.class)))
+                .thenReturn(List.of(passwordResetTokenA, passwordResetTokenB, passwordResetTokenC));
+
+        passwordResetService.removePasswordResetTokens();
+
+        verify(auditService, times(3)).logDelete(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
+        verify(passwordResetTokenRepository, times(3)).delete(any(PasswordResetToken.class));
     }
 
     private ForgotPasswordCreateDto sampleForgotPasswordCreateDto() {

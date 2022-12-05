@@ -165,6 +165,24 @@ public class PasswordResetServiceTest {
 
     }
 
+    @Test
+    public void resetPassword_SavesNewPassword_WhenSuccessful() {
+        PasswordResetDto passwordResetDto = samplePasswordResetDto();
+        UUID tokenId = UUID.fromString(passwordResetDto.getToken());
+        PasswordResetToken passwordResetToken = samplePasswordResetToken();
+        Account account = passwordResetToken.getAccount();
+        when(recaptchaService.isValid(anyString())).thenReturn(Boolean.TRUE);
+        when(passwordResetTokenRepository.findByToken(tokenId)).thenReturn(Optional.of(passwordResetToken));
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+
+        passwordResetService.resetPassword(passwordResetDto);
+
+        verify(passwordEncoder, times(1)).encode(anyString());
+        verify(accountRepository, times(1)).save(account);
+        verify(passwordResetTokenRepository, times(1)).deleteById(any(UUID.class));
+        verify(auditService, times(1)).logUpdate(any(Account.class), any(ResourceName.class), anyString(), any(UUID.class));
+    }
+
     private ForgotPasswordCreateDto sampleForgotPasswordCreateDto() {
         return new ForgotPasswordCreateDto(
                 "shineinouzen@email.com",

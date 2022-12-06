@@ -333,6 +333,47 @@ class SessionServiceTest {
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.SCHEDULE_IN_PAST);
     }
 
+    @Test
+    public void create_ThrowsException_WhenSessionScheduleHasIntersections() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        SessionCreateDto sessionCreateDtoWithInterception = getSampleSessionCreateDtoWithScheduleInterception();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDtoWithInterception.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        var startSession1 = sessionCreateDtoWithInterception.getSessionSchedules().get(0).getExecutionStart();
+        var endSession1 = sessionCreateDtoWithInterception.getSessionSchedules().get(0).getExecutionEnd();
+
+        var startSession2 = sessionCreateDtoWithInterception.getSessionSchedules().get(1).getExecutionStart();
+        var endSession2 = sessionCreateDtoWithInterception.getSessionSchedules().get(1).getExecutionEnd();
+
+        var condition1 = startSession1.isBefore(startSession2) || startSession1.isEqual(startSession2);
+        var condition2 = endSession1.isAfter(startSession2);
+        var condition3 = startSession2.isBefore(startSession1) || startSession2.isEqual(startSession1);
+        var condition4 = endSession2.isAfter(startSession1);
+        var condition5 = condition1 && condition2;
+        var condition6 = condition3 && condition4;
+        var condition7 = condition5 || condition6;
+
+        assertThat(condition7).isTrue();
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDtoWithInterception)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.SCHEDULE_HAS_INTERSECTIONS);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",
@@ -396,6 +437,31 @@ class SessionServiceTest {
                                 UUID.fromString("6af7fd0b-84c7-440a-9159-7a1fb26bbb47"),
                                 UUID.fromString("d2bf49f1-4ef5-4cf4-90e5-c72a0ea58cef"),
                                 UUID.fromString("8215f714-1bd5-4a17-bbef-6aa9396775a8")
+                        )
+                )
+        );
+    }
+
+    private SessionCreateDto getSampleSessionCreateDtoWithScheduleInterception() {
+        return new SessionCreateDto(
+                "Sessão 1",
+                20,
+                List.of(
+                        new SessionScheduleCreateDto(
+                                LocalDateTime.of(2023, 1, 9, 10, 0, 0),
+                                LocalDateTime.of(2023, 1, 9, 11, 45, 0),
+                                "",
+                                UUID.fromString("6af7fd0b-84c7-440a-9159-7a1fb26bbb47"),
+                                UUID.fromString("d2bf49f1-4ef5-4cf4-90e5-c72a0ea58cef"),
+                                UUID.fromString("8215f714-1bd5-4a17-bbef-6aa9396775a8")
+                        ),
+                        new SessionScheduleCreateDto(
+                                LocalDateTime.of(2023, 1, 9, 10, 0, 0),
+                                LocalDateTime.of(2023, 1, 9, 11, 45, 0),
+                                "",
+                                UUID.randomUUID(),
+                                UUID.randomUUID(),
+                                UUID.randomUUID()
                         )
                 )
         );

@@ -689,6 +689,34 @@ class SessionServiceTest {
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.URL_OR_LOCATION_NOT_DEFINED);
     }
 
+    @Test
+    public void create_ThrowsException_WhenNoLocationIsFoundInSessionScheduleListCreation() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        UUID scheduleLocationId = sessionCreateDto.getSessionSchedules().get(0).getLocationId();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(scheduleLocationId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",

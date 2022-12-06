@@ -242,6 +242,36 @@ class SessionServiceTest {
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.CANCELED_ACTIVITY);
     }
 
+    @Test
+    public void create_ThrowsException_WhenSessionSchedulesPeriodStartIsAfterEnd() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        SessionCreateDto sessionCreateDtoWithInvalidPeriod = getSampleSessionCreateDtoWithInvalidPeriodStartIsAfterEnd();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDtoWithInvalidPeriod.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        var start = sessionCreateDtoWithInvalidPeriod.getSessionSchedules().get(0).getExecutionStart();
+        var end = sessionCreateDtoWithInvalidPeriod.getSessionSchedules().get(0).getExecutionEnd();
+
+        assertThat(start).isAfter(end);
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDtoWithInvalidPeriod)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.SCHEDULE_INVALID_PERIOD);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",
@@ -250,6 +280,23 @@ class SessionServiceTest {
                         new SessionScheduleCreateDto(
                                 LocalDateTime.of(2023, 1, 9, 10, 0, 0),
                                 LocalDateTime.of(2023, 1, 9, 11, 45, 0),
+                                "",
+                                UUID.fromString("6af7fd0b-84c7-440a-9159-7a1fb26bbb47"),
+                                UUID.fromString("d2bf49f1-4ef5-4cf4-90e5-c72a0ea58cef"),
+                                UUID.fromString("8215f714-1bd5-4a17-bbef-6aa9396775a8")
+                        )
+                )
+        );
+    }
+
+    private SessionCreateDto getSampleSessionCreateDtoWithInvalidPeriodStartIsAfterEnd() {
+        return new SessionCreateDto(
+                "Sessão 1",
+                20,
+                List.of(
+                        new SessionScheduleCreateDto(
+                                LocalDateTime.of(2023, 1, 9, 11, 45, 0),
+                                LocalDateTime.of(2023, 1, 9, 10, 0, 0),
                                 "",
                                 UUID.fromString("6af7fd0b-84c7-440a-9159-7a1fb26bbb47"),
                                 UUID.fromString("d2bf49f1-4ef5-4cf4-90e5-c72a0ea58cef"),

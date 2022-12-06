@@ -410,6 +410,43 @@ class SessionServiceTest {
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.OUTSIDE_EXECUTION_PERIOD);
     }
 
+    @Test
+    public void create_ThrowsException_WhenSessionSchedulePeriodIsOutsideEventPeriod() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        activity.setSubevent(null);
+        SessionCreateDto sessionCreateDtoWithOutsideExecutionPeriod = getSampleSessionCreateDtoWithSessionScheduleOutsideEventOrSubeventPeriod();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDtoWithOutsideExecutionPeriod.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        var sessionStart = sessionCreateDtoWithOutsideExecutionPeriod.getSessionSchedules().get(0).getExecutionStart();
+        var sessionEnd = sessionCreateDtoWithOutsideExecutionPeriod.getSessionSchedules().get(0).getExecutionStart();
+        var eventStart = activity.getEvent().getExecutionPeriod().getStartDate().atStartOfDay();
+        var eventEnd = activity.getEvent().getExecutionPeriod().getEndDate().plusDays(1).atStartOfDay();
+
+        var condition1 = sessionStart.isBefore(eventStart);
+        var condition2 = sessionEnd.isAfter(eventEnd);
+        var condition3 = condition1 || condition2;
+
+        assertThat(condition3).isTrue();
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDtoWithOutsideExecutionPeriod)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.OUTSIDE_EXECUTION_PERIOD);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",

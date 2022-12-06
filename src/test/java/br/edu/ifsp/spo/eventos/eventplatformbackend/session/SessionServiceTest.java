@@ -5,6 +5,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
@@ -27,6 +28,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -507,6 +509,38 @@ class SessionServiceTest {
         );
         assertThat(exception).isInstanceOf(SessionRuleException.class);
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.SEATS_NOT_DEFINED);
+    }
+
+    @Test
+    public void create_ThrowsException_WhenEventsRegistrationPeriodHasEnded() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+
+        activity.getEvent().setRegistrationPeriod(
+                new Period(
+                        LocalDate.of(2023, 1, 1),
+                        LocalDate.of(2022, 1, 31))
+                );
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        assertThat(activity.getEvent().isRegistrationPeriodEnded()).isTrue();
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.REGISTRATION_PERIOD_ENDED);
     }
 
     private SessionCreateDto getSampleSessionCreateDto() {

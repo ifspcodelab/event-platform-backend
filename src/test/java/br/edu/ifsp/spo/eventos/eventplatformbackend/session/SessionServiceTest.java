@@ -717,6 +717,37 @@ class SessionServiceTest {
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.LOCATION);
     }
 
+    @Test
+    public void create_ThrowsException_WhenNoAreaIsFoundInSessionScheduleListCreation() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        UUID scheduleAreaId = sessionCreateDto.getSessionSchedules().get(0).getAreaId();
+        Location location = LocationFactory.sampleLocation();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = (ResourceNotFoundException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(exception.getResourceId()).isEqualTo(scheduleAreaId.toString());
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.AREA);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",

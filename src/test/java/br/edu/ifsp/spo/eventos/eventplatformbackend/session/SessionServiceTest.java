@@ -141,6 +141,31 @@ class SessionServiceTest {
         assertThat(exception.getRelated()).isEqualTo(ResourceName.EVENT);
     }
 
+    @Test
+    public void create_ThrowsException_WhenSessionTitleAlreadyExists() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.TRUE);
+
+        ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceAlreadyExistsException.class);
+        assertThat(exception.getResourceName()).isEqualTo(ResourceName.SESSION);
+        assertThat(exception.getResourceAttributeValue()).isEqualTo(sessionCreateDto.getTitle());
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",

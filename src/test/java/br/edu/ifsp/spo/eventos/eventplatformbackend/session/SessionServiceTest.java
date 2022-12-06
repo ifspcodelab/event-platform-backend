@@ -5,10 +5,7 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleException;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.BusinessRuleType;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceName;
-import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.ResourceNotFoundException;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetails;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventFactory;
@@ -120,6 +117,28 @@ class SessionServiceTest {
         assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
         assertThat(exception.getResourceId()).isEqualTo(activityId.toString());
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.ACTIVITY);
+    }
+
+    @Test
+    public void create_ThrowsException_WhenActivityDoesNotExistInGivenEvent() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activityRandomId.getEvent().getId();
+        UUID activityId = activityRandomId.getId();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activityRandomId));
+
+        assertThat(eventId.toString()).isNotEqualTo(activityEventId.toString());
+
+        ResourceReferentialIntegrityException exception = (ResourceReferentialIntegrityException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceReferentialIntegrityException.class);
+        assertThat(exception.getPrimary()).isEqualTo(ResourceName.ACTIVITY);
+        assertThat(exception.getRelated()).isEqualTo(ResourceName.EVENT);
     }
 
     private SessionCreateDto getSampleSessionCreateDto() {

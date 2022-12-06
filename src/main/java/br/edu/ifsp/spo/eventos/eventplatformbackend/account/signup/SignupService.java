@@ -48,7 +48,7 @@ public class SignupService {
         }
 
         if (accountRepository.findByCpfAndStatusUnverified(dto.getCpf()).isPresent()) {
-            throw new SignupException(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_CPF_NOT_VERIFIED, dto.getCpf(), dto.getEmail());
+            throw new SignupException(SignupRuleType.SIGNUP_ACCOUNT_WITH_EXISTENT_CPF_NOT_VERIFIED, dto.getEmail(), dto.getCpf());
         }
 
         if (accountRepository.findByEmailAndStatusUnverified(dto.getEmail()).isPresent()) {

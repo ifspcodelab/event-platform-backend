@@ -377,6 +377,7 @@ public class SignupServiceTest {
         );
     }
 
+    //TODO: verify how to use accountConfig env var, since its used in SignupService
     private VerificationToken getSampleVerificationToken() {
         return new VerificationToken(
                 AccountFactory.sampleAccount(),

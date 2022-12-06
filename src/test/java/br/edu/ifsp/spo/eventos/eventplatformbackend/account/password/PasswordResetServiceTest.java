@@ -212,10 +212,11 @@ public class PasswordResetServiceTest {
         );
     }
 
+    //TODO: verify how to use accountConfig env var, since its used in PasswordResetService
     private PasswordResetToken samplePasswordResetToken() {
         return new PasswordResetToken(
                 AccountFactory.sampleAccount_StatusVerified(),
-                900
+                900 //accountConfig passwordResetTokenExpiresIn
         );
     }
 

@@ -7,7 +7,6 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,17 +50,6 @@ class SpaceServiceTest {
         space = SpaceFactory.sampleSpace();
         spaceWithHardCodedUuid = SpaceFactory.sampleSpaceWithHardcodedUuid();
         spaceCreateDto = getSampleSpaceCreateDto();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        location = null;
-        locationWithHardCodedUuid = null;
-        area = null;
-        areaWithHardCodedUuid = null;
-        space = null;
-        spaceWithHardCodedUuid = null;
-        spaceCreateDto = null;
     }
 
     @Test

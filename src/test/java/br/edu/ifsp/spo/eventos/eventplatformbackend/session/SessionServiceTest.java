@@ -374,6 +374,42 @@ class SessionServiceTest {
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.SCHEDULE_HAS_INTERSECTIONS);
     }
 
+    @Test
+    public void create_ThrowsException_WhenSessionSchedulePeriodIsOutsideSubeventPeriod() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        SessionCreateDto sessionCreateDtoWithOutsideExecutionPeriod = getSampleSessionCreateDtoWithSessionScheduleOutsideEventOrSubeventPeriod();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDtoWithOutsideExecutionPeriod.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        var sessionStart = sessionCreateDtoWithOutsideExecutionPeriod.getSessionSchedules().get(0).getExecutionStart();
+        var sessionEnd = sessionCreateDtoWithOutsideExecutionPeriod.getSessionSchedules().get(0).getExecutionStart();
+        var subeventStart = activity.getSubevent().getExecutionPeriod().getStartDate().atStartOfDay();
+        var subeventEnd = activity.getSubevent().getExecutionPeriod().getEndDate().plusDays(1).atStartOfDay();
+
+        var condition1 = sessionStart.isBefore(subeventStart);
+        var condition2 = sessionEnd.isAfter(subeventEnd);
+        var condition3 = condition1 || condition2;
+
+        assertThat(condition3).isTrue();
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDtoWithOutsideExecutionPeriod)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.OUTSIDE_EXECUTION_PERIOD);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",
@@ -462,6 +498,23 @@ class SessionServiceTest {
                                 UUID.randomUUID(),
                                 UUID.randomUUID(),
                                 UUID.randomUUID()
+                        )
+                )
+        );
+    }
+
+    private SessionCreateDto getSampleSessionCreateDtoWithSessionScheduleOutsideEventOrSubeventPeriod() {
+        return new SessionCreateDto(
+                "Sessão 1",
+                20,
+                List.of(
+                        new SessionScheduleCreateDto(
+                                LocalDateTime.of(2023, 2, 9, 10, 0, 0),
+                                LocalDateTime.of(2023, 2, 9, 11, 45, 0),
+                                "",
+                                UUID.fromString("6af7fd0b-84c7-440a-9159-7a1fb26bbb47"),
+                                UUID.fromString("d2bf49f1-4ef5-4cf4-90e5-c72a0ea58cef"),
+                                UUID.fromString("8215f714-1bd5-4a17-bbef-6aa9396775a8")
                         )
                 )
         );

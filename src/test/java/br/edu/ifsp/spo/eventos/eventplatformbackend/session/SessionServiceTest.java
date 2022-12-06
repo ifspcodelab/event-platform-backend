@@ -543,6 +543,39 @@ class SessionServiceTest {
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.REGISTRATION_PERIOD_ENDED);
     }
 
+    @Test
+    public void create_ThrowsException_WhenExecutionPeriodHasEnded() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+        activity.setNeedRegistration(false);
+
+        activity.getEvent().setExecutionPeriod(
+                new Period(
+                        LocalDate.of(2023, 1, 1),
+                        LocalDate.of(2022, 1, 31))
+        );
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        assertThat(activity.getEvent().isExecutionPeriodEnded()).isTrue();
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.EXECUTION_PERIOD_ENDED);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",

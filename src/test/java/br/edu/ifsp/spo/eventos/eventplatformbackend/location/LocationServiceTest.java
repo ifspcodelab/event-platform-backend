@@ -40,7 +40,7 @@ public class LocationServiceTest {
 
     @Test
     public void create_ThrowsException_WhenLocationNameAlreadyExists() {
-        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto();
         when(locationRepository.existsByName(any(String.class))).thenReturn(true);
 
         ResourceAlreadyExistsException exception = (ResourceAlreadyExistsException)
@@ -54,7 +54,7 @@ public class LocationServiceTest {
 
     @Test
     public void create_ReturnsLocation_WhenSuccessful() {
-        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto();
         when(locationRepository.existsByName(any(String.class))).thenReturn(false);
         when(locationRepository.save(any(Location.class))).thenReturn(location);
 
@@ -69,7 +69,7 @@ public class LocationServiceTest {
 
     @Test
     public void update_ThrowsException_WhenLocationDoesNotExists() {
-        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto2();
         UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
@@ -83,7 +83,7 @@ public class LocationServiceTest {
 
     @Test
     public void update_ThrowsException_WhenLocationNameAlreadyExistsExcludingTheProvided() {
-        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto2();
         UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(true);
@@ -99,7 +99,7 @@ public class LocationServiceTest {
 
     @Test
     public void update_ReturnsLocation_WhenSuccessful() {
-        LocationCreateDto locationCreateDto = sampleLocationCreateDto(location);
+        LocationCreateDto locationCreateDto = sampleLocationCreateDto2();
         UUID locationId = location.getId();
         when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(location));
         when(locationRepository.existsByNameAndIdNot(any(String.class),any(UUID.class))).thenReturn(false);
@@ -114,8 +114,8 @@ public class LocationServiceTest {
         );
         assertThat(locationUpdated).isNotNull();
         assertThat(locationUpdated.getId()).isEqualTo(location.getId());
-        assertThat(locationUpdated.getName()).isEqualTo(location.getName());
-        assertThat(locationUpdated.getAddress()).isEqualTo(location.getAddress());
+        assertThat(locationUpdated.getName()).isEqualTo(locationCreateDto.getName());
+        assertThat(locationUpdated.getAddress()).isEqualTo(locationCreateDto.getAddress());
     }
 
     @Test
@@ -206,10 +206,17 @@ public class LocationServiceTest {
         assertThat(locationFound.getId()).isEqualTo(locationId);
     }
 
-    private LocationCreateDto sampleLocationCreateDto(Location location) {
+    private LocationCreateDto sampleLocationCreateDto() {
         return new LocationCreateDto(
             location.getName(),
             location.getAddress()
+        );
+    }
+
+    private LocationCreateDto sampleLocationCreateDto2() {
+        return new LocationCreateDto(
+                "Shopping D",
+                "Av. Cruzeiro do Sul, 1100 - Canindé, São Paulo - SP, 03033-020"
         );
     }
 }

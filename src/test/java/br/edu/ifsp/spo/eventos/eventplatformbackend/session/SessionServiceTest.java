@@ -5,6 +5,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.Activity;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityModality;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.activity.ActivityRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.Area;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.area.AreaRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.annotations.Period;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.common.exceptions.*;
@@ -12,6 +14,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.common.security.JwtUserDetai
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.Event;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.event.EventStatus;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
@@ -629,6 +633,32 @@ class SessionServiceTest {
         );
         assertThat(exception).isInstanceOf(SessionRuleException.class);
         assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.URL_NOT_DEFINED);
+    }
+
+    @Test
+    public void create_ThrowsException_WhenUrlAreNotDefinedWhenModalityIsHybrid() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+
+        activity.setModality(ActivityModality.HYBRID);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        SessionRuleException exception = (SessionRuleException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(SessionRuleException.class);
+        assertThat(exception.getRuleType()).isEqualTo(SessionRuleType.URL_OR_LOCATION_NOT_DEFINED);
     }
 
     private SessionCreateDto getSampleSessionCreateDto() {

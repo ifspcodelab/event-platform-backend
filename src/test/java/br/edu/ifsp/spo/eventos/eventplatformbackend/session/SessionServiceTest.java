@@ -37,6 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,8 +45,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(SpringRunner.class)
@@ -826,6 +826,54 @@ class SessionServiceTest {
                 () -> sessionService.create(eventId, activityId, sessionCreateDto)
         );
         assertThat(exception).isInstanceOf(ResourceAlreadyReservedInTheSpaceException.class);
+    }
+
+    @Test
+    public void create_ReturnSession_WhenSuccessful() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+
+        Location locationWithHardcodedUuid = LocationFactory.sampleLocationWithHardcodedUuid();
+        Area areaWithHardcodedUuid = AreaFactory.sampleAreaWithHardcodedUuid();
+        Space spaceWithHardcodedUuid = SpaceFactory.sampleSpaceWithHardcodedUuid();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(locationWithHardcodedUuid));
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardcodedUuid));
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(spaceWithHardcodedUuid));
+
+        when(sessionScheduleRepository
+                .findAllBySpaceIdAndExecutionStartGreaterThanEqual(any(UUID.class), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
+
+        Session session = SessionFactory.sampleSession();
+
+        when(sessionRepository.save(any(Session.class))).thenReturn(session);
+
+        Session createdSession = sessionService.create(eventId, activityId, sessionCreateDto);
+
+        verify(sessionRepository, times(1)).save(any(Session.class));
+        assertThat(createdSession).isNotNull();
+        assertThat(createdSession.getId()).isEqualTo(session.getId());
+        assertThat(createdSession.getTitle()).isEqualTo(session.getTitle());
+        assertThat(createdSession.getSessionSchedules()).isEqualTo(session.getSessionSchedules());
+        assertThat(createdSession.getSeats()).isEqualTo(session.getSeats());
+        assertThat(createdSession.getConfirmedSeats()).isEqualTo(session.getConfirmedSeats());
+        assertThat(createdSession.getActivity()).isEqualTo(session.getActivity());
+        assertThat(createdSession.getCancellationMessage()).isEqualTo(session.getCancellationMessage());
     }
 
     private SessionCreateDto getSampleSessionCreateDto() {

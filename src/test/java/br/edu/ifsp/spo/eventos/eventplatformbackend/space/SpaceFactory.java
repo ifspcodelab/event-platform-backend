@@ -20,7 +20,7 @@ public class SpaceFactory {
                 "IVO",
                 100,
                 SpaceType.AUDITORIUM,
-                AreaFactory.sampleAreaWithHardcodedLocationUuid()
+                AreaFactory.sampleAreaWithHardcodedUuid()
         );
     }
 }

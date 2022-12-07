@@ -13,7 +13,7 @@ public class AreaFactory {
         );
     }
 
-    public static Area sampleAreaWithHardcodedLocationUuid() {
+    public static Area sampleAreaWithHardcodedUuid() {
         return new Area(
                 UUID.fromString("e023fcfb-5a6a-4f8b-9c2d-ff768f3eb6e0"),
                 "Bloco A",

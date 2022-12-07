@@ -35,4 +35,19 @@ public class SessionFactory {
                         SpaceFactory.sampleSpaceWithHardcodedUuid()
                 ));
     }
+
+    public static List<SessionSchedule> sampleSessionScheduleListWithHardcodedUuid() {
+        SessionSchedule sessionSchedule = new SessionSchedule(
+                LocalDateTime.of(2023, 1, 9, 10, 0, 0),
+                LocalDateTime.of(2023, 1, 9, 11, 45, 0),
+                "",
+                LocationFactory.sampleLocationWithHardcodedUuid(),
+                AreaFactory.sampleAreaWithHardcodedUuid(),
+                SpaceFactory.sampleSpaceWithHardcodedUuid()
+        );
+
+        sessionSchedule.setSession(sampleSession());
+
+        return List.of(sessionSchedule);
+    }
 }

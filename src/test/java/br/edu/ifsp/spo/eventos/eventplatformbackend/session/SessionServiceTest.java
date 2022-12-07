@@ -18,6 +18,8 @@ import br.edu.ifsp.spo.eventos.eventplatformbackend.location.Location;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.location.LocationRepository;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.registration.RegistrationRepository;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.Space;
+import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceFactory;
 import br.edu.ifsp.spo.eventos.eventplatformbackend.space.SpaceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -782,6 +784,50 @@ class SessionServiceTest {
         assertThat(exception.getResourceName()).isEqualTo(ResourceName.SPACE);
     }
 
+    @Test
+    public void create_ThrowsException_WhenResourceAlreadyReservedInTheSpace() {
+        UUID eventId = event.getId();
+        UUID activityEventId = activity.getEvent().getId();
+        UUID activityId = activity.getId();
+
+        Location locationWithHardcodedUuid = LocationFactory.sampleLocationWithHardcodedUuid();
+        Area areaWithHardcodedUuid = AreaFactory.sampleAreaWithHardcodedUuid();
+        Space spaceWithHardcodedUuid = SpaceFactory.sampleSpaceWithHardcodedUuid();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwtUserDetailsAdmin);
+
+        when(activityRepository.findById(any(UUID.class))).thenReturn(Optional.of(activity));
+
+        assertThat(eventId.toString()).isEqualTo(activityEventId.toString());
+
+        var title = sessionCreateDto.getTitle();
+        when(sessionRepository.existsByTitleIgnoreCaseAndActivityId(title, activityId)).thenReturn(Boolean.FALSE);
+
+        when(locationRepository.findById(any(UUID.class))).thenReturn(Optional.of(locationWithHardcodedUuid));
+
+        when(areaRepository.findById(any(UUID.class))).thenReturn(Optional.of(areaWithHardcodedUuid));
+
+        when(spaceRepository.findById(any(UUID.class))).thenReturn(Optional.of(spaceWithHardcodedUuid));
+
+        List<SessionSchedule> sessionSchedules = SessionFactory.sampleSessionScheduleListWithHardcodedUuid();
+
+        assertThat(sessionSchedules.get(0).getSpace()).isNotNull();
+
+        when(sessionScheduleRepository
+                .findAllBySpaceIdAndExecutionStartGreaterThanEqual(any(UUID.class), any(LocalDateTime.class)))
+                .thenReturn(sessionSchedules);
+
+        assertThat(sessionSchedules.get(0).hasIntersection(sessionSchedules.get(0))).isTrue();
+        assertThat(sessionSchedules.get(0).getSession().isCanceled()).isFalse();
+
+        ResourceAlreadyReservedInTheSpaceException exception = (ResourceAlreadyReservedInTheSpaceException) catchThrowable(
+                () -> sessionService.create(eventId, activityId, sessionCreateDto)
+        );
+        assertThat(exception).isInstanceOf(ResourceAlreadyReservedInTheSpaceException.class);
+    }
+
     private SessionCreateDto getSampleSessionCreateDto() {
         return new SessionCreateDto(
                 "Sessão 1",
@@ -791,8 +837,8 @@ class SessionServiceTest {
                                 LocalDateTime.of(2023, 1, 9, 10, 0, 0),
                                 LocalDateTime.of(2023, 1, 9, 11, 45, 0),
                                 "",
-                                UUID.fromString("6af7fd0b-84c7-440a-9159-7a1fb26bbb47"),
-                                UUID.fromString("d2bf49f1-4ef5-4cf4-90e5-c72a0ea58cef"),
+                                UUID.fromString("73c8b552-1d2c-4d62-9506-90697b53aa85"),
+                                UUID.fromString("e023fcfb-5a6a-4f8b-9c2d-ff768f3eb6e0"),
                                 UUID.fromString("8215f714-1bd5-4a17-bbef-6aa9396775a8")
                         )
                 )

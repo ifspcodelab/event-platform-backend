@@ -9,7 +9,7 @@ public class AreaCreateDto {
     @NotNull
     @NotBlank
     @Size(min = 1, max = 200)
-    @Pattern(regexp = "/^[0-9a-zA-ZÀ-ü][0-9a-zA-ZÀ-ü ]*$/")
+    @Pattern(regexp = "^[0-9a-zA-ZÀ-ü][0-9a-zA-ZÀ-ü ]*$")
     String name;
 
     @Size(min = 1, max = 200)
